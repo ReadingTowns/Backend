@@ -42,4 +42,3 @@ secrets.yml
 
 .idea
 .env
-src/main/resources/application-*.yml
