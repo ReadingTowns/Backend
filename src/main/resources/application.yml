@@ -1,0 +1,12 @@
+spring:
+  profiles:
+    active: local
+    group:
+      local: local, datasource
+      prod: prod, datasource
+  config:
+    import: optional:file:.env[.properties]
+
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
