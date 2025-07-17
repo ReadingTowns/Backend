@@ -1,6 +1,7 @@
 package kr.readingtown.backend.global.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import kr.readingtown.backend.global.exception.ErrorCode;
 
 import java.time.LocalDateTime;
 
@@ -18,7 +19,7 @@ public record CommonResponse<T>(
     }
 
     // api 응답이 실패인 경우
-    public CommonResponse(int errorCode, String errorMessage) {
-        this(LocalDateTime.now(), errorCode, errorMessage, null);
+    public CommonResponse(ErrorCode errorCode) {
+        this(LocalDateTime.now(), errorCode.getErrorCode(), errorCode.getErrorMessage(), null);
     }
 }

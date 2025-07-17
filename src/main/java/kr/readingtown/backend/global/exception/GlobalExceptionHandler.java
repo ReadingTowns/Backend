@@ -21,6 +21,6 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new CommonResponse<>(HttpErrorCode.INTERNAL_SERVER_ERROR.getErrorCode(), HttpErrorCode.INTERNAL_SERVER_ERROR.getErrorMessage()));
+                .body(new CommonResponse<>(HttpErrorCode.INTERNAL_SERVER_ERROR));
     }
 }
