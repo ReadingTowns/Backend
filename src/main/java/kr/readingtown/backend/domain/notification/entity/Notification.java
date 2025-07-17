@@ -11,7 +11,7 @@ import lombok.*;
 public class Notification extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long notificationId;
 
     // 알림을 받는 대상 회원
     @ManyToOne(fetch = FetchType.LAZY)
