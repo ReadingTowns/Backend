@@ -25,6 +25,13 @@ public class Review extends BaseEntity {
     @Lob
     private String content;
 
+    /**
+     * Constructs a new Review entity with the specified book, member, and review content.
+     *
+     * @param book    the book being reviewed
+     * @param member  the member who wrote the review
+     * @param content the text content of the review
+     */
     @Builder
     public Review(Book book, Member member, String content) {
         this.book = book;

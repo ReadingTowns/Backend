@@ -17,6 +17,11 @@ public class Category extends BaseEntity {
 
     private String categoryName;
 
+    /**
+     * Constructs a new Category with the specified category name.
+     *
+     * @param categoryName the name of the category
+     */
     @Builder
     public Category(String categoryName) {
         this.categoryName = categoryName;

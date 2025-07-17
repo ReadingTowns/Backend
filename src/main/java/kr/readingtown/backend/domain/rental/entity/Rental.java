@@ -36,6 +36,15 @@ public class Rental extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private ExchangeStatus exchangeStatus;
 
+    /**
+     * Constructs a Rental entity representing a book exchange transaction between two members.
+     *
+     * @param owner the member who owns the book being offered for rental
+     * @param requester the member requesting the rental
+     * @param ownerBookstoreBook the book owned by the owner involved in the rental
+     * @param requesterBookstoreBook the book owned by the requester involved in the rental
+     * @param exchangeStatus the current status of the exchange
+     */
     @Builder
     public Rental(Member owner, Member requester, BookstoreBook ownerBookstoreBook,
                   BookstoreBook requesterBookstoreBook, ExchangeStatus exchangeStatus) {

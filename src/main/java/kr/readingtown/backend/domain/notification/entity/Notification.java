@@ -24,6 +24,13 @@ public class Notification extends BaseEntity {
     @Lob
     private String content;
 
+    /**
+     * Constructs a new Notification with the specified recipient, type, and content.
+     *
+     * @param member the recipient of the notification
+     * @param type the type of notification
+     * @param content the notification message content
+     */
     @Builder
     public Notification(Member member, NotificationType type, String content) {
         this.member = member;

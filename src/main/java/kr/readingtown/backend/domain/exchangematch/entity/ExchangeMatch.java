@@ -29,6 +29,14 @@ public class ExchangeMatch extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private RequestStatus requestStatus;
 
+    /**
+     * Constructs an ExchangeMatch entity with the specified chatroom, requester, receiver, and request status.
+     *
+     * @param chatroom the chatroom associated with this exchange match
+     * @param requester the member initiating the exchange request
+     * @param receiver the member receiving the exchange request
+     * @param requestStatus the initial status of the exchange request
+     */
     @Builder
     public ExchangeMatch(Chatroom chatroom, Member requester, Member receiver, RequestStatus requestStatus) {
         this.chatroom = chatroom;
@@ -37,15 +45,25 @@ public class ExchangeMatch extends BaseEntity {
         this.requestStatus = requestStatus;
     }
 
-    // 상태 변경 메서드
+    /**
+     * Updates the status of the exchange request to the specified value.
+     *
+     * @param newStatus the new status to set for the exchange request
+     */
     public void updateStatus(RequestStatus newStatus) {
         this.requestStatus = newStatus;
     }
 
+    /**
+     * Sets the request status of this exchange match to {@code ACCEPTED}.
+     */
     public void accept() {
         updateStatus(RequestStatus.ACCEPTED);
     }
 
+    /**
+     * Sets the request status of this exchange match to REJECTED.
+     */
     public void reject() {
         updateStatus(RequestStatus.REJECTED);
     }

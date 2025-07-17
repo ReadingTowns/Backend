@@ -25,6 +25,12 @@ public class MemberBookstore extends BaseEntity {
     @JoinColumn(name = "bookstore_id")
     private Bookstore bookstore;
 
+    /**
+     * Constructs a MemberBookstore entity linking the specified member and bookstore.
+     *
+     * @param member    the member associated with this entity
+     * @param bookstore the bookstore associated with this entity
+     */
     @Builder
     public MemberBookstore(Member member, Bookstore bookstore) {
         this.member = member;

@@ -26,6 +26,15 @@ public class Book extends BaseEntity {
 
     private String publisher;
 
+    /**
+     * Constructs a new Book entity with the specified details.
+     *
+     * @param bookName   the title of the book
+     * @param bookImage  the URL or path to the book's image
+     * @param author     the author of the book
+     * @param summary    a summary or description of the book
+     * @param publisher  the publisher of the book
+     */
     @Builder
     public Book(String bookName, String bookImage, String author, String summary, String publisher) {
         this.bookName = bookName;

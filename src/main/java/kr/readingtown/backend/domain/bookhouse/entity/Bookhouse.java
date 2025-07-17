@@ -24,6 +24,12 @@ public class Bookhouse extends BaseEntity {
     @JoinColumn(name = "book_id")
     private Book book;
 
+    /**
+     * Constructs a Bookhouse entity with the specified member and book associations.
+     *
+     * @param member the member associated with this Bookhouse
+     * @param book the book associated with this Bookhouse
+     */
     @Builder
     public Bookhouse(Member member, Book book) {
         this.member = member;

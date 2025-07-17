@@ -32,6 +32,15 @@ public class BookstoreBook extends BaseEntity {
 
     private Boolean isExchanging;
 
+    /**
+     * Constructs a new BookstoreBook entity associating a bookstore with a bookhouse and specifying book state, availability, and exchange status.
+     *
+     * @param bookstore     the associated Bookstore entity
+     * @param bookhouse     the associated Bookhouse entity
+     * @param bookState     the state or condition of the book
+     * @param availableTime the time when the book is available
+     * @param isExchanging  whether the book is currently being exchanged
+     */
     @Builder
     public BookstoreBook(Bookstore bookstore, Bookhouse bookhouse, String bookState, String availableTime, Boolean isExchanging) {
         this.bookstore = bookstore;

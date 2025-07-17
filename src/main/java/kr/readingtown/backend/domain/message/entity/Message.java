@@ -30,6 +30,14 @@ public class Message extends BaseEntity {
 
     private LocalDateTime sentTime;
 
+    /**
+     * Constructs a Message entity with the specified chatroom, sender, content, and sent time.
+     *
+     * @param chatroom the chatroom to which this message belongs
+     * @param sender the member who sent the message
+     * @param content the content of the message
+     * @param sentTime the timestamp when the message was sent
+     */
     @Builder
     public Message(Chatroom chatroom, Member sender, String content, LocalDateTime sentTime) {
         this.chatroom = chatroom;

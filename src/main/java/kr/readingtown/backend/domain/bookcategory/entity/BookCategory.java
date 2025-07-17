@@ -24,6 +24,12 @@ public class BookCategory extends BaseEntity {
     @JoinColumn(name = "category_id")
     private Category category;
 
+    /**
+     * Constructs a BookCategory entity associating a specific Book with a Category.
+     *
+     * @param book     the Book entity to associate
+     * @param category the Category entity to associate
+     */
     @Builder
     public BookCategory(Book book, Category category) {
         this.book = book;

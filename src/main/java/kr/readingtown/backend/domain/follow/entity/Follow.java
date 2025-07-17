@@ -21,6 +21,12 @@ public class Follow extends BaseEntity {
     @JoinColumn(name = "to_following_id", nullable = false)
     private Member following;
 
+    /**
+     * Constructs a Follow entity representing a follow relationship between two members.
+     *
+     * @param follower  the member who initiates the follow
+     * @param following the member who is being followed
+     */
     @Builder
     public Follow(Member follower, Member following) {
         this.follower = follower;

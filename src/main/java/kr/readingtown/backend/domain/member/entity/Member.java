@@ -33,6 +33,11 @@ public class Member extends BaseEntity {
 
     private Integer chatAvgResponseMinutes;
 
+    /**
+     * Constructs a new Member entity with the specified profile and account details.
+     *
+     * Initializes all member attributes except for the primary key, which is managed by the persistence layer.
+     */
     @Builder
     public Member(String username, LoginType loginType, String loginId, String profileImage, String phoneNumber, Double userRating, Integer userRatingCount, String currentTown, Double chatResponseRate, Integer chatAvgResponseMinutes) {
         this.username = username;

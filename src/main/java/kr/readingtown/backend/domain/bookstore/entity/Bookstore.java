@@ -21,6 +21,12 @@ public class Bookstore extends BaseEntity {
 
     private String townAddress;
 
+    /**
+     * Constructs a new Bookstore entity with the specified town name and address.
+     *
+     * @param townName    the name of the town where the bookstore is located
+     * @param townAddress the address of the bookstore within the town
+     */
     @Builder
     public Bookstore(String townName, String townAddress) {
         this.townName = townName;

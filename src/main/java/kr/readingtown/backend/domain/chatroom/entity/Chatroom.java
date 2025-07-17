@@ -27,6 +27,13 @@ public class Chatroom extends BaseEntity {
     @JoinColumn(name = "rental_id")
     private Rental rental;
 
+    /**
+     * Constructs a Chatroom entity with the specified owner, requester, and rental associations.
+     *
+     * @param owner the member who owns the chat room
+     * @param requester the member who requested the chat room
+     * @param rental the rental entity associated with this chat room
+     */
     @Builder
     public Chatroom(Member owner, Member requester, Rental rental) {
         this.owner = owner;
