@@ -1,4 +1,4 @@
-package kr.readingtown.backend.exception;
+package kr.readingtown.backend.global.exception;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

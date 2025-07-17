@@ -1,4 +1,4 @@
-package kr.readingtown.backend;
+package kr.readingtown.backend.global.healthCheck;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;

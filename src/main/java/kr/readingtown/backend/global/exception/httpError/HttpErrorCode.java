@@ -1,6 +1,6 @@
-package kr.readingtown.backend.exception.httpError;
+package kr.readingtown.backend.global.exception.httpError;
 
-import kr.readingtown.backend.exception.ErrorCode;
+import kr.readingtown.backend.global.exception.ErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

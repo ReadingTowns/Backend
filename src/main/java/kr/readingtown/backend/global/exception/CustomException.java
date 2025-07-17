@@ -1,4 +1,4 @@
-package kr.readingtown.backend.exception;
+package kr.readingtown.backend.global.exception;
 
 import lombok.Getter;
 
