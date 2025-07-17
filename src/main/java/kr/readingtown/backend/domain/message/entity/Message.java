@@ -5,6 +5,7 @@ import kr.readingtown.backend.domain.chatroom.entity.Chatroom;
 import kr.readingtown.backend.domain.member.entity.Member;
 import kr.readingtown.backend.global.entity.BaseEntity;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 
@@ -28,13 +29,13 @@ public class Message extends BaseEntity {
     @Lob
     private String content;
 
+    @CreatedDate
     private LocalDateTime sentTime;
 
     @Builder
-    public Message(Chatroom chatroom, Member sender, String content, LocalDateTime sentTime) {
+    public Message(Chatroom chatroom, Member sender, String content) {
         this.chatroom = chatroom;
         this.sender = sender;
         this.content = content;
-        this.sentTime = sentTime;
     }
 }
