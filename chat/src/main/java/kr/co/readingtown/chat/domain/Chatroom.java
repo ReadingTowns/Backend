@@ -1,4 +1,4 @@
-package kr.co.readingtown.domain;
+package kr.co.readingtown.chat.domain;
 
 import jakarta.persistence.*;
 import kr.co.readingtown.common.entity.BaseEntity;
