@@ -12,6 +12,7 @@ dependencies {
 	implementation project(':book')
 	implementation project(':review')
 	implementation project(':chat')
+	implementation project(":authentication")
 
 	// spring
 	implementation 'org.springframework.boot:spring-boot-starter-web'
