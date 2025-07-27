@@ -1,0 +1,23 @@
+
+dependencies {
+
+	implementation project(':common')
+
+	implementation project(':notification')
+	implementation project(':member')
+	implementation project(':social')
+	implementation project(':bookhouse')
+	implementation project(':bookstore')
+	implementation project(':rental')
+	implementation project(':book')
+	implementation project(':review')
+	implementation project(':chat')
+
+	// spring
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	// swagger
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+}

@@ -1,0 +1,15 @@
+spring:
+  profiles:
+    active: local
+    group:
+      local: local, datasource
+      prod: prod, datasource
+  config:
+    import: optional:file:api/.env[.properties]
+
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+
+swagger:
+  server: ${SERVER_URI}
