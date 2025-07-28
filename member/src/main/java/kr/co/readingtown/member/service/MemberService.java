@@ -27,4 +27,10 @@ public class MemberService {
             memberRepository.save(newMember);
         }
     }
+
+    public Long getMemberId(LoginType loginType, String loginId) {
+
+        Member member = memberRepository.findByLoginTypeAndLoginId(loginType, loginId);
+        return member.getMemberId();
+    }
 }

@@ -20,4 +20,12 @@ public class InternalMemberController {
 
         memberService.registerMember(loginType, loginId, username);
     }
+
+    @GetMapping("/id")
+    public Long getMemberId(
+            @RequestParam("provider")LoginType loginType,
+            @RequestParam("providerId") String loginId) {
+
+        return memberService.getMemberId(loginType, loginId);
+    }
 }
