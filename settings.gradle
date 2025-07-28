@@ -11,4 +11,5 @@ include 'book'
 include 'review'
 include 'chat'
 include 'authentication'
+include 'authorization'
 
