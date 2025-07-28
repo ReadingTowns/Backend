@@ -1,6 +1,7 @@
-package kr.co.readingtown.authentication.config;
+package kr.co.readingtown.config;
 
 import kr.co.readingtown.authentication.oauth.CustomOAuth2UserService;
+import kr.co.readingtown.handler.OAuth2LoginSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityWebConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -29,7 +31,7 @@ public class SecurityWebConfig {
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                         )
-                        .defaultSuccessUrl("/success.html", true)
+                        .successHandler(oAuth2LoginSuccessHandler)
                 );
         return http.build();
     }
