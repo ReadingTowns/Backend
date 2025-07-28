@@ -1,4 +1,4 @@
-package kr.co.readingtown.authorization.jwt;
+package kr.co.readingtown.authentication.jwt;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -59,17 +59,23 @@ public class TokenProvider {
         return parseClaims(token).getBody().get("provider", String.class);
     }
 
+    public String getProviderId(String token) {
+        return parseClaims(token).getBody().getSubject();
+    }
+
     public String getTokenType(String token) {
         return parseClaims(token).getBody().get("type", String.class);
     }
 
 
-    // [TODO] : validateToken 더 세분화 하기
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
-        } catch (JwtException | IllegalArgumentException e) {
+        } catch (ExpiredJwtException e) {
+            return false;
+        }
+        catch (JwtException | IllegalArgumentException e) {
             return false;
         }
     }
