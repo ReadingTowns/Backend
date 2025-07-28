@@ -11,5 +11,5 @@ spring:
     serialization:
       fail-on-empty-beans: false
 
-swagger:
-  server: ${SERVER_URI}
+server:
+  base-uri: ${SERVER_URI}
