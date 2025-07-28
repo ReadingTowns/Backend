@@ -33,6 +33,11 @@ public class CustomResponseBodyAdvice implements ResponseBodyAdvice<Object> {
             return body;
         }
 
+        String path = request.getURI().getPath();
+        if (path.startsWith("/internal")) {
+            return body;
+        }
+
         return new CommonResponse<>(body);
     }
 }
