@@ -2,7 +2,6 @@
 dependencies {
     implementation project(':common')
 
-    // security
-    implementation 'org.springframework.boot:spring-boot-starter-security'
+    // oauth
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 }
