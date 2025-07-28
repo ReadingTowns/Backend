@@ -2,8 +2,8 @@ spring:
   profiles:
     active: local
     group:
-      local: local, datasource
-      prod: prod, datasource
+      local: local, datasource, auth
+      prod: prod, datasource, auth
   config:
     import: optional:file:api/.env[.properties]
 
@@ -11,5 +11,5 @@ spring:
     serialization:
       fail-on-empty-beans: false
 
-swagger:
-  server: ${SERVER_URI}
+server:
+  base-uri: ${SERVER_URI}

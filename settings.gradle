@@ -10,4 +10,5 @@ include 'rental'
 include 'book'
 include 'review'
 include 'chat'
+include 'authentication'
 

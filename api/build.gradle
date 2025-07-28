@@ -12,6 +12,7 @@ dependencies {
 	implementation project(':book')
 	implementation project(':review')
 	implementation project(':chat')
+	implementation project(":authentication")
 
 	// spring
 	implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -20,4 +21,8 @@ dependencies {
 
 	// swagger
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+
+	// security
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 }
