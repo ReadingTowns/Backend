@@ -31,9 +31,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             providerId = String.valueOf(attributes.get("id"));
             Map<String, Object> properties = (Map<String, Object>) attributes.get("properties");
             username = (String) properties.get("nickname");
+        } else if (provider.equals("GOOGLE")) {
+            providerId = (String) attributes.get("id");
+            username = (String) attributes.get("name");
         }
-
-        // [TODO] : google일때 .get("sub")으로 providerId 저장해주기
 
         // member 저장
         memberClient.registerMember(provider, providerId, username);
