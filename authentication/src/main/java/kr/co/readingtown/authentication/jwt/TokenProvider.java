@@ -3,6 +3,7 @@ package kr.co.readingtown.authentication.jwt;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import kr.co.readingtown.authentication.exception.AuthenticationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -73,10 +74,10 @@ public class TokenProvider {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException e) {
-            return false;
+            throw new AuthenticationException.ExpiredToken();
         }
         catch (JwtException | IllegalArgumentException e) {
-            return false;
+            throw new AuthenticationException.TokenNotValid();
         }
     }
 }
