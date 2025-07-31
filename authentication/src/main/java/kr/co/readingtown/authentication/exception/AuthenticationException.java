@@ -31,4 +31,16 @@ public class AuthenticationException extends CustomException {
             super(AuthenticationErrorCode.TOKEN_CATEGORY_MISMATCH);
         }
     }
+
+    public static class InvalidRefreshToken extends AuthenticationException {
+        public InvalidRefreshToken() {
+            super(AuthenticationErrorCode.INVALID_REFRESH_TOKEN);
+        }
+    }
+
+    public static class RefreshTokenNotFount extends AuthenticationException {
+        public RefreshTokenNotFount() {
+            super(AuthenticationErrorCode.REFRESH_TOKEN_NOT_FOUNT);
+        }
+    }
 }
