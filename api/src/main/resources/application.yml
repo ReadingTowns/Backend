@@ -1,0 +1,19 @@
+spring:
+  profiles:
+    active: local
+    group:
+      local: local, datasource, auth
+      prod: prod, datasource, auth
+  config:
+    import: optional:file:api/.env[.properties]
+
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+
+server:
+  base-uri: ${SERVER_URI}
+
+cors:
+  allowed-origins:
+    - http://localhost:3000
