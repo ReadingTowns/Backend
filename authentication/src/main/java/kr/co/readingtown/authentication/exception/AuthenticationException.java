@@ -43,4 +43,10 @@ public class AuthenticationException extends CustomException {
             super(AuthenticationErrorCode.REFRESH_TOKEN_NOT_FOUNT);
         }
     }
+
+    public static class BlacklistedToken extends AuthenticationException {
+        public BlacklistedToken() {
+            super(AuthenticationErrorCode.BLACKLISTED_TOKEN);
+        }
+    }
 }
