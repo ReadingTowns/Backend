@@ -25,4 +25,10 @@ public class AuthenticationException extends CustomException {
             super(AuthenticationErrorCode.NO_TOKEN_EXCEPTION);
         }
     }
+
+    public static class TokenCategoryMismatch extends AuthenticationException {
+        public TokenCategoryMismatch() {
+            super(AuthenticationErrorCode.TOKEN_CATEGORY_MISMATCH);
+        }
+    }
 }
