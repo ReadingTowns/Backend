@@ -20,6 +20,7 @@ public class TokenProvider {
 
     private Key key;
     private final RefreshTokenService refreshTokenService;
+    private final TokenBlacklistService tokenBlacklistService;
 
     public static final String ACCESS_TOKEN_TYPE = "access";
 
@@ -78,7 +79,6 @@ public class TokenProvider {
     }
 
 
-    // 기본 유효성 검사
     private boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
@@ -93,11 +93,17 @@ public class TokenProvider {
 
     public void validateAccessToken(String token) {
 
+        // 1. 기본 토큰 유효성 검사
         validateToken(token);
 
+        // 2. 타입 검사
         String tokenType = getTokenType(token);
         if (!tokenType.equals(ACCESS_TOKEN_TYPE))
             throw new AuthenticationException.TokenCategoryMismatch();
+
+        // 3. Redis 블랙리스트 확인
+        if (tokenBlacklistService.isBlacklisted(token))
+            throw new AuthenticationException.BlacklistedToken();
     }
 
     public void validateRefreshToken(String token) {
@@ -116,5 +122,18 @@ public class TokenProvider {
             throw new AuthenticationException.RefreshTokenNotFount();
         if (!token.equals(savedToken))
             throw new AuthenticationException.InvalidRefreshToken();
+    }
+
+    public long getExpiration(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        Date expiration = claims.getExpiration();
+        long now = System.currentTimeMillis();
+
+        return expiration.getTime() - now;
     }
 }
