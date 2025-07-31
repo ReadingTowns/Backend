@@ -16,26 +16,27 @@ public class AuthenticationService {
 
     private final TokenProvider tokenProvider;
     private final CookieUtil cookieUtil;
-
     public static final String REFRESH_TOKEN_COOKIE_NAME = "refresh_token";
 
-    // accessToken 재발급 할 때 refreshToken도 함께 재발급
     public void reissue(HttpServletRequest request, HttpServletResponse response) {
 
+        // 1. 쿠키에서 refresh token 추출
         String refreshToken = cookieUtil.extractTokenFromCookie(request, REFRESH_TOKEN_COOKIE_NAME);
-
         if (refreshToken == null)
             throw new AuthenticationException.NoTokenException();
 
-        // TODO: refreshToken 검증 로직 추가 (category 검사 + redis 확인)
-        tokenProvider.validateToken(refreshToken);
+        // 2. refresh token 유효성 검사
+        tokenProvider.validateRefreshToken(refreshToken);
 
+        // 3. 토큰에서 사용자 정보 추출
         String provider = tokenProvider.getProvider(refreshToken);
         String providerId = tokenProvider.getProviderId(refreshToken);
 
+        // 4. 새 access/refresh token 생성
         String newAccessToken = tokenProvider.createAccessToken(provider, providerId);
         String newRefreshToken = tokenProvider.createRefreshToken(provider, providerId);
 
+        // 5. 쿠키에 새 token 저장
         cookieUtil.saveTokenToCookie(response, newAccessToken, newRefreshToken);
     }
 }
