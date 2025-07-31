@@ -5,7 +5,7 @@ spring:
       local: local, datasource, auth
       prod: prod, datasource, auth
   config:
-    import: optional:file:api/.env[.properties]
+    import: optional:file:.env[.properties]
 
   jackson:
     serialization:
