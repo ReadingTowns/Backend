@@ -68,12 +68,13 @@ public class TokenProvider {
         return parseClaims(token).getBody().getSubject();
     }
 
-    public String getTokenType(String token) {
+    private String getTokenType(String token) {
         return parseClaims(token).getBody().get("type", String.class);
     }
 
 
-    public boolean validateToken(String token) {
+    // 기본 유효성 검사
+    private boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
@@ -83,5 +84,23 @@ public class TokenProvider {
         catch (JwtException | IllegalArgumentException e) {
             throw new AuthenticationException.TokenNotValid();
         }
+    }
+
+    public void validateAccessToken(String token) {
+
+        validateToken(token);
+
+        String tokenType = getTokenType(token);
+        if (!tokenType.equals(ACCESS_TOKEN_TYPE))
+            throw new AuthenticationException.TokenCategoryMismatch();
+    }
+
+    public void validateRefreshToken(String token) {
+
+        validateToken(token);
+
+        String tokenType = getTokenType(token);
+        if (!tokenType.equals(REFRESH_TOKEN_TYPE))
+            throw new AuthenticationException.TokenCategoryMismatch();
     }
 }
