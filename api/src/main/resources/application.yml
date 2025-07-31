@@ -5,7 +5,7 @@ spring:
       local: local, datasource, auth
       prod: prod, datasource, auth
   config:
-    import: optional:file:api/.env[.properties]
+    import: optional:file:.env[.properties]
 
   jackson:
     serialization:
@@ -15,5 +15,4 @@ server:
   base-uri: ${SERVER_URI}
 
 cors:
-  allowed-origins:
-    - http://localhost:3000
+  allowed-origins: http://localhost:3000
