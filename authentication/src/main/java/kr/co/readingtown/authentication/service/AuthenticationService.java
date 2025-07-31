@@ -20,7 +20,7 @@ public class AuthenticationService {
 
     public void reissue(HttpServletRequest request, HttpServletResponse response) {
 
-        // 1. 쿠키에서 refresh token 추출
+        // 1. 쿠키에서 refresh token 추리
         String refreshToken = cookieUtil.extractTokenFromCookie(request, REFRESH_TOKEN_COOKIE_NAME);
         if (refreshToken == null)
             throw new AuthenticationException.NoTokenException();
