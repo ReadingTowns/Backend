@@ -22,4 +22,6 @@ dependencies {
 
     // openfeign
     api 'org.springframework.cloud:spring-cloud-starter-openfeign'
+
+    implementation 'jakarta.servlet:jakarta.servlet-api:6.0.0'
 }

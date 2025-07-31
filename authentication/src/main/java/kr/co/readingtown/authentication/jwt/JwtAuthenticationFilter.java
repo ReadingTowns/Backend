@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import kr.co.readingtown.authentication.client.MemberClient;
+import kr.co.readingtown.authentication.exception.AuthenticationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -30,18 +31,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = extractTokenFromCookie(request);
 
-        if (token != null && tokenProvider.validateToken(token)) {
+        try {
+            if (token != null && tokenProvider.validateToken(token)) {
 
-            // DB 조회
-            String provider = tokenProvider.getProvider(token);
-            String providerId = tokenProvider.getProviderId(token);
-            Long memberId = memberClient.getMemberId(provider, providerId);
+                // DB 조회
+                String provider = tokenProvider.getProvider(token);
+                String providerId = tokenProvider.getProviderId(token);
+                Long memberId = memberClient.getMemberId(provider, providerId);
 
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(memberId, null, null);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(memberId, null, null);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+            filterChain.doFilter(request, response);
+        } catch (AuthenticationException e) {
+            throw e;
         }
-        filterChain.doFilter(request, response);
     }
 
     private String extractTokenFromCookie(HttpServletRequest request) {
