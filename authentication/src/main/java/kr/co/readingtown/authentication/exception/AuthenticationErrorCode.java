@@ -14,7 +14,7 @@ public enum AuthenticationErrorCode implements ErrorCode {
     NO_TOKEN_EXCEPTION(3004, "토큰이 없습니다"),
     EXPIRED_TOKEN(3005, "만료된 토큰입니다."),
     TOKEN_CATEGORY_MISMATCH(3006, "토큰 타입이 일치하지 않습니다."),
-    REFRESH_TOKEN_NOT_FOUNT(3007, "해당 사용자의 Refresh Token이 만료되었거나 삭제되었습니다."),
+    REFRESH_TOKEN_NOT_FOUND(3007, "해당 사용자의 Refresh Token이 만료되었거나 삭제되었습니다."),
     BLACKLISTED_TOKEN(3008, "블랙리스트 된 토큰입니다.");
 
     private final int errorCode;

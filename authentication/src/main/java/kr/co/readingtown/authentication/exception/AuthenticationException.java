@@ -38,9 +38,9 @@ public class AuthenticationException extends CustomException {
         }
     }
 
-    public static class RefreshTokenNotFount extends AuthenticationException {
-        public RefreshTokenNotFount() {
-            super(AuthenticationErrorCode.REFRESH_TOKEN_NOT_FOUNT);
+    public static class RefreshTokenNotFound extends AuthenticationException {
+        public RefreshTokenNotFound() {
+            super(AuthenticationErrorCode.REFRESH_TOKEN_NOT_FOUND);
         }
     }
 
