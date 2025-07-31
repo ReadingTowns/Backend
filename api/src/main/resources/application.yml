@@ -16,3 +16,7 @@ server:
 
 cors:
   allowed-origins: http://localhost:3000
+
+app:
+  profile:
+    default-image-url: ${DEFAULT_PROFILE_URL}
