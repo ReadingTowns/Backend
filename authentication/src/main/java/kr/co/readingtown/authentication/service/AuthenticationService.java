@@ -8,7 +8,6 @@ import kr.co.readingtown.authentication.jwt.TokenBlacklistService;
 import kr.co.readingtown.authentication.jwt.TokenProvider;
 import kr.co.readingtown.common.util.CookieUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +23,6 @@ public class AuthenticationService {
     private final TokenProvider tokenProvider;
     private final RefreshTokenService refreshTokenService;
     private final TokenBlacklistService tokenBlacklistService;
-    private final RedisTemplate<String, String> redisTemplate;
 
     public void reissue(HttpServletRequest request, HttpServletResponse response) {
 
@@ -51,13 +49,17 @@ public class AuthenticationService {
     public void logout(HttpServletRequest request) {
 
         // 1. 쿠키에서 access token 추출
-        String token = cookieUtil.extractTokenFromCookie(request, ACCESS_TOKEN_COOKIE_NAME);
+        String accessToken = cookieUtil.extractTokenFromCookie(request, ACCESS_TOKEN_COOKIE_NAME);
 
-        // 2. redis에서 refresh token 삭제
-        refreshTokenService.deleteRefreshToken(tokenProvider.getProvider(token), tokenProvider.getProviderId(token));
+        // 2. 토큰에서 사용자 정보 추출
+        String provider = tokenProvider.getProvider(accessToken);
+        String providerId = tokenProvider.getProviderId(accessToken);
 
-        // 3. redis 블랙리스트에 access token 저장
-        long expiration = tokenProvider.getExpiration(token);  // access token 남은 유효기간
-        tokenBlacklistService.addToBlacklist(token, expiration);
+        // 3. redis에서 refresh token 삭제
+        refreshTokenService.deleteRefreshToken(provider, providerId);
+
+        // 4. redis 블랙리스트에 access token 저장
+        long expiration = tokenProvider.getExpiration(accessToken);  // access token 남은 유효기간
+        tokenBlacklistService.addToBlacklist(accessToken, expiration);
     }
 }
