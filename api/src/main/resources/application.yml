@@ -13,3 +13,7 @@ spring:
 
 server:
   base-uri: ${SERVER_URI}
+
+cors:
+  allowed-origins:
+    - http://localhost:3000
