@@ -22,21 +22,18 @@ public class AuthenticationService {
 
         String refreshToken = cookieUtil.extractTokenFromCookie(request, "refresh_token");
 
+        if (refreshToken == null)
+            throw new AuthenticationException.NoTokenException();
+
         // TODO: refreshToken 검증 로직 추가 (category 검사 + redis 확인)
-        try {
+        tokenProvider.validateToken(refreshToken);
 
-            if (refreshToken != null & tokenProvider.validateToken(refreshToken)) {
+        String provider = tokenProvider.getProvider(refreshToken);
+        String providerId = tokenProvider.getProviderId(refreshToken);
 
-                String provider = tokenProvider.getProvider(refreshToken);
-                String providerId = tokenProvider.getProviderId(refreshToken);
+        String newAccessToken = tokenProvider.createAccessToken(provider, providerId);
+        String newRefreshToken = tokenProvider.createRefreshToken(provider, providerId);
 
-                String newAccessToken = tokenProvider.createAccessToken(provider, providerId);
-                String newRefreshToken = tokenProvider.createRefreshToken(provider, providerId);
-
-                cookieUtil.saveTokenToCookie(response, newAccessToken, newRefreshToken);
-            }
-        } catch (AuthenticationException e) {
-            throw e;
-        }
+        cookieUtil.saveTokenToCookie(response, newAccessToken, newRefreshToken);
     }
 }
