@@ -55,7 +55,6 @@ public class SecurityWebConfig {
                 );
 
         http
-                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/hc").authenticated()
                         .requestMatchers(PermitAllPatterns).permitAll()
