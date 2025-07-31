@@ -17,6 +17,10 @@ public class TokenProvider {
     private String secret;
 
     private Key key;
+
+    public static final String ACCESS_TOKEN_TYPE = "access";
+
+    public static final String REFRESH_TOKEN_TYPE = "refresh";
     private final long accessTokenValidityInMillis = 1000 * 60 * 15; // 15분
     private final long refreshTokenValidityInMillis = 1000L * 60 * 60 * 24 * 7; // 일주일
 
@@ -48,12 +52,12 @@ public class TokenProvider {
 
     public String createAccessToken(String provider, String providerId) {
 
-        return createToken(provider, providerId, "access", accessTokenValidityInMillis);
+        return createToken(provider, providerId, ACCESS_TOKEN_TYPE, accessTokenValidityInMillis);
     }
 
     public String createRefreshToken(String provider, String providerId) {
 
-        return createToken(provider, providerId, "refresh", refreshTokenValidityInMillis);
+        return createToken(provider, providerId, REFRESH_TOKEN_TYPE, refreshTokenValidityInMillis);
     }
 
     public String getProvider(String token) {

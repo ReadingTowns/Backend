@@ -17,10 +17,12 @@ public class AuthenticationService {
     private final TokenProvider tokenProvider;
     private final CookieUtil cookieUtil;
 
+    public static final String REFRESH_TOKEN_COOKIE_NAME = "refresh_token";
+
     // accessToken 재발급 할 때 refreshToken도 함께 재발급
     public void reissue(HttpServletRequest request, HttpServletResponse response) {
 
-        String refreshToken = cookieUtil.extractTokenFromCookie(request, "refresh_token");
+        String refreshToken = cookieUtil.extractTokenFromCookie(request, REFRESH_TOKEN_COOKIE_NAME);
 
         if (refreshToken == null)
             throw new AuthenticationException.NoTokenException();
