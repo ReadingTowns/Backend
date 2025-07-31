@@ -25,4 +25,28 @@ public class AuthenticationException extends CustomException {
             super(AuthenticationErrorCode.NO_TOKEN_EXCEPTION);
         }
     }
+
+    public static class TokenCategoryMismatch extends AuthenticationException {
+        public TokenCategoryMismatch() {
+            super(AuthenticationErrorCode.TOKEN_CATEGORY_MISMATCH);
+        }
+    }
+
+    public static class InvalidRefreshToken extends AuthenticationException {
+        public InvalidRefreshToken() {
+            super(AuthenticationErrorCode.INVALID_REFRESH_TOKEN);
+        }
+    }
+
+    public static class RefreshTokenNotFound extends AuthenticationException {
+        public RefreshTokenNotFound() {
+            super(AuthenticationErrorCode.REFRESH_TOKEN_NOT_FOUND);
+        }
+    }
+
+    public static class BlacklistedToken extends AuthenticationException {
+        public BlacklistedToken() {
+            super(AuthenticationErrorCode.BLACKLISTED_TOKEN);
+        }
+    }
 }

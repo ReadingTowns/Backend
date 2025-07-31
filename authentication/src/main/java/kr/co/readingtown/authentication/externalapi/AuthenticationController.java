@@ -20,4 +20,10 @@ public class AuthenticationController {
 
         authenticationService.reissue(request, response);
     }
+
+    @PostMapping("/logout")
+    public void logout(HttpServletRequest request) {
+
+        authenticationService.logout(request);
+    }
 }
