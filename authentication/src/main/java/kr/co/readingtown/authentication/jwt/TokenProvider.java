@@ -119,7 +119,7 @@ public class TokenProvider {
         // 3. Redis에서 발급된 토큰과 비교
         String savedToken = refreshTokenService.getRefreshToken(getProvider(token), getProviderId(token));
         if (savedToken == null)
-            throw new AuthenticationException.RefreshTokenNotFount();
+            throw new AuthenticationException.RefreshTokenNotFound();
         if (!token.equals(savedToken))
             throw new AuthenticationException.InvalidRefreshToken();
     }
