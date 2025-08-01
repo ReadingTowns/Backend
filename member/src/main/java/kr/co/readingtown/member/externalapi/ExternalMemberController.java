@@ -18,6 +18,7 @@ public class ExternalMemberController {
 
     @GetMapping("/onboarding/default-profile")
     public DefaultProfileResponseDto getDefaultProfile(@AuthenticationPrincipal Long memberId) {
+
         return memberService.getDefaultProfile(memberId);
     }
 
@@ -25,18 +26,12 @@ public class ExternalMemberController {
     public void completeOnboarding(@AuthenticationPrincipal Long memberId,
                                    @RequestBody OnboardingRequestDto onboardingRequestDto) {
 
-        memberService.completeOnboarding(
-                memberId,
-                onboardingRequestDto.getPhoneNumber(),
-                onboardingRequestDto.getCurrentTown(),
-                onboardingRequestDto.getUsername(),
-                onboardingRequestDto.getProfileImage(),
-                onboardingRequestDto.getAvailableTime()
-        );
+        memberService.completeOnboarding(memberId, onboardingRequestDto);
     }
 
     @GetMapping("/username/check")
     public Map<String, Boolean> checkUsername(@RequestParam String username) {
+
         boolean available = memberService.isUsernameAvailable(username);
         return Map.of("isAvailable", available);
     }

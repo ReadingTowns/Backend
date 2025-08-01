@@ -4,6 +4,7 @@ import kr.co.readingtown.common.config.AppProperties;
 import kr.co.readingtown.member.domain.Member;
 import kr.co.readingtown.member.domain.enums.LoginType;
 import kr.co.readingtown.member.dto.DefaultProfileResponseDto;
+import kr.co.readingtown.member.dto.OnboardingRequestDto;
 import kr.co.readingtown.member.exception.MemberException;
 import kr.co.readingtown.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -41,18 +42,18 @@ public class MemberService {
     }
 
     @Transactional
-    public void completeOnboarding(Long memberId, String phoneNumber, String currentTown, String username, String profileImage, String availableTime) {
+    public void completeOnboarding(Long memberId, OnboardingRequestDto onboardingRequestDto) {
 
-        Member member = memberRepository.findById(memberId).orElseThrow(MemberException.NoAuthMember::new);
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberException.NoAuthMember::new);
 
-        if (phoneNumber == null || phoneNumber.isBlank()
-                || currentTown == null || currentTown.isBlank()
-                || username == null || username.isBlank()
-                || profileImage == null || profileImage.isBlank()) {
-            throw new MemberException.MissingRequiredField();
-        }
-
-        member.completeOnboarding(phoneNumber, currentTown, username, profileImage, availableTime);
+        member.completeOnboarding(
+                onboardingRequestDto.getPhoneNumber(),
+                onboardingRequestDto.getCurrentTown(),
+                onboardingRequestDto.getUsername(),
+                onboardingRequestDto.getProfileImage(),
+                onboardingRequestDto.getAvailableTime()
+        );
     }
 
     public DefaultProfileResponseDto getDefaultProfile(Long memberId) {
@@ -67,6 +68,7 @@ public class MemberService {
 
     //랜덤 닉네임 설정
     private String generateUniqueUsername() {
+
         String prefix = "리딩여우";
         String candidate;
         int attempt = 0;

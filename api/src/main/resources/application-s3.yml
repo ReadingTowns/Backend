@@ -1,0 +1,7 @@
+spring:
+  config:
+    activate:
+      on-profile: s3
+app:
+  profile:
+    default-image-url: ${DEFAULT_PROFILE_URL}
