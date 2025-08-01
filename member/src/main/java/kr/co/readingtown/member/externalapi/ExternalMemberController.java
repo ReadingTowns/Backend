@@ -10,18 +10,18 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/v1/members")
 @RequiredArgsConstructor
 public class ExternalMemberController {
 
     private final MemberService memberService;
 
-    @GetMapping("/v1/onboarding/default-profile")
+    @GetMapping("/onboarding/default-profile")
     public DefaultProfileResponseDto getDefaultProfile(@AuthenticationPrincipal Long memberId) {
         return memberService.getDefaultProfile(memberId);
     }
 
-    @PostMapping("/v1/onboarding/complete")
+    @PostMapping("/onboarding/complete")
     public void completeOnboarding(@AuthenticationPrincipal Long memberId,
                                    @RequestBody OnboardingRequestDto onboardingRequestDto) {
 
@@ -35,7 +35,7 @@ public class ExternalMemberController {
         );
     }
 
-    @GetMapping("/v1/members/username/check")
+    @GetMapping("/username/check")
     public Map<String, Boolean> checkUsername(@RequestParam String username) {
         boolean available = memberService.isUsernameAvailable(username);
         return Map.of("isAvailable", available);

@@ -1,12 +1,4 @@
 
 dependencies {
     implementation project(':common')
-//
-//    // 테스트를 위해 추가된 의존성
-//    // Spring Web - RestController 사용을 위해 필요
-//    implementation 'org.springframework.boot:spring-boot-starter-web'
-//
-//    // 테스트 의존성
-//    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-//    testImplementation 'org.springframework.security:spring-security-test'
 }
