@@ -17,11 +17,14 @@ dependencies {
     api 'mysql:mysql-connector-java:8.0.33'
 
     // security
-//	implementation 'org.springframework.boot:spring-boot-starter-security'
+	api 'org.springframework.boot:spring-boot-starter-security'
 //	testImplementation 'org.springframework.security:spring-security-test'
 
     // openfeign
     api 'org.springframework.cloud:spring-cloud-starter-openfeign'
 
     implementation 'jakarta.servlet:jakarta.servlet-api:6.0.0'
+
+    // redis
+    api 'org.springframework.boot:spring-boot-starter-data-redis'
 }
