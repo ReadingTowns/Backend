@@ -5,7 +5,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import kr.co.readingtown.authentication.client.MemberClient;
-import kr.co.readingtown.authentication.exception.AuthenticationException;
 import kr.co.readingtown.common.util.CookieUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,8 +31,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 1. 쿠키에서 access token 추출
         String token = cookieUtil.extractTokenFromCookie(request, ACCESS_TOKEN_COOKIE_NAME);
-        if (token == null)
-            throw new AuthenticationException.NoTokenException();
+        if (token == null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         // 2. access token 유효성 검사
         tokenProvider.validateAccessToken(token);
@@ -56,13 +57,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
 
-        return path.equals("/favicon.ico")
+        return path.startsWith("/favicon.ico")
                 || path.startsWith("/static/")
                 || path.startsWith("/css/")
                 || path.startsWith("/js/")
                 || path.startsWith("/images/")
                 || path.startsWith("/public/")
                 || path.startsWith("/error")
-                || path.startsWith("/health");
+                || path.startsWith("/health")
+                || path.startsWith("/.well-known/");
     }
 }
