@@ -46,8 +46,11 @@ public class Member extends BaseEntity {
     @Column(name = "chat_avg_response_minutes")
     private Integer chatAvgResponseMinutes;
 
+    @Column(name = "available_time")
+    private String availableTime;
+
     @Builder
-    public Member(String username, LoginType loginType, String loginId, String profileImage, String phoneNumber, Double userRating, Integer userRatingCount, String currentTown, Double chatResponseRate, Integer chatAvgResponseMinutes) {
+    public Member(String username, LoginType loginType, String loginId, String profileImage, String phoneNumber, Double userRating, Integer userRatingCount, String currentTown, Double chatResponseRate, Integer chatAvgResponseMinutes, String availableTime) {
         this.username = username;
         this.loginType = loginType;
         this.loginId = loginId;
@@ -58,5 +61,14 @@ public class Member extends BaseEntity {
         this.currentTown = currentTown;
         this.chatResponseRate = chatResponseRate;
         this.chatAvgResponseMinutes = chatAvgResponseMinutes;
+        this.availableTime = availableTime;
+    }
+
+    public void completeOnboarding(String phoneNumber, String currentTown, String username, String profileImage, String availableTime) {
+        this.phoneNumber = phoneNumber;
+        this.currentTown = currentTown;
+        this.username = username;
+        this.profileImage = profileImage;
+        this.availableTime = availableTime;
     }
 }

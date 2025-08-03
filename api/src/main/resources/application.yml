@@ -2,8 +2,8 @@ spring:
   profiles:
     active: local
     group:
-      local: local, datasource, auth
-      prod: prod, datasource, auth
+      local: local, datasource, auth, s3
+      prod: prod, datasource, auth, s3
   config:
     import: optional:file:.env[.properties]
 
