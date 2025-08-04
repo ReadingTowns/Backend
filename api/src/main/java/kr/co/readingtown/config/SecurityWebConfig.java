@@ -60,7 +60,7 @@ public class SecurityWebConfig {
 
         http
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/hc").authenticated()
+                        .requestMatchers("/hc").permitAll()
                         .requestMatchers(PermitAllPatterns).permitAll()
                         .anyRequest().permitAll()
                 )
