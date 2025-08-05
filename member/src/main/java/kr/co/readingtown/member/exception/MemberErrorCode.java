@@ -14,7 +14,9 @@ public enum MemberErrorCode implements ErrorCode {
     //닉네임 관련
     USERNAME_GENERATION_FAILED(4010, "중복이 많아 기본 닉네임 생성에 실패했습니다."),
     INVALID_USERNAME_FORMAT(4011, "닉네임은 2자 이상 20자 이하로 입력해주세요."),
-    USERNAME_ALREADY_EXISTS(4012, "이미 사용 중인 닉네임입니다.");
+    USERNAME_ALREADY_EXISTS(4012, "이미 사용 중인 닉네임입니다."),
+
+    SELF_RATING_NOT_ALLOWED(4020, "본인에게 유저 평가는 남길 수 없습니다.");
     private final int errorCode;
     private final String errorMessage;
 };

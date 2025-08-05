@@ -31,11 +31,14 @@ public class Member extends BaseEntity {
     @Column(name = "phone_number")
     private String phoneNumber;
 
-    @Column(name = "user_rating")
-    private Double userRating;
+    @Column(name = "user_rating_sum") //리뷰 점수 합
+    private int userRatingSum = 0;
 
-    @Column(name = "user_rating_count")
-    private Integer userRatingCount;
+    @Column(name = "user_rating_count") //리뷰 개수
+    private Integer userRatingCount = 0;
+
+    @Column(name = "user_rating") //리뷰 평점
+    private Double userRating;
 
     @Column(name = "current_town")
     private String currentTown;
@@ -49,14 +52,27 @@ public class Member extends BaseEntity {
     @Column(name = "available_time")
     private String availableTime;
 
+    public void updateProfile(String username, String profileImage, String availableTime) {
+        this.username = username;
+        this.profileImage = profileImage;
+        this.availableTime = availableTime;
+    }
+
+    public void addStarRating(int starRating) {
+        this.userRatingSum += starRating;
+        this.userRatingCount += 1;
+        this.userRating = (double)this.userRatingSum / (double)this.userRatingCount;
+    }
+
     @Builder
-    public Member(String username, LoginType loginType, String loginId, String profileImage, String phoneNumber, Double userRating, Integer userRatingCount, String currentTown, Double chatResponseRate, Integer chatAvgResponseMinutes, String availableTime) {
+    public Member(String username, LoginType loginType, String loginId, String profileImage, String phoneNumber, Integer userRatingSum, Integer userRatingCount, Double userRating, String currentTown, Double chatResponseRate, Integer chatAvgResponseMinutes, String availableTime) {
         this.username = username;
         this.loginType = loginType;
         this.loginId = loginId;
         this.profileImage = profileImage;
         this.phoneNumber = phoneNumber;
         this.userRating = userRating;
+        this.userRatingSum = userRatingSum;
         this.userRatingCount = userRatingCount;
         this.currentTown = currentTown;
         this.chatResponseRate = chatResponseRate;

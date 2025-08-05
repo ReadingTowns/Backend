@@ -3,8 +3,7 @@ package kr.co.readingtown.member.service;
 import kr.co.readingtown.common.config.AppProperties;
 import kr.co.readingtown.member.domain.Member;
 import kr.co.readingtown.member.domain.enums.LoginType;
-import kr.co.readingtown.member.dto.DefaultProfileResponseDto;
-import kr.co.readingtown.member.dto.OnboardingRequestDto;
+import kr.co.readingtown.member.dto.*;
 import kr.co.readingtown.member.exception.MemberException;
 import kr.co.readingtown.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -106,4 +105,45 @@ public class MemberService {
         return true;
     }
 
+    @Transactional
+    public Boolean saveStarRating(Long fromMemberId, StarRatingRequestDto starRatingRequestDto) {
+        Member member = memberRepository.findById(starRatingRequestDto.getMemberId())
+                .orElseThrow(MemberException.NoAuthMember::new);
+
+        // 자기 자신을 평가하는 경우 예외 처리 (선택적)
+        if (fromMemberId.equals(starRatingRequestDto.getMemberId())) {
+            throw new MemberException.SelfRatingNotAllowed();
+        }
+
+        // 평점 추가
+        member.addStarRating(starRatingRequestDto.getStarRating());
+        memberRepository.save(member);
+
+        return true;
+    }
+
+    @Transactional
+    public void updateProfile(Long memberId, UpdateProfileRequestDto updateProfileRequestDto) {
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberException.NoAuthMember::new);
+
+        member.updateProfile(
+                updateProfileRequestDto.getUsername(),
+                updateProfileRequestDto.getProfileImage(),
+                updateProfileRequestDto.getAvailableTime()
+        );
+    }
+
+    public StarRatingResponseDto getStarRatingOf(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberException.NoAuthMember::new);
+
+        return StarRatingResponseDto.builder()
+                .memberId(member.getMemberId())
+                .userRatingSum(member.getUserRatingSum())
+                .userRatingCount(member.getUserRatingCount())
+                .userRating(member.getUserRating())
+                .build();
+    }
 }

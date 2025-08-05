@@ -34,4 +34,10 @@ public class MemberException extends CustomException {
             super(MemberErrorCode.USERNAME_ALREADY_EXISTS);
         }
     }
+
+    public static class SelfRatingNotAllowed extends MemberException {
+        public SelfRatingNotAllowed() {
+            super(MemberErrorCode.SELF_RATING_NOT_ALLOWED);
+        }
+    }
 }
