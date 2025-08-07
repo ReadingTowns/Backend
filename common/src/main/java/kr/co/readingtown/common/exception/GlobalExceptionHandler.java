@@ -103,7 +103,7 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
-                .body(new CommonResponse<>(HttpErrorCode.UNAUTHORIZED));
+                .body(new CommonResponse<>(HttpErrorCode.ACCESS_DENIED));
     }
 
     // DB 제약조건 위반 등 충돌 시
@@ -118,7 +118,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<CommonResponse<HttpErrorCode>> handleUnknownException(final Exception e, HttpServletRequest request) {
+    public ResponseEntity<CommonResponse<Object>> handleUnknownException(final Exception e, HttpServletRequest request) {
 
         // no static resoure
         if (e.getClass().getName().equals("org.springframework.web.servlet.resource.NoResourceFoundException")) {
