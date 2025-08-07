@@ -23,6 +23,10 @@ public class Review extends BaseEntity {
     @Lob
     private String content;
 
+    public void updateContent(String content) {
+        this.content = content;
+    }
+
     @Builder
     public Review(Long bookId, Long memberId, String content) {
         this.bookId = bookId;
