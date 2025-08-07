@@ -5,13 +5,17 @@ import kr.co.readingtown.member.domain.Member;
 import kr.co.readingtown.member.domain.enums.LoginType;
 import kr.co.readingtown.member.dto.DefaultProfileResponseDto;
 import kr.co.readingtown.member.dto.OnboardingRequestDto;
+import kr.co.readingtown.member.dto.query.MemberIdNameDto;
 import kr.co.readingtown.member.exception.MemberException;
 import kr.co.readingtown.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +43,16 @@ public class MemberService {
 
         Member member = memberRepository.findByLoginTypeAndLoginId(loginType, loginId);
         return member.getMemberId();
+    }
+
+    public Map<Long, String> getMembersName(List<Long> memberIds) {
+
+        List<MemberIdNameDto> memberIdNameDtos = memberRepository.findIdAndNameByIdIn(memberIds);
+        return memberIdNameDtos.stream()
+                .collect(Collectors.toMap(
+                        MemberIdNameDto::id,
+                        MemberIdNameDto::name
+                ));
     }
 
     @Transactional
