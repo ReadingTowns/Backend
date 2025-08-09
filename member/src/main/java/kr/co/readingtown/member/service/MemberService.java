@@ -55,6 +55,11 @@ public class MemberService {
                 ));
     }
 
+    public boolean getMemberExists(Long memberId) {
+
+        return memberRepository.existsById(memberId);
+    }
+
     @Transactional
     public void completeOnboarding(Long memberId, OnboardingRequestDto onboardingRequestDto) {
 
