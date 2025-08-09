@@ -1,6 +1,8 @@
-package kr.co.readingtown.review.client;
+package kr.co.readingtown.review.integration.member;
 
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -13,6 +15,9 @@ import java.util.Map;
 )
 public interface MemberClient {
 
-    @PostMapping("/internal/members/name")
+    @PostMapping("/internal/members/names")
     Map<Long, String> getMembersName(@RequestBody List<Long> memberIds);
+
+    @GetMapping("/internal/members/{memberId}/exists")
+    boolean existsMember(@PathVariable("memberId") Long memberId);
 }

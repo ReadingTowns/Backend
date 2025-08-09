@@ -37,4 +37,10 @@ public class InternalMemberController {
 
         return memberService.getMembersName(memberIds);
     }
+
+    @GetMapping("/{memberId}/exists")
+    public boolean existsMember(@PathVariable("memberId") Long memberId) {
+
+        return memberService.getMemberExists(memberId);
+    }
 }
