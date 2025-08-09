@@ -22,7 +22,8 @@ public class SwaggerConfig {
         return GroupedOpenApi.builder()
                 .group("external-api")
                 .packagesToScan(
-                        "kr.co.readingtown.member.externalapi"
+                        "kr.co.readingtown.member.externalapi",
+                        "kr.co.readingtown.review.externalapi"
                 )
                 .build();
     }
