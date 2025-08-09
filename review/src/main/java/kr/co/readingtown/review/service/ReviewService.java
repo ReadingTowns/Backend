@@ -1,6 +1,7 @@
 package kr.co.readingtown.review.service;
 
-import kr.co.readingtown.review.client.MemberClient;
+import kr.co.readingtown.review.integration.book.BookValidator;
+import kr.co.readingtown.review.integration.member.MemberClient;
 import kr.co.readingtown.review.domain.Review;
 import kr.co.readingtown.review.dto.query.ReviewContentAndAuthorNameDto;
 import kr.co.readingtown.review.dto.query.ReviewIdAndContentDto;
@@ -8,6 +9,7 @@ import kr.co.readingtown.review.dto.request.ReviewRequestDto;
 import kr.co.readingtown.review.dto.response.ReviewResponseDto;
 import kr.co.readingtown.review.dto.response.ReviewWithAuthorResponseDto;
 import kr.co.readingtown.review.exception.ReviewException;
+import kr.co.readingtown.review.integration.member.MemberValidator;
 import kr.co.readingtown.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,8 @@ import java.util.Map;
 public class ReviewService {
 
     private final MemberClient memberClient;
+    private final BookValidator bookValidator;
+    private final MemberValidator memberValidator;
     private final ReviewRepository reviewRepository;
 
     // 책 감상평 등록
@@ -32,6 +36,7 @@ public class ReviewService {
         if (reviewRepository.existsByBookIdAndMemberId(bookId, memberId)) {
             throw new ReviewException.ReviewAlreadyExists();
         }
+        bookValidator.validateBookExists(bookId);
 
         Review newReview = Review.builder()
                 .bookId(bookId)
@@ -59,6 +64,9 @@ public class ReviewService {
     // 특정 책에 대한 특정 회원의 감상평 조회
     public ReviewResponseDto getReviewByMemberId(Long bookId, Long memberId) {
 
+        bookValidator.validateBookExists(bookId);
+        memberValidator.validateMemberExists(memberId);
+
         ReviewIdAndContentDto myReview = reviewRepository.findReviewByBookIdAndMemberId(bookId, memberId)
                 .orElseThrow(ReviewException.ReviewNotFound::new);
 
@@ -68,6 +76,7 @@ public class ReviewService {
     // 특정 책의 모든 감상평 조회
     public List<ReviewWithAuthorResponseDto> getReviews(Long bookId) {
 
+        bookValidator.validateBookExists(bookId);
         List<ReviewContentAndAuthorNameDto> reviews = reviewRepository.findReviewByBookId(bookId);
         if (reviews.isEmpty()) {
             return Collections.emptyList();
