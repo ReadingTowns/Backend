@@ -47,6 +47,9 @@ public class MemberService {
 
     public Map<Long, String> getMembersName(List<Long> memberIds) {
 
+        if (memberIds == null || memberIds.isEmpty())
+            return Map.of();
+
         List<MemberIdNameDto> memberIdNameDtos = memberRepository.findIdAndNameByIdIn(memberIds);
         return memberIdNameDtos.stream()
                 .collect(Collectors.toMap(
