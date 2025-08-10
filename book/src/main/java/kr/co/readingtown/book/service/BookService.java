@@ -17,6 +17,8 @@ public class BookService {
 
     public boolean getBookExists(Long bookId) {
 
+        if (bookId == null)
+            return (false);
         return bookRepository.existsById(bookId);
     }
 
