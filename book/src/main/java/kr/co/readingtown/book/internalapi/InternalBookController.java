@@ -1,11 +1,12 @@
 package kr.co.readingtown.book.internalapi;
 
+import kr.co.readingtown.book.dto.request.BookInfoRequestDto;
+import kr.co.readingtown.book.dto.response.BookPreviewResponseDto;
 import kr.co.readingtown.book.service.BookService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,5 +19,17 @@ public class InternalBookController {
     public boolean existsBook(@PathVariable("bookId") Long bookId) {
 
         return bookService.getBookExists(bookId);
+    }
+
+    @PostMapping("/preview")
+    public List<BookPreviewResponseDto> getBooksPreview(@RequestBody List<Long> bookIds) {
+
+        return bookService.getBooksPreview(bookIds);
+    }
+
+    @PostMapping
+    public Long saveIfNotExistsAndGetBookId(@RequestBody BookInfoRequestDto bookInfoRequestDto) {
+
+        return bookService.saveIfNotExistsAndGetBookId(bookInfoRequestDto);
     }
 }
