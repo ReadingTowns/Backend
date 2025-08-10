@@ -1,4 +1,4 @@
-package kr.co.readingtown.member.dto;
+package kr.co.readingtown.member.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;

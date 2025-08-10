@@ -1,7 +1,11 @@
 package kr.co.readingtown.member.externalapi;
 
 import jakarta.validation.Valid;
-import kr.co.readingtown.member.dto.*;
+import kr.co.readingtown.member.dto.request.OnboardingRequestDto;
+import kr.co.readingtown.member.dto.request.StarRatingRequestDto;
+import kr.co.readingtown.member.dto.request.UpdateProfileRequestDto;
+import kr.co.readingtown.member.dto.response.DefaultProfileResponseDto;
+import kr.co.readingtown.member.dto.response.StarRatingResponseDto;
 import kr.co.readingtown.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -30,10 +34,10 @@ public class ExternalMemberController {
     }
 
     //닉네임 중복 체크
-    @GetMapping("/username/check")
-    public Map<String, Boolean> checkUsername(@RequestParam String username) {
+    @GetMapping("/username/validate")
+    public Map<String, Boolean> checkUsername(@AuthenticationPrincipal Long memberId, @RequestParam String username) {
 
-        boolean available = memberService.isUsernameAvailable(username);
+        boolean available = memberService.isUsernameAvailable(memberId, username);
         return Map.of("isAvailable", available);
     }
 
@@ -47,8 +51,7 @@ public class ExternalMemberController {
     //유저에 대한 리뷰 별점 조회
     @GetMapping("/star-rating")
     public StarRatingResponseDto getStarRating(@AuthenticationPrincipal Long loginMemberId,
-            @RequestParam(value="memberId", required=false) Long memberId
-    ) {
+                                               @RequestParam(value="memberId", required=false) Long memberId) {
         Long targetId = (memberId != null ? memberId : loginMemberId);
         return memberService.getStarRatingOf(targetId);
     }
@@ -59,5 +62,4 @@ public class ExternalMemberController {
                               @Valid @RequestBody UpdateProfileRequestDto updateProfileRequestDto) {
         memberService.updateProfile(memberId, updateProfileRequestDto);
     }
-
 }

@@ -3,7 +3,11 @@ package kr.co.readingtown.member.service;
 import kr.co.readingtown.common.config.AppProperties;
 import kr.co.readingtown.member.domain.Member;
 import kr.co.readingtown.member.domain.enums.LoginType;
-import kr.co.readingtown.member.dto.*;
+import kr.co.readingtown.member.dto.request.OnboardingRequestDto;
+import kr.co.readingtown.member.dto.request.StarRatingRequestDto;
+import kr.co.readingtown.member.dto.request.UpdateProfileRequestDto;
+import kr.co.readingtown.member.dto.response.DefaultProfileResponseDto;
+import kr.co.readingtown.member.dto.response.StarRatingResponseDto;
 import kr.co.readingtown.member.exception.MemberException;
 import kr.co.readingtown.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +33,8 @@ public class MemberService {
                     .loginType(loginType)
                     .loginId(loginId)
                     .username(username)
+                    .userRatingSum(0)
+                    .userRatingCount(0)
                     .build();
             memberRepository.save(newMember);
         }
@@ -86,7 +92,10 @@ public class MemberService {
     }
 
     //닉네임 사용가능 여부 확인
-    public boolean isUsernameAvailable(String username) {
+    public boolean isUsernameAvailable(Long memberId, String username) {
+
+        Member member = memberRepository.findById(memberId).orElseThrow(MemberException.NoAuthMember::new);
+
         //null 체크
         if (username == null || username.isBlank()) {
             throw new MemberException.InvalidUsername();

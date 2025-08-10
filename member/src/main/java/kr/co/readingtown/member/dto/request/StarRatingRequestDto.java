@@ -1,4 +1,4 @@
-package kr.co.readingtown.member.dto;
+package kr.co.readingtown.member.dto.request;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

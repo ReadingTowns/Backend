@@ -32,7 +32,7 @@ public class Member extends BaseEntity {
     private String phoneNumber;
 
     @Column(name = "user_rating_sum") //리뷰 점수 합
-    private int userRatingSum = 0;
+    private Integer userRatingSum = 0;
 
     @Column(name = "user_rating_count") //리뷰 개수
     private Integer userRatingCount = 0;
