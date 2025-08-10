@@ -284,7 +284,7 @@ public class MemberService {
         memberRepository.findById(memberId)
                 .orElseThrow(MemberException.NoAuthMember::new);
 
-        memberRepository.findById(memberId)
+        memberRepository.findById(partnerMemberId)
                 .orElseThrow(MemberException.NotFoundMember::new);
 
         followClient.follow(memberId, partnerMemberId);
@@ -295,7 +295,7 @@ public class MemberService {
         memberRepository.findById(memberId)
                 .orElseThrow(MemberException.NoAuthMember::new);
 
-        memberRepository.findById(memberId)
+        memberRepository.findById(partnerMemberId)
                 .orElseThrow(MemberException.NotFoundMember::new);
 
         followClient.follow(memberId, partnerMemberId);

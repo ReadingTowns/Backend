@@ -72,7 +72,8 @@ public class ExternalMemberController {
 
     //다른 유저의 프로필 조회
     @GetMapping("/{partnerId}/profile")
-    public PartnerProfileResponseDto getOtherProfile(@AuthenticationPrincipal Long memberId, @PathVariable Long partnerId) {
+    public PartnerProfileResponseDto getOtherProfile(@AuthenticationPrincipal Long memberId,
+                                                     @PathVariable Long partnerId) {
         return memberService.getPartnerProfile(memberId, partnerId);
     }
 
@@ -90,14 +91,14 @@ public class ExternalMemberController {
     }
 
     //유저에 대한 리뷰 별점 조회
-    @GetMapping("/star-rating")
+    @GetMapping("/{partnerId}/star-rating")
     public StarRatingResponseDto getStarRating(@AuthenticationPrincipal Long memberId,
-                                               @RequestParam Long partnerId) {
+                                               @PathVariable Long partnerId) {
         return memberService.getStarRatingOfPartner(memberId, partnerId);
     }
 
     //내 리뷰 별점 조회
-    @GetMapping("/star-rating")
+    @GetMapping("/me/star-rating")
     public StarRatingResponseDto getMyStarRating(@AuthenticationPrincipal Long memberId) {
         return memberService.getStarRatingOf(memberId);
     }

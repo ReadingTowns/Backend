@@ -14,6 +14,7 @@ public class BookhouseService {
 
     private final BookhouseRepository bookhouseRepository;
 
+    @Transactional
     public void registerBookhouse(Long memberId) {
         // 이미 존재하면 생성 실패 처리
         if (bookhouseRepository.existsByMemberId(memberId)) {
