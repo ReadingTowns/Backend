@@ -10,6 +10,7 @@ public enum MemberErrorCode implements ErrorCode {
 
     MISSING_REQUIRED_FIELD(4001,"온보딩 필수 입력값이 누락되었습니다." ),
     NO_AUTH_MEMBER(4002, "로그인된 회원 정보가 없습니다."),
+    NOT_FOUND_MEMBER(4003, "해당 회원 정보를 찾을 수 없습니다."),
 
     //닉네임 관련
     NICKNAME_GENERATION_FAILED(4010, "중복이 많아 기본 닉네임 생성에 실패했습니다."),

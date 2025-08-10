@@ -7,5 +7,3 @@ public interface LocationService {
 
     String resolveTown(BigDecimal longitude, BigDecimal latitude);
 }
-
-

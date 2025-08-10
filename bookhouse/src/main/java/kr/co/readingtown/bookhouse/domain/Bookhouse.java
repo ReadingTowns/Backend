@@ -20,12 +20,8 @@ public class Bookhouse extends BaseEntity {
     @Column(name = "member_id")
     private Long memberId;
 
-    @Column(name = "book_id")
-    private Long bookId;
-
     @Builder
-    public Bookhouse(Long memberId, Long bookId) {
+    public Bookhouse(Long memberId) {
         this.memberId = memberId;
-        this.bookId = bookId;
     }
 }

@@ -1,7 +1,7 @@
 package kr.co.readingtown.member.service;
 
 import kr.co.readingtown.common.config.AppProperties;
-import kr.co.readingtown.common.exception.CustomException;
+import kr.co.readingtown.member.client.BookhouseClient;
 import kr.co.readingtown.member.domain.Member;
 import kr.co.readingtown.member.domain.enums.LoginType;
 import kr.co.readingtown.member.dto.request.OnboardingRequestDto;
@@ -9,6 +9,7 @@ import kr.co.readingtown.member.dto.request.StarRatingRequestDto;
 import kr.co.readingtown.member.dto.request.UpdateProfileRequestDto;
 import kr.co.readingtown.member.dto.request.UpdateTownRequestDto;
 import kr.co.readingtown.member.dto.response.DefaultProfileResponseDto;
+import kr.co.readingtown.member.dto.response.ProfileResponseDto;
 import kr.co.readingtown.member.dto.response.StarRatingResponseDto;
 import kr.co.readingtown.member.exception.MemberException;
 import kr.co.readingtown.member.repository.MemberRepository;
@@ -26,6 +27,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final AppProperties appProperties;
     private final LocationService locationService;
+    private final BookhouseClient bookhouseClient;
 
     @Transactional
     public void registerMember(LoginType loginType, String loginId, String username) {
@@ -41,6 +43,9 @@ public class MemberService {
                     .userRatingCount(0)
                     .build();
             memberRepository.save(newMember);
+
+            //회원 등록 시 서재 자동 생성
+            bookhouseClient.registerBookhouse(newMember.getMemberId());
         }
     }
 
@@ -120,7 +125,7 @@ public class MemberService {
 
         //중복체크
         if (memberRepository.existsByNickname(nickname)) {
-            throw new MemberException.UsernameAlreadyExists();
+            throw new MemberException.NicknameAlreadyExists();
         }
 
         return true;
@@ -168,6 +173,21 @@ public class MemberService {
                 .build();
     }
 
+    public StarRatingResponseDto getStarRatingOfPartner(Long memberId, Long partnerId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberException.NoAuthMember::new);
+
+        Member partner = memberRepository.findById(partnerId)
+                .orElseThrow(MemberException.NotFoundMember::new);
+
+        return StarRatingResponseDto.builder()
+                .memberId(partner.getMemberId())
+                .userRatingSum(partner.getUserRatingSum())
+                .userRatingCount(partner.getUserRatingCount())
+                .userRating(partner.getUserRating())
+                .build();
+    }
+
     public String getTown(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(MemberException.NoAuthMember::new);
@@ -175,6 +195,7 @@ public class MemberService {
         return member.getCurrentTown();
     }
 
+    @Transactional
     public String updateTown(Long memberId, UpdateTownRequestDto updateTownRequestDto) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(MemberException.NoAuthMember::new);
@@ -191,5 +212,23 @@ public class MemberService {
 
         member.updateTown(updateTownRequestDto.getLatitude(), updateTownRequestDto.getLongitude(), currentTown);
         return currentTown;
+    }
+
+    public ProfileResponseDto getProfile(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberException.NoAuthMember::new);
+
+        Long bookhouseId = bookhouseClient.getBookhouseId(memberId);
+
+        return ProfileResponseDto.builder()
+                .memberId(member.getMemberId())
+                .profileImage(member.getProfileImage())
+                .nickname(member.getNickname())
+                .currentTown(member.getCurrentTown())
+                .userRating(member.getUserRating())
+                .userRatingCount(member.getUserRatingCount())
+                .availableTime(member.getAvailableTime())
+                .bookhouseId(bookhouseId)
+                .build();
     }
 }

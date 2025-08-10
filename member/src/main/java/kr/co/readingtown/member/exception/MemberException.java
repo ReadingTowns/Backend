@@ -3,6 +3,7 @@ package kr.co.readingtown.member.exception;
 import kr.co.readingtown.common.exception.CustomException;
 
 public class MemberException extends CustomException {
+
     public MemberException(final MemberErrorCode memberErrorCode) {
         super(memberErrorCode);
     }
@@ -14,6 +15,12 @@ public class MemberException extends CustomException {
     public static class NoAuthMember extends MemberException {
         public NoAuthMember() {
             super(MemberErrorCode.NO_AUTH_MEMBER);
+        }
+    }
+
+    public static class NotFoundMember extends MemberException {
+        public NotFoundMember() {
+            super(MemberErrorCode.NOT_FOUND_MEMBER);
         }
     }
 
@@ -29,8 +36,8 @@ public class MemberException extends CustomException {
         }
     }
 
-    public static class UsernameAlreadyExists extends MemberException {
-        public UsernameAlreadyExists() {
+    public static class NicknameAlreadyExists extends MemberException {
+        public NicknameAlreadyExists() {
             super(MemberErrorCode.NICKNAME_ALREADY_EXISTS);
         }
     }

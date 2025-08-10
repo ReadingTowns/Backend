@@ -1,11 +1,13 @@
 package kr.co.readingtown.member.externalapi;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import kr.co.readingtown.member.dto.request.OnboardingRequestDto;
 import kr.co.readingtown.member.dto.request.StarRatingRequestDto;
 import kr.co.readingtown.member.dto.request.UpdateProfileRequestDto;
 import kr.co.readingtown.member.dto.request.UpdateTownRequestDto;
 import kr.co.readingtown.member.dto.response.DefaultProfileResponseDto;
+import kr.co.readingtown.member.dto.response.ProfileResponseDto;
 import kr.co.readingtown.member.dto.response.StarRatingResponseDto;
 import kr.co.readingtown.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -66,6 +68,18 @@ public class ExternalMemberController {
         memberService.updateProfile(memberId, updateProfileRequestDto);
     }
 
+    //다른 유저의 프로필 조회
+    @GetMapping("/{partnerId}/profile")
+    public ProfileResponseDto getOtherProfile(@AuthenticationPrincipal Long memberId, @PathVariable Long partnerId) {
+        return memberService.getProfile(memberId); //Todo: 팔로우 여부 기능 추가 필요. 내 프로필 조회와 달라야함
+    }
+
+    //내 프로필 조회
+    @GetMapping("/me/profile")
+    public ProfileResponseDto getMyProfile(@AuthenticationPrincipal Long memberId) {
+        return memberService.getProfile(memberId);
+    }
+
     //유저에 대한 리뷰 별점 제출
     @PostMapping("/star-rating")
     public Boolean submitStarRating(@AuthenticationPrincipal Long fromMemberId,
@@ -75,10 +89,16 @@ public class ExternalMemberController {
 
     //유저에 대한 리뷰 별점 조회
     @GetMapping("/star-rating")
-    public StarRatingResponseDto getStarRating(@AuthenticationPrincipal Long loginMemberId,
-                                               @RequestParam(value="memberId", required=false) Long memberId) {
-        Long targetId = (memberId != null ? memberId : loginMemberId);
-        return memberService.getStarRatingOf(targetId);
+    public StarRatingResponseDto getStarRating(@AuthenticationPrincipal Long memberId,
+                                               @RequestParam Long partnerId) {
+        return memberService.getStarRatingOfPartner(memberId, partnerId);
     }
 
+    //내 리뷰 별점 조회
+    @GetMapping("/star-rating")
+    public StarRatingResponseDto getMyStarRating(@AuthenticationPrincipal Long memberId) {
+        return memberService.getStarRatingOf(memberId);
+    }
+
+    
 }

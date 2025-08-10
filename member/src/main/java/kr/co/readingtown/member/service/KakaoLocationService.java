@@ -2,7 +2,6 @@ package kr.co.readingtown.member.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kr.co.readingtown.common.exception.CustomException;
 import kr.co.readingtown.member.exception.MemberException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
