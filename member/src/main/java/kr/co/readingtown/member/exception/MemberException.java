@@ -17,27 +17,33 @@ public class MemberException extends CustomException {
         }
     }
 
-    public static class UsernameGenerationFailed extends MemberException {
-        public UsernameGenerationFailed() {
-            super(MemberErrorCode.USERNAME_GENERATION_FAILED);
+    public static class NicknameGenerationFailed extends MemberException {
+        public NicknameGenerationFailed() {
+            super(MemberErrorCode.NICKNAME_GENERATION_FAILED);
         }
     }
 
-    public static class InvalidUsername extends MemberException {
-        public InvalidUsername() {
-            super(MemberErrorCode.INVALID_USERNAME_FORMAT);
+    public static class InvalidNickname extends MemberException {
+        public InvalidNickname() {
+            super(MemberErrorCode.INVALID_NICKNAME_FORMAT);
         }
     }
 
     public static class UsernameAlreadyExists extends MemberException {
         public UsernameAlreadyExists() {
-            super(MemberErrorCode.USERNAME_ALREADY_EXISTS);
+            super(MemberErrorCode.NICKNAME_ALREADY_EXISTS);
         }
     }
 
     public static class SelfRatingNotAllowed extends MemberException {
         public SelfRatingNotAllowed() {
             super(MemberErrorCode.SELF_RATING_NOT_ALLOWED);
+        }
+    }
+
+    public static class TownResolvedFailed extends MemberException {
+        public TownResolvedFailed() {
+            super(MemberErrorCode.TOWN_RESOLVED_FAILED);
         }
     }
 }

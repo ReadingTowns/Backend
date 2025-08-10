@@ -1,0 +1,6 @@
+spring:
+  config:
+    activate:
+      on-profile: kakao-map
+kakao:
+  rest-api-key: ${KAKAO_CLIENT_ID}

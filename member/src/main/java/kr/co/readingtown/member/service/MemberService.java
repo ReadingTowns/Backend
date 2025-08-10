@@ -1,11 +1,13 @@
 package kr.co.readingtown.member.service;
 
 import kr.co.readingtown.common.config.AppProperties;
+import kr.co.readingtown.common.exception.CustomException;
 import kr.co.readingtown.member.domain.Member;
 import kr.co.readingtown.member.domain.enums.LoginType;
 import kr.co.readingtown.member.dto.request.OnboardingRequestDto;
 import kr.co.readingtown.member.dto.request.StarRatingRequestDto;
 import kr.co.readingtown.member.dto.request.UpdateProfileRequestDto;
+import kr.co.readingtown.member.dto.request.UpdateTownRequestDto;
 import kr.co.readingtown.member.dto.response.DefaultProfileResponseDto;
 import kr.co.readingtown.member.dto.response.StarRatingResponseDto;
 import kr.co.readingtown.member.exception.MemberException;
@@ -23,6 +25,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final AppProperties appProperties;
+    private final LocationService locationService;
 
     @Transactional
     public void registerMember(LoginType loginType, String loginId, String username) {
@@ -33,6 +36,7 @@ public class MemberService {
                     .loginType(loginType)
                     .loginId(loginId)
                     .username(username)
+                    .nickname(null) //기본 닉네임 Null로 설정 후 온보딩에서 설정
                     .userRatingSum(0)
                     .userRatingCount(0)
                     .build();
@@ -52,10 +56,18 @@ public class MemberService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(MemberException.NoAuthMember::new);
 
+        // 카카오 API로 동네명 해석
+        String currentTown = locationService.resolveTown(
+                onboardingRequestDto.getLongitude(),
+                onboardingRequestDto.getLatitude()
+        );
+
         member.completeOnboarding(
                 onboardingRequestDto.getPhoneNumber(),
-                onboardingRequestDto.getCurrentTown(),
-                onboardingRequestDto.getUsername(),
+                currentTown,
+                onboardingRequestDto.getLongitude(), //경도
+                onboardingRequestDto.getLatitude(), //위도
+                onboardingRequestDto.getNickname(),
                 onboardingRequestDto.getProfileImage(),
                 onboardingRequestDto.getAvailableTime()
         );
@@ -65,14 +77,14 @@ public class MemberService {
 
         Member member = memberRepository.findById(memberId).orElseThrow(MemberException.NoAuthMember::new);
 
-        String defaultUsername = generateUniqueUsername();
+        String defaultNickname = generateUniqueNickname();
         String defaultImageUrl = appProperties.getDefaultProfileImageUrl();
 
-        return new DefaultProfileResponseDto(defaultUsername, defaultImageUrl);
+        return new DefaultProfileResponseDto(defaultNickname, defaultImageUrl);
     }
 
     //랜덤 닉네임 설정
-    private String generateUniqueUsername() {
+    private String generateUniqueNickname() {
 
         String prefix = "리딩여우";
         String candidate;
@@ -84,30 +96,30 @@ public class MemberService {
             candidate = prefix + random;
             attempt++;
             if (attempt > 10) {
-                throw new MemberException.UsernameGenerationFailed();
+                throw new MemberException.NicknameGenerationFailed();
             }
-        } while (memberRepository.existsByUsername(candidate));
+        } while (memberRepository.existsByNickname(candidate));
 
         return candidate;
     }
 
     //닉네임 사용가능 여부 확인
-    public boolean isUsernameAvailable(Long memberId, String username) {
+    public boolean isNicknameAvailable(Long memberId, String nickname) {
 
         Member member = memberRepository.findById(memberId).orElseThrow(MemberException.NoAuthMember::new);
 
         //null 체크
-        if (username == null || username.isBlank()) {
-            throw new MemberException.InvalidUsername();
+        if (nickname == null || nickname.isBlank()) {
+            throw new MemberException.InvalidNickname();
         }
 
         // 길이 제한 체크
-        if (username.length() < 2 || username.length() > 20) {
-            throw new MemberException.InvalidUsername();
+        if (nickname.length() < 2 || nickname.length() > 20) {
+            throw new MemberException.InvalidNickname();
         }
 
         //중복체크
-        if (memberRepository.existsByUsername(username)) {
+        if (memberRepository.existsByNickname(nickname)) {
             throw new MemberException.UsernameAlreadyExists();
         }
 
@@ -138,7 +150,7 @@ public class MemberService {
                 .orElseThrow(MemberException.NoAuthMember::new);
 
         member.updateProfile(
-                updateProfileRequestDto.getUsername(),
+                updateProfileRequestDto.getNickname(),
                 updateProfileRequestDto.getProfileImage(),
                 updateProfileRequestDto.getAvailableTime()
         );
@@ -154,5 +166,30 @@ public class MemberService {
                 .userRatingCount(member.getUserRatingCount())
                 .userRating(member.getUserRating())
                 .build();
+    }
+
+    public String getTown(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberException.NoAuthMember::new);
+
+        return member.getCurrentTown();
+    }
+
+    public String updateTown(Long memberId, UpdateTownRequestDto updateTownRequestDto) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberException.NoAuthMember::new);
+
+        // 범위 검증 (-90~90, -180~180)
+        double lat = updateTownRequestDto.getLatitude().doubleValue();
+        double lon = updateTownRequestDto.getLongitude().doubleValue();
+        if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+            throw new MemberException.TownResolvedFailed();
+        }
+
+        // 경위도 -> 동네명 해석 (coord2region → 실패 시 coord2address → 둘 다 실패 시 LocationException.TownResolveFailed)
+        String currentTown = locationService.resolveTown(updateTownRequestDto.getLongitude(), updateTownRequestDto.getLatitude());
+
+        member.updateTown(updateTownRequestDto.getLatitude(), updateTownRequestDto.getLongitude(), currentTown);
+        return currentTown;
     }
 }

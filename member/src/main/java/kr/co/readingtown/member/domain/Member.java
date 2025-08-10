@@ -5,6 +5,8 @@ import kr.co.readingtown.common.entity.BaseEntity;
 import kr.co.readingtown.member.domain.enums.LoginType;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Getter
 @Table(name = "members")
@@ -23,6 +25,8 @@ public class Member extends BaseEntity {
 
     @Column(name = "login_id")
     private String loginId;
+
+    private String nickname;
 
     @Lob
     @Column(name = "profile_image")
@@ -43,6 +47,12 @@ public class Member extends BaseEntity {
     @Column(name = "current_town")
     private String currentTown;
 
+    @Column(precision = 9, scale = 6)
+    private BigDecimal longitude; //경도
+
+    @Column(precision = 9, scale = 6)
+    private BigDecimal latitude; //위도
+
     @Column(name = "chat_response_rate")
     private Double chatResponseRate;
 
@@ -52,8 +62,8 @@ public class Member extends BaseEntity {
     @Column(name = "available_time")
     private String availableTime;
 
-    public void updateProfile(String username, String profileImage, String availableTime) {
-        this.username = username;
+    public void updateProfile(String nickname, String profileImage, String availableTime) {
+        this.nickname = nickname;
         this.profileImage = profileImage;
         this.availableTime = availableTime;
     }
@@ -65,8 +75,9 @@ public class Member extends BaseEntity {
     }
 
     @Builder
-    public Member(String username, LoginType loginType, String loginId, String profileImage, String phoneNumber, Integer userRatingSum, Integer userRatingCount, Double userRating, String currentTown, Double chatResponseRate, Integer chatAvgResponseMinutes, String availableTime) {
+    public Member(String username, LoginType loginType, String loginId, String nickname, String profileImage, String phoneNumber, Integer userRatingSum, Integer userRatingCount, Double userRating, String currentTown, BigDecimal longitude, BigDecimal latitude, Double chatResponseRate, Integer chatAvgResponseMinutes, String availableTime) {
         this.username = username;
+        this.nickname = nickname;
         this.loginType = loginType;
         this.loginId = loginId;
         this.profileImage = profileImage;
@@ -75,16 +86,26 @@ public class Member extends BaseEntity {
         this.userRatingSum = userRatingSum;
         this.userRatingCount = userRatingCount;
         this.currentTown = currentTown;
+        this.longitude = longitude;
+        this.latitude = latitude;
         this.chatResponseRate = chatResponseRate;
         this.chatAvgResponseMinutes = chatAvgResponseMinutes;
         this.availableTime = availableTime;
     }
 
-    public void completeOnboarding(String phoneNumber, String currentTown, String username, String profileImage, String availableTime) {
+    public void completeOnboarding(String phoneNumber, String currentTown, BigDecimal longitude, BigDecimal latitude, String nickname, String profileImage, String availableTime) {
         this.phoneNumber = phoneNumber;
         this.currentTown = currentTown;
-        this.username = username;
+        this.longitude = longitude;
+        this.latitude = latitude;
+        this.nickname = nickname;
         this.profileImage = profileImage;
         this.availableTime = availableTime;
+    }
+
+    public void updateTown(BigDecimal latitude, BigDecimal longitude, String currentTown) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.currentTown = currentTown;
     }
 }

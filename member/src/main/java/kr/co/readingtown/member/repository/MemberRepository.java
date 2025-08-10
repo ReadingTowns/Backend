@@ -10,5 +10,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Member findByLoginTypeAndLoginId(LoginType loginType, String loginId);
 
-    boolean existsByUsername(String candidate);
+    boolean existsByNickname(String candidate);
+
 }
