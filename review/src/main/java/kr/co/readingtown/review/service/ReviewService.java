@@ -1,7 +1,6 @@
 package kr.co.readingtown.review.service;
 
 import kr.co.readingtown.review.integration.book.BookValidator;
-import kr.co.readingtown.review.integration.member.MemberClient;
 import kr.co.readingtown.review.domain.Review;
 import kr.co.readingtown.review.dto.query.ReviewContentAndAuthorNameDto;
 import kr.co.readingtown.review.dto.query.ReviewIdAndContentDto;
@@ -9,6 +8,7 @@ import kr.co.readingtown.review.dto.request.ReviewRequestDto;
 import kr.co.readingtown.review.dto.response.ReviewResponseDto;
 import kr.co.readingtown.review.dto.response.ReviewWithAuthorResponseDto;
 import kr.co.readingtown.review.exception.ReviewException;
+import kr.co.readingtown.review.integration.member.MemberReader;
 import kr.co.readingtown.review.integration.member.MemberValidator;
 import kr.co.readingtown.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ import java.util.Map;
 @Transactional(readOnly = true)
 public class ReviewService {
 
-    private final MemberClient memberClient;
+    private final MemberReader memberReader;
     private final BookValidator bookValidator;
     private final MemberValidator memberValidator;
     private final ReviewRepository reviewRepository;
@@ -91,7 +91,8 @@ public class ReviewService {
         List<Long> memberIds = reviews.stream()
                 .map(ReviewContentAndAuthorNameDto::memberId)
                 .toList();
-        return memberClient.getMembersName(memberIds);
+
+        return memberReader.getMembersName(memberIds);
     }
 
     private List<ReviewWithAuthorResponseDto> convertToReviewWithAuthorResponseDto(
