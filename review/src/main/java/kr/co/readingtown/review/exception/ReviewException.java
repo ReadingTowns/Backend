@@ -20,6 +20,12 @@ public class ReviewException extends CustomException {
         }
     }
 
+    public static class ReviewAuthorMismatch extends ReviewException {
+        public ReviewAuthorMismatch() {
+            super(ReviewErrorCode.REVIEW_AUTHOR_MISMATCH);
+        }
+    }
+
     public static class ReviewMemberNotFound extends ReviewException {
         public ReviewMemberNotFound() {
             super(ReviewErrorCode.REVIEW_MEMBER_NOT_FOUND);
