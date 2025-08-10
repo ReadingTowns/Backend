@@ -29,9 +29,10 @@ public class ExternalReviewController {
     @PatchMapping("/review/{reviewId}")
     public ReviewResponseDto updateReview(
             @PathVariable Long reviewId,
+            @AuthenticationPrincipal Long memberId,
             @RequestBody ReviewRequestDto reviewUpdateDto) {
 
-        return reviewService.updateReview(reviewId, reviewUpdateDto);
+        return reviewService.updateReview(reviewId, memberId, reviewUpdateDto);
     }
 
     @GetMapping("/{bookId}/reviews/me")

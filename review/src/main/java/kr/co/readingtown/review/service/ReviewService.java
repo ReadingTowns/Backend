@@ -33,10 +33,11 @@ public class ReviewService {
     @Transactional
     public ReviewResponseDto createReview(Long bookId, Long memberId, ReviewRequestDto reviewCreateDto) {
 
+        memberValidator.validateMemberExists(memberId);
+        bookValidator.validateBookExists(bookId);
         if (reviewRepository.existsByBookIdAndMemberId(bookId, memberId)) {
             throw new ReviewException.ReviewAlreadyExists();
         }
-        bookValidator.validateBookExists(bookId);
 
         Review newReview = Review.builder()
                 .bookId(bookId)
@@ -50,10 +51,12 @@ public class ReviewService {
 
     // 책 감상평 수정
     @Transactional
-    public ReviewResponseDto updateReview(Long reviewId, ReviewRequestDto reviewUpdateDto) {
+    public ReviewResponseDto updateReview(Long reviewId, Long memberId, ReviewRequestDto reviewUpdateDto) {
 
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(ReviewException.ReviewNotFound::new);
+        if (!review.getMemberId().equals(memberId))
+            throw new ReviewException.ReviewAuthorMismatch();
 
         review.updateContent(reviewUpdateDto.content());
         Review saved = reviewRepository.save(review);
@@ -92,7 +95,7 @@ public class ReviewService {
                 .map(ReviewContentAndAuthorNameDto::memberId)
                 .toList();
 
-        return memberReader.getMembersName(memberIds);
+        return memberReader.getMemberNames(memberIds);
     }
 
     private List<ReviewWithAuthorResponseDto> convertToReviewWithAuthorResponseDto(
