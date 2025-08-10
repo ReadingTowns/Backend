@@ -2,22 +2,24 @@ package kr.co.readingtown.member.service;
 
 import kr.co.readingtown.common.config.AppProperties;
 import kr.co.readingtown.member.client.BookhouseClient;
+import kr.co.readingtown.member.client.FollowClient;
 import kr.co.readingtown.member.domain.Member;
 import kr.co.readingtown.member.domain.enums.LoginType;
-import kr.co.readingtown.member.dto.request.OnboardingRequestDto;
-import kr.co.readingtown.member.dto.request.StarRatingRequestDto;
-import kr.co.readingtown.member.dto.request.UpdateProfileRequestDto;
-import kr.co.readingtown.member.dto.request.UpdateTownRequestDto;
-import kr.co.readingtown.member.dto.response.DefaultProfileResponseDto;
-import kr.co.readingtown.member.dto.response.ProfileResponseDto;
-import kr.co.readingtown.member.dto.response.StarRatingResponseDto;
+import kr.co.readingtown.member.dto.request.*;
+import kr.co.readingtown.member.dto.response.*;
 import kr.co.readingtown.member.exception.MemberException;
 import kr.co.readingtown.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +30,7 @@ public class MemberService {
     private final AppProperties appProperties;
     private final LocationService locationService;
     private final BookhouseClient bookhouseClient;
+    private final FollowClient followClient;
 
     @Transactional
     public void registerMember(LoginType loginType, String loginId, String username) {
@@ -80,7 +83,7 @@ public class MemberService {
 
     public DefaultProfileResponseDto getDefaultProfile(Long memberId) {
 
-        Member member = memberRepository.findById(memberId).orElseThrow(MemberException.NoAuthMember::new);
+        memberRepository.findById(memberId).orElseThrow(MemberException.NoAuthMember::new);
 
         String defaultNickname = generateUniqueNickname();
         String defaultImageUrl = appProperties.getDefaultProfileImageUrl();
@@ -111,7 +114,7 @@ public class MemberService {
     //닉네임 사용가능 여부 확인
     public boolean isNicknameAvailable(Long memberId, String nickname) {
 
-        Member member = memberRepository.findById(memberId).orElseThrow(MemberException.NoAuthMember::new);
+        memberRepository.findById(memberId).orElseThrow(MemberException.NoAuthMember::new);
 
         //null 체크
         if (nickname == null || nickname.isBlank()) {
@@ -174,7 +177,7 @@ public class MemberService {
     }
 
     public StarRatingResponseDto getStarRatingOfPartner(Long memberId, Long partnerId) {
-        Member member = memberRepository.findById(memberId)
+        memberRepository.findById(memberId)
                 .orElseThrow(MemberException.NoAuthMember::new);
 
         Member partner = memberRepository.findById(partnerId)
@@ -230,5 +233,121 @@ public class MemberService {
                 .availableTime(member.getAvailableTime())
                 .bookhouseId(bookhouseId)
                 .build();
+    }
+
+    public PartnerProfileResponseDto getPartnerProfile(Long memberId, Long partnerId) {
+        memberRepository.findById(memberId).orElseThrow(MemberException.NoAuthMember::new);
+
+        Member partner = memberRepository.findById(partnerId)
+                .orElseThrow(MemberException.NotFoundMember::new);
+
+        Long bookhouseId = bookhouseClient.getBookhouseId(partnerId);
+
+        return PartnerProfileResponseDto.builder()
+                .memberId(partner.getMemberId())
+                .profileImage(partner.getProfileImage())
+                .nickname(partner.getNickname())
+                .currentTown(partner.getCurrentTown())
+                .userRating(partner.getUserRating())
+                .userRatingCount(partner.getUserRatingCount())
+                .availableTime(partner.getAvailableTime())
+                .bookhouseId(bookhouseId)
+                .build();
+    }
+
+    public Page<MemberSearchResponseDto> searchByNickname(Long loginMemberId, String keyword, Pageable pageable) {
+        Page<Member> page = memberRepository.findByNicknameContainingIgnoreCase(keyword, pageable);
+
+        // 자기 자신 제외(선택)
+        List<Long> targetIds = page.stream()
+                .map(Member::getMemberId)
+                .filter(id -> !id.equals(loginMemberId))
+                .toList();
+
+        // 팔로우 여부 벌크 조회
+        Map<Long, Boolean> followMap = targetIds.isEmpty()
+                ? Map.of()
+                : followClient.isFollowingBulk(new FollowBulkCheckRequestDto(loginMemberId, targetIds));
+
+        // 결과 매핑
+        return page.map(m -> MemberSearchResponseDto.builder()
+                .memberId(m.getMemberId())
+                .nickname(m.getNickname())
+                .profileImage(m.getProfileImage())
+                .followed(followMap.getOrDefault(m.getMemberId(), false))
+                .build());
+    }
+
+    @Transactional
+    public void follow(Long memberId, Long partnerMemberId) {
+
+        memberRepository.findById(memberId)
+                .orElseThrow(MemberException.NoAuthMember::new);
+
+        memberRepository.findById(memberId)
+                .orElseThrow(MemberException.NotFoundMember::new);
+
+        followClient.follow(memberId, partnerMemberId);
+    }
+
+    @Transactional
+    public void unfollow(Long memberId, Long partnerMemberId) {
+        memberRepository.findById(memberId)
+                .orElseThrow(MemberException.NoAuthMember::new);
+
+        memberRepository.findById(memberId)
+                .orElseThrow(MemberException.NotFoundMember::new);
+
+        followClient.follow(memberId, partnerMemberId);
+    }
+
+    public List<FollowingResponseDto> getMyFollowing(Long memberId) {
+        // 1) 팔로잉 대상 ID 목록 조회
+        List<Long> followingIds = followClient.getFollowingIds(memberId);
+        if (followingIds.isEmpty()) return List.of();
+
+        // 2) 대상 회원 프로필 일괄 조회
+        List<Member> members = memberRepository.findAllById(followingIds);
+
+        // 3) 요청 순서 유지하여 DTO 매핑
+        Map<Long, Member> byId = members.stream()
+                .collect(Collectors.toMap(Member::getMemberId, m -> m));
+
+        List<FollowingResponseDto> result = new ArrayList<>(followingIds.size());
+        for (Long id : followingIds) {
+            Member m = byId.get(id);
+            if (m == null) continue; // 동시성으로 삭제된 경우 방어
+            result.add(FollowingResponseDto.builder()
+                    .memberId(m.getMemberId())
+                    .nickname(m.getNickname())
+                    .profileImage(m.getProfileImage())
+                    .build());
+        }
+        return result;
+    }
+
+    public List<FollowerResponseDto> getMyFollowers(Long memberId) {
+        // 1) 나를 팔로우하는 대상 ID 목록
+        List<Long> followerIds = followClient.getFollowerIds(memberId);
+        if (followerIds.isEmpty()) return List.of();
+
+        // 2) 대상 회원 프로필 일괄 조회
+        List<Member> members = memberRepository.findAllById(followerIds);
+
+        // 3) 요청 순서 유지하여 DTO 매핑
+        Map<Long, Member> byId = members.stream()
+                .collect(Collectors.toMap(Member::getMemberId, m -> m));
+
+        List<FollowerResponseDto> result = new ArrayList<>(followerIds.size());
+        for (Long id : followerIds) {
+            Member m = byId.get(id);
+            if (m == null) continue;
+            result.add(FollowerResponseDto.builder()
+                    .memberId(m.getMemberId())
+                    .nickname(m.getNickname())
+                    .profileImage(m.getProfileImage())
+                    .build());
+        }
+        return result;
     }
 }

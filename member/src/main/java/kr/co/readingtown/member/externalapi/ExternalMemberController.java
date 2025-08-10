@@ -6,14 +6,16 @@ import kr.co.readingtown.member.dto.request.OnboardingRequestDto;
 import kr.co.readingtown.member.dto.request.StarRatingRequestDto;
 import kr.co.readingtown.member.dto.request.UpdateProfileRequestDto;
 import kr.co.readingtown.member.dto.request.UpdateTownRequestDto;
-import kr.co.readingtown.member.dto.response.DefaultProfileResponseDto;
-import kr.co.readingtown.member.dto.response.ProfileResponseDto;
-import kr.co.readingtown.member.dto.response.StarRatingResponseDto;
+import kr.co.readingtown.member.dto.response.*;
 import kr.co.readingtown.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -70,8 +72,8 @@ public class ExternalMemberController {
 
     //다른 유저의 프로필 조회
     @GetMapping("/{partnerId}/profile")
-    public ProfileResponseDto getOtherProfile(@AuthenticationPrincipal Long memberId, @PathVariable Long partnerId) {
-        return memberService.getProfile(memberId); //Todo: 팔로우 여부 기능 추가 필요. 내 프로필 조회와 달라야함
+    public PartnerProfileResponseDto getOtherProfile(@AuthenticationPrincipal Long memberId, @PathVariable Long partnerId) {
+        return memberService.getPartnerProfile(memberId, partnerId);
     }
 
     //내 프로필 조회
@@ -100,5 +102,36 @@ public class ExternalMemberController {
         return memberService.getStarRatingOf(memberId);
     }
 
-    
+    // 유저 검색 (부분 일치)
+    @GetMapping("/search")
+    public Page<MemberSearchResponseDto> searchMembers(@AuthenticationPrincipal Long loginMemberId,
+                                                       @RequestParam @NotBlank String nickname,
+                                                       @PageableDefault(size = 20) Pageable pageable) {
+        return memberService.searchByNickname(loginMemberId, nickname, pageable);
+    }
+
+    // 팔로우 생성
+    @PostMapping("/{targetMemberId}/follow")
+    public void follow(@AuthenticationPrincipal Long memberId, @PathVariable("targetMemberId") Long targetMemberId) {
+        memberService.follow(memberId, targetMemberId);
+    }
+
+    // 팔로우 취소
+    @DeleteMapping("/{targetMemberId}/follow")
+    public void unfollow(@AuthenticationPrincipal Long memberId,
+                         @PathVariable("targetMemberId") Long targetMemberId) {
+        memberService.unfollow(memberId, targetMemberId);
+    }
+
+    // 내가 팔로우 중인 유저(= following) 리스트 조회
+    @GetMapping("/me/following")
+    public List<FollowingResponseDto> getMyFollowingAlias(@AuthenticationPrincipal Long loginMemberId) {
+        return memberService.getMyFollowing(loginMemberId);
+    }
+
+    // 나를 팔로우하는 유저(= followers) 리스트 조회
+    @GetMapping("/me/followers")
+    public List<FollowerResponseDto> getMyFollowers(@AuthenticationPrincipal Long loginMemberId) {
+        return memberService.getMyFollowers(loginMemberId);
+    }
 }
