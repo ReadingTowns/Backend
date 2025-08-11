@@ -4,8 +4,9 @@ import kr.co.readingtown.common.config.AppProperties;
 import kr.co.readingtown.member.client.FollowClient;
 import kr.co.readingtown.member.domain.Member;
 import kr.co.readingtown.member.domain.enums.LoginType;
-import kr.co.readingtown.member.dto.request.*;
-import kr.co.readingtown.member.dto.response.*;
+
+import kr.co.readingtown.member.dto.*
+import kr.co.readingtown.member.dto.*
 import kr.co.readingtown.member.exception.MemberException;
 import kr.co.readingtown.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +47,24 @@ public class MemberService {
 
         Member member = memberRepository.findByLoginTypeAndLoginId(loginType, loginId);
         return member.getMemberId();
+    }
+
+    public Map<Long, String> getMembersName(List<Long> memberIds) {
+
+        if (memberIds == null || memberIds.isEmpty())
+            return Map.of();
+
+        List<MemberIdNameDto> memberIdNameDtos = memberRepository.findIdAndNameByIdIn(memberIds);
+        return memberIdNameDtos.stream()
+                .collect(Collectors.toMap(
+                        MemberIdNameDto::id,
+                        MemberIdNameDto::name
+                ));
+    }
+
+    public boolean getMemberExists(Long memberId) {
+
+        return memberRepository.existsById(memberId);
     }
 
     @Transactional
