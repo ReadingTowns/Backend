@@ -2,8 +2,8 @@ spring:
   profiles:
     active: local
     group:
-      local: local, datasource, auth, s3
-      prod: prod, datasource, auth, s3
+      local: local, datasource, auth, s3, kakao-map
+      prod: prod, datasource, auth, s3, kakao-map
   config:
     import: optional:file:.env[.properties]
 

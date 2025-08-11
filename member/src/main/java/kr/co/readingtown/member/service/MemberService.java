@@ -1,20 +1,19 @@
 package kr.co.readingtown.member.service;
 
 import kr.co.readingtown.common.config.AppProperties;
+import kr.co.readingtown.member.client.FollowClient;
 import kr.co.readingtown.member.domain.Member;
 import kr.co.readingtown.member.domain.enums.LoginType;
-import kr.co.readingtown.member.dto.DefaultProfileResponseDto;
-import kr.co.readingtown.member.dto.OnboardingRequestDto;
-import kr.co.readingtown.member.dto.query.MemberIdNameDto;
+
+import kr.co.readingtown.member.dto.*
+import kr.co.readingtown.member.dto.*
 import kr.co.readingtown.member.exception.MemberException;
 import kr.co.readingtown.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,6 +23,8 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final AppProperties appProperties;
+    private final LocationService locationService;
+    private final FollowClient followClient;
 
     @Transactional
     public void registerMember(LoginType loginType, String loginId, String username) {
@@ -34,6 +35,9 @@ public class MemberService {
                     .loginType(loginType)
                     .loginId(loginId)
                     .username(username)
+                    .nickname(null) //기본 닉네임 Null로 설정 후 온보딩에서 설정
+                    .userRatingSum(0)
+                    .userRatingCount(0)
                     .build();
             memberRepository.save(newMember);
         }
@@ -69,10 +73,18 @@ public class MemberService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(MemberException.NoAuthMember::new);
 
+        // 카카오 API로 동네명 해석
+        String currentTown = locationService.resolveTown(
+                onboardingRequestDto.getLongitude(),
+                onboardingRequestDto.getLatitude()
+        );
+
         member.completeOnboarding(
                 onboardingRequestDto.getPhoneNumber(),
-                onboardingRequestDto.getCurrentTown(),
-                onboardingRequestDto.getUsername(),
+                currentTown,
+                onboardingRequestDto.getLongitude(), //경도
+                onboardingRequestDto.getLatitude(), //위도
+                onboardingRequestDto.getNickname(),
                 onboardingRequestDto.getProfileImage(),
                 onboardingRequestDto.getAvailableTime()
         );
@@ -80,16 +92,16 @@ public class MemberService {
 
     public DefaultProfileResponseDto getDefaultProfile(Long memberId) {
 
-        Member member = memberRepository.findById(memberId).orElseThrow(MemberException.NoAuthMember::new);
+        memberRepository.findById(memberId).orElseThrow(MemberException.NoAuthMember::new);
 
-        String defaultUsername = generateUniqueUsername();
+        String defaultNickname = generateUniqueNickname();
         String defaultImageUrl = appProperties.getDefaultProfileImageUrl();
 
-        return new DefaultProfileResponseDto(defaultUsername, defaultImageUrl);
+        return new DefaultProfileResponseDto(defaultNickname, defaultImageUrl);
     }
 
     //랜덤 닉네임 설정
-    private String generateUniqueUsername() {
+    private String generateUniqueNickname() {
 
         String prefix = "리딩여우";
         String candidate;
@@ -101,31 +113,250 @@ public class MemberService {
             candidate = prefix + random;
             attempt++;
             if (attempt > 10) {
-                throw new MemberException.UsernameGenerationFailed();
+                throw new MemberException.NicknameGenerationFailed();
             }
-        } while (memberRepository.existsByUsername(candidate));
+        } while (memberRepository.existsByNickname(candidate));
 
         return candidate;
     }
 
     //닉네임 사용가능 여부 확인
-    public boolean isUsernameAvailable(String username) {
+    public boolean isNicknameAvailable(Long memberId, String nickname) {
+
+        Member member = memberRepository.findById(memberId).orElseThrow(MemberException.NoAuthMember::new);
+
         //null 체크
-        if (username == null || username.isBlank()) {
-            throw new MemberException.InvalidUsername();
+        if (nickname == null || nickname.isBlank()) {
+            throw new MemberException.InvalidNickname();
         }
 
         // 길이 제한 체크
-        if (username.length() < 2 || username.length() > 20) {
-            throw new MemberException.InvalidUsername();
+        if (nickname.length() < 2 || nickname.length() > 20) {
+            throw new MemberException.InvalidNickname();
         }
 
-        //중복체크
-        if (memberRepository.existsByUsername(username)) {
-            throw new MemberException.UsernameAlreadyExists();
+        //중복체크: 온보딩이 아닐 때는 기존 닉네임과 같아도 사용 가능하게 처리
+        if (!nickname.equals(member.getNickname()) && memberRepository.existsByNickname(nickname)) {
+            throw new MemberException.NicknameAlreadyExists();
         }
 
         return true;
     }
 
+    @Transactional
+    public Boolean saveStarRating(Long fromMemberId, StarRatingRequestDto starRatingRequestDto) {
+        memberRepository.findById(fromMemberId)
+                .orElseThrow(MemberException.NoAuthMember::new);
+
+        Member member = memberRepository.findById(starRatingRequestDto.getMemberId())
+                .orElseThrow(MemberException.NotFoundMember::new);
+
+        // 자기 자신을 평가하는 경우 예외 처리 (선택적)
+        if (fromMemberId.equals(starRatingRequestDto.getMemberId())) {
+            throw new MemberException.SelfRatingNotAllowed();
+        }
+
+        // 평점 추가
+        member.addStarRating(starRatingRequestDto.getStarRating());
+        memberRepository.save(member);
+
+        return true;
+    }
+
+    @Transactional
+    public void updateProfile(Long memberId, UpdateProfileRequestDto updateProfileRequestDto) {
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberException.NoAuthMember::new);
+
+        member.updateProfile(
+                updateProfileRequestDto.getNickname(),
+                updateProfileRequestDto.getProfileImage(),
+                updateProfileRequestDto.getAvailableTime()
+        );
+    }
+
+    public StarRatingResponseDto getStarRatingOf(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberException.NoAuthMember::new);
+
+        return StarRatingResponseDto.builder()
+                .memberId(member.getMemberId())
+                .userRatingSum(member.getUserRatingSum())
+                .userRatingCount(member.getUserRatingCount())
+                .userRating(member.getUserRating())
+                .build();
+    }
+
+    public StarRatingResponseDto getStarRatingOfPartner(Long memberId, Long partnerId) {
+        memberRepository.findById(memberId)
+                .orElseThrow(MemberException.NoAuthMember::new);
+
+        Member partner = memberRepository.findById(partnerId)
+                .orElseThrow(MemberException.NotFoundMember::new);
+
+        return StarRatingResponseDto.builder()
+                .memberId(partner.getMemberId())
+                .userRatingSum(partner.getUserRatingSum())
+                .userRatingCount(partner.getUserRatingCount())
+                .userRating(partner.getUserRating())
+                .build();
+    }
+
+    public String getTown(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberException.NoAuthMember::new);
+
+        return member.getCurrentTown();
+    }
+
+    @Transactional
+    public String updateTown(Long memberId, UpdateTownRequestDto updateTownRequestDto) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberException.NoAuthMember::new);
+
+        // 범위 검증 (-90~90, -180~180)
+        double lat = updateTownRequestDto.getLatitude().doubleValue();
+        double lon = updateTownRequestDto.getLongitude().doubleValue();
+        if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+            throw new MemberException.TownResolvedFailed();
+        }
+
+        // 경위도 -> 동네명 해석 (coord2region → 실패 시 coord2address → 둘 다 실패 시 LocationException.TownResolveFailed)
+        String currentTown = locationService.resolveTown(updateTownRequestDto.getLongitude(), updateTownRequestDto.getLatitude());
+
+        member.updateTown(updateTownRequestDto.getLongitude(), updateTownRequestDto.getLatitude(), currentTown);
+        return currentTown;
+    }
+
+    public ProfileResponseDto getProfile(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberException.NoAuthMember::new);
+
+        return ProfileResponseDto.builder()
+                .memberId(member.getMemberId())
+                .profileImage(member.getProfileImage())
+                .nickname(member.getNickname())
+                .currentTown(member.getCurrentTown())
+                .userRating(member.getUserRating())
+                .userRatingCount(member.getUserRatingCount())
+                .availableTime(member.getAvailableTime())
+                .build();
+    }
+
+    public PartnerProfileResponseDto getPartnerProfile(Long memberId, Long partnerId) {
+        memberRepository.findById(memberId).orElseThrow(MemberException.NoAuthMember::new);
+
+        Member partner = memberRepository.findById(partnerId)
+                .orElseThrow(MemberException.NotFoundMember::new);
+
+        return PartnerProfileResponseDto.builder()
+                .memberId(partner.getMemberId())
+                .profileImage(partner.getProfileImage())
+                .nickname(partner.getNickname())
+                .currentTown(partner.getCurrentTown())
+                .userRating(partner.getUserRating())
+                .userRatingCount(partner.getUserRatingCount())
+                .availableTime(partner.getAvailableTime())
+                .isFollowing(followClient.isFollowing(memberId, partnerId))
+                .build();
+    }
+
+    public List<MemberSearchResponseDto> searchByNickname(Long loginMemberId, String keyword) {
+        List<Member> members = memberRepository.findByNicknameContainingIgnoreCase(keyword);
+
+        // 검색 리스트에 자기 자신 제외
+        List<Long> targetIds = members.stream()
+                .map(Member::getMemberId)
+                .filter(id -> !id.equals(loginMemberId))
+                .toList();
+
+        // 팔로우 여부 벌크 조회
+        Map<Long, Boolean> followMap = targetIds.isEmpty()
+                ? Map.of()
+                : followClient.isFollowingBulk(new FollowBulkCheckRequestDto(loginMemberId, targetIds));
+
+        return members.stream()
+                .filter(m -> !m.getMemberId().equals(loginMemberId))  // ← 이 줄 추가하면 “자기 자신”은 리스트에서 제거
+                .map(m -> MemberSearchResponseDto.builder()
+                        .memberId(m.getMemberId())
+                        .nickname(m.getNickname())
+                        .profileImage(m.getProfileImage())
+                        .isFollowing(followMap.getOrDefault(m.getMemberId(), false))
+                        .build())
+                .toList();
+    }
+
+    @Transactional
+    public void follow(Long memberId, Long partnerMemberId) {
+
+        memberRepository.findById(memberId)
+                .orElseThrow(MemberException.NoAuthMember::new);
+
+        memberRepository.findById(partnerMemberId)
+                .orElseThrow(MemberException.NotFoundMember::new);
+
+        followClient.follow(memberId, partnerMemberId);
+    }
+
+    @Transactional
+    public void unfollow(Long memberId, Long partnerMemberId) {
+        memberRepository.findById(memberId)
+                .orElseThrow(MemberException.NoAuthMember::new);
+
+        memberRepository.findById(partnerMemberId)
+                .orElseThrow(MemberException.NotFoundMember::new);
+
+        followClient.unfollow(memberId, partnerMemberId);
+    }
+
+    public List<FollowingResponseDto> getMyFollowing(Long memberId) {
+        // 1) 팔로잉 대상 ID 목록 조회
+        List<Long> followingIds = followClient.getFollowingIds(memberId);
+        if (followingIds.isEmpty()) return List.of();
+
+        // 2) 대상 회원 프로필 일괄 조회
+        List<Member> members = memberRepository.findAllById(followingIds);
+
+        // 3) 요청 순서 유지하여 DTO 매핑
+        Map<Long, Member> byId = members.stream()
+                .collect(Collectors.toMap(Member::getMemberId, m -> m));
+
+        List<FollowingResponseDto> result = new ArrayList<>(followingIds.size());
+        for (Long id : followingIds) {
+            Member m = byId.get(id);
+            if (m == null) continue; // 동시성으로 삭제된 경우 방어
+            result.add(FollowingResponseDto.builder()
+                    .memberId(m.getMemberId())
+                    .nickname(m.getNickname())
+                    .profileImage(m.getProfileImage())
+                    .build());
+        }
+        return result;
+    }
+
+    public List<FollowerResponseDto> getMyFollowers(Long memberId) {
+        // 1) 나를 팔로우하는 대상 ID 목록
+        List<Long> followerIds = followClient.getFollowerIds(memberId);
+        if (followerIds.isEmpty()) return List.of();
+
+        // 2) 대상 회원 프로필 일괄 조회
+        List<Member> members = memberRepository.findAllById(followerIds);
+
+        // 3) 요청 순서 유지하여 DTO 매핑
+        Map<Long, Member> byId = members.stream()
+                .collect(Collectors.toMap(Member::getMemberId, m -> m));
+
+        List<FollowerResponseDto> result = new ArrayList<>(followerIds.size());
+        for (Long id : followerIds) {
+            Member m = byId.get(id);
+            if (m == null) continue;
+            result.add(FollowerResponseDto.builder()
+                    .memberId(m.getMemberId())
+                    .nickname(m.getNickname())
+                    .profileImage(m.getProfileImage())
+                    .build());
+        }
+        return result;
+    }
 }

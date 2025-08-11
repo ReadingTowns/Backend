@@ -9,11 +9,18 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
+import java.util.List;
+
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
     boolean existsByLoginTypeAndLoginId(LoginType loginType, String loginId);
 
     Member findByLoginTypeAndLoginId(LoginType loginType, String loginId);
+  
+    boolean existsByNickname(String candidate);
+
+    //유저 검색
+    List<Member> findByNicknameContainingIgnoreCase(String nickname);
 
     boolean existsByUsername(String candidate);
 
