@@ -15,7 +15,7 @@ public interface FollowClient {
 
     // 프로필 조회에 사용되는 팔로우 여부 확인
     @GetMapping("/internal/follows/is-following")
-    boolean isFollowing(@RequestParam("from") Long fromMemberId, @RequestParam("to") Long toMemberId);
+    boolean isFollowing(@RequestParam("fromMemberId") Long fromMemberId, @RequestParam("toMemberId") Long toMemberId);
 
     // 유저 검색에 사용되는 팔로우 여부 확인
     @PostMapping("/internal/follows/is-following-bulk")

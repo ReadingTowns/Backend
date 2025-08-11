@@ -104,7 +104,7 @@ public class MemberService {
     //닉네임 사용가능 여부 확인
     public boolean isNicknameAvailable(Long memberId, String nickname) {
 
-        memberRepository.findById(memberId).orElseThrow(MemberException.NoAuthMember::new);
+        Member member = memberRepository.findById(memberId).orElseThrow(MemberException.NoAuthMember::new);
 
         //null 체크
         if (nickname == null || nickname.isBlank()) {
@@ -116,8 +116,8 @@ public class MemberService {
             throw new MemberException.InvalidNickname();
         }
 
-        //중복체크
-        if (memberRepository.existsByNickname(nickname)) {
+        //중복체크: 온보딩이 아닐 때는 기존 닉네임과 같아도 사용 가능하게 처리
+        if (!nickname.equals(member.getNickname()) && memberRepository.existsByNickname(nickname)) {
             throw new MemberException.NicknameAlreadyExists();
         }
 
@@ -126,8 +126,11 @@ public class MemberService {
 
     @Transactional
     public Boolean saveStarRating(Long fromMemberId, StarRatingRequestDto starRatingRequestDto) {
-        Member member = memberRepository.findById(starRatingRequestDto.getMemberId())
+        memberRepository.findById(fromMemberId)
                 .orElseThrow(MemberException.NoAuthMember::new);
+
+        Member member = memberRepository.findById(starRatingRequestDto.getMemberId())
+                .orElseThrow(MemberException.NotFoundMember::new);
 
         // 자기 자신을 평가하는 경우 예외 처리 (선택적)
         if (fromMemberId.equals(starRatingRequestDto.getMemberId())) {
@@ -203,7 +206,7 @@ public class MemberService {
         // 경위도 -> 동네명 해석 (coord2region → 실패 시 coord2address → 둘 다 실패 시 LocationException.TownResolveFailed)
         String currentTown = locationService.resolveTown(updateTownRequestDto.getLongitude(), updateTownRequestDto.getLatitude());
 
-        member.updateTown(updateTownRequestDto.getLatitude(), updateTownRequestDto.getLongitude(), currentTown);
+        member.updateTown(updateTownRequestDto.getLongitude(), updateTownRequestDto.getLatitude(), currentTown);
         return currentTown;
     }
 
@@ -260,7 +263,7 @@ public class MemberService {
                         .memberId(m.getMemberId())
                         .nickname(m.getNickname())
                         .profileImage(m.getProfileImage())
-                        .followed(followMap.getOrDefault(m.getMemberId(), false))
+                        .isFollowing(followMap.getOrDefault(m.getMemberId(), false))
                         .build())
                 .toList();
     }

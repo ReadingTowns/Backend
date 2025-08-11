@@ -54,10 +54,6 @@ public class KakaoLocationService implements LocationService {
                     lon.toPlainString(), lat.toPlainString()
             );
 
-            // 임시 디버그
-            log.info("[KAKAO coord2region] status={}, body={}",
-                    resp.getStatusCode(), resp.getBody());
-
             if (!resp.getStatusCode().is2xxSuccessful() || resp.getBody() == null) return "";
 
             JsonNode docs = objectMapper.readTree(resp.getBody()).path("documents");
@@ -78,6 +74,7 @@ public class KakaoLocationService implements LocationService {
             // fallback: 구 단위라도
             return selected.path("region_2depth_name").asText("");
         } catch (Exception e) {
+            log.warn("[KAKAO coord2region] request failed: {}", e.toString());
             return "";
         }
     }
@@ -104,6 +101,7 @@ public class KakaoLocationService implements LocationService {
 
             return addr.path("region_2depth_name").asText("");
         } catch (Exception e) {
+            log.warn("[KAKAO coord2region] request failed: {}", e.toString());
             return "";
         }
     }

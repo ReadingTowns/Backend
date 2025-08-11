@@ -1,6 +1,8 @@
 package kr.co.readingtown.member.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import kr.co.readingtown.common.entity.BaseEntity;
 import kr.co.readingtown.member.domain.enums.LoginType;
 import lombok.*;
@@ -26,6 +28,7 @@ public class Member extends BaseEntity {
     @Column(name = "login_id")
     private String loginId;
 
+    @Column(name = "nickname", length = 20, unique = true)
     private String nickname;
 
     @Lob
@@ -103,9 +106,9 @@ public class Member extends BaseEntity {
         this.availableTime = availableTime;
     }
 
-    public void updateTown(BigDecimal latitude, BigDecimal longitude, String currentTown) {
-        this.latitude = latitude;
+    public void updateTown(BigDecimal longitude, BigDecimal latitude, String currentTown) {
         this.longitude = longitude;
+        this.latitude = latitude;
         this.currentTown = currentTown;
     }
 }

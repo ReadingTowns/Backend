@@ -24,16 +24,17 @@ public class Bookhouse extends BaseEntity {
     private Long bookId;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "is_exchanged", nullable = false)
     private IsExchanged isExchanged;
 
     @Column(name = "chatroom_id")
-    private Long chatRoomId;
+    private Long chatroomId;
 
     @Builder
-    public Bookhouse(Long memberId, Long bookId, IsExchanged isExchanged, Long chatRoomId) {
+    public Bookhouse(Long memberId, Long bookId, IsExchanged isExchanged, Long chatroomId) {
         this.memberId = memberId;
         this.bookId = bookId;
         this.isExchanged = isExchanged;
-        this.chatRoomId = chatRoomId;
+        this.chatroomId = chatroomId;
     }
 }

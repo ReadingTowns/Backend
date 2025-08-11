@@ -26,12 +26,12 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
        from Follow f
        where f.fromFollowerId = :memberId
        """)
-    List<Long> findFollowingIds(Long memberId);
+    List<Long> findFollowingIds(@Param("memberId") Long memberId);
 
     @Query("""
        select f.fromFollowerId
        from Follow f
        where f.toFollowingId = :memberId
        """)
-    List<Long> findFollowerIds(Long memberId);
+    List<Long> findFollowerIds(@Param("memberId") Long memberId);
 }

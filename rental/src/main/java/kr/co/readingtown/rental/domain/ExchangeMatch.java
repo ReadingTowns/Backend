@@ -16,7 +16,7 @@ public class ExchangeMatch extends BaseEntity {
     private Long exchangeMatchId;
 
     @Column(name = "chat_room_id")
-    private Long chatRoomId;
+    private Long chatroomId;
 
     @Column(name = "requester_id")
     private Long requesterId;
@@ -29,8 +29,8 @@ public class ExchangeMatch extends BaseEntity {
     private RequestStatus requestStatus;
 
     @Builder
-    public ExchangeMatch(Long chatRoomId, Long requesterId, Long receiverId, RequestStatus requestStatus) {
-        this.chatRoomId = chatRoomId;
+    public ExchangeMatch(Long chatroomId, Long requesterId, Long receiverId, RequestStatus requestStatus) {
+        this.chatroomId = chatroomId;
         this.requesterId = requesterId;
         this.receiverId = receiverId;
         this.requestStatus = requestStatus;
