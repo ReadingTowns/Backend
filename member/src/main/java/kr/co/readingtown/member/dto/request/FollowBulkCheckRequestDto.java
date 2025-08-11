@@ -14,11 +14,11 @@ public class FollowBulkCheckRequestDto {
     @NotNull
     private Long fromMemberId;
     @NotEmpty
-    private List<Long> toMemberIds;
+    private List<Long> targetMemberIds;
 
     @Builder
-    public FollowBulkCheckRequestDto(Long fromMemberId, List<Long> toMemberIds) {
+    public FollowBulkCheckRequestDto(Long fromMemberId, List<Long> targetMemberIds) {
         this.fromMemberId = fromMemberId;
-        this.toMemberIds = toMemberIds;
+        this.targetMemberIds = targetMemberIds;
     }
 }

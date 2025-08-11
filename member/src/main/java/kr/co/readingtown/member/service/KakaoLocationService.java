@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.co.readingtown.member.exception.MemberException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class KakaoLocationService implements LocationService {
 
     @Value("${kakao.rest-api-key}")
@@ -51,6 +53,11 @@ public class KakaoLocationService implements LocationService {
                     url, HttpMethod.GET, new HttpEntity<>(headers), String.class,
                     lon.toPlainString(), lat.toPlainString()
             );
+
+            // 임시 디버그
+            log.info("[KAKAO coord2region] status={}, body={}",
+                    resp.getStatusCode(), resp.getBody());
+
             if (!resp.getStatusCode().is2xxSuccessful() || resp.getBody() == null) return "";
 
             JsonNode docs = objectMapper.readTree(resp.getBody()).path("documents");

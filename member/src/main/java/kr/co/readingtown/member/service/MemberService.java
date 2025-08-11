@@ -1,7 +1,6 @@
 package kr.co.readingtown.member.service;
 
 import kr.co.readingtown.common.config.AppProperties;
-import kr.co.readingtown.member.client.BookhouseClient;
 import kr.co.readingtown.member.client.FollowClient;
 import kr.co.readingtown.member.domain.Member;
 import kr.co.readingtown.member.domain.enums.LoginType;
@@ -10,15 +9,10 @@ import kr.co.readingtown.member.dto.response.*;
 import kr.co.readingtown.member.exception.MemberException;
 import kr.co.readingtown.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,7 +23,6 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final AppProperties appProperties;
     private final LocationService locationService;
-    private final BookhouseClient bookhouseClient;
     private final FollowClient followClient;
 
     @Transactional
@@ -46,9 +39,6 @@ public class MemberService {
                     .userRatingCount(0)
                     .build();
             memberRepository.save(newMember);
-
-            //회원 등록 시 서재 자동 생성
-            bookhouseClient.registerBookhouse(newMember.getMemberId());
         }
     }
 
@@ -221,8 +211,6 @@ public class MemberService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(MemberException.NoAuthMember::new);
 
-        Long bookhouseId = bookhouseClient.getBookhouseId(memberId);
-
         return ProfileResponseDto.builder()
                 .memberId(member.getMemberId())
                 .profileImage(member.getProfileImage())
@@ -231,7 +219,6 @@ public class MemberService {
                 .userRating(member.getUserRating())
                 .userRatingCount(member.getUserRatingCount())
                 .availableTime(member.getAvailableTime())
-                .bookhouseId(bookhouseId)
                 .build();
     }
 
@@ -241,8 +228,6 @@ public class MemberService {
         Member partner = memberRepository.findById(partnerId)
                 .orElseThrow(MemberException.NotFoundMember::new);
 
-        Long bookhouseId = bookhouseClient.getBookhouseId(partnerId);
-
         return PartnerProfileResponseDto.builder()
                 .memberId(partner.getMemberId())
                 .profileImage(partner.getProfileImage())
@@ -251,15 +236,15 @@ public class MemberService {
                 .userRating(partner.getUserRating())
                 .userRatingCount(partner.getUserRatingCount())
                 .availableTime(partner.getAvailableTime())
-                .bookhouseId(bookhouseId)
+                .isFollowing(followClient.isFollowing(memberId, partnerId))
                 .build();
     }
 
-    public Page<MemberSearchResponseDto> searchByNickname(Long loginMemberId, String keyword, Pageable pageable) {
-        Page<Member> page = memberRepository.findByNicknameContainingIgnoreCase(keyword, pageable);
+    public List<MemberSearchResponseDto> searchByNickname(Long loginMemberId, String keyword) {
+        List<Member> members = memberRepository.findByNicknameContainingIgnoreCase(keyword);
 
-        // 자기 자신 제외(선택)
-        List<Long> targetIds = page.stream()
+        // 검색 리스트에 자기 자신 제외
+        List<Long> targetIds = members.stream()
                 .map(Member::getMemberId)
                 .filter(id -> !id.equals(loginMemberId))
                 .toList();
@@ -269,13 +254,15 @@ public class MemberService {
                 ? Map.of()
                 : followClient.isFollowingBulk(new FollowBulkCheckRequestDto(loginMemberId, targetIds));
 
-        // 결과 매핑
-        return page.map(m -> MemberSearchResponseDto.builder()
-                .memberId(m.getMemberId())
-                .nickname(m.getNickname())
-                .profileImage(m.getProfileImage())
-                .followed(followMap.getOrDefault(m.getMemberId(), false))
-                .build());
+        return members.stream()
+                .filter(m -> !m.getMemberId().equals(loginMemberId))  // ← 이 줄 추가하면 “자기 자신”은 리스트에서 제거
+                .map(m -> MemberSearchResponseDto.builder()
+                        .memberId(m.getMemberId())
+                        .nickname(m.getNickname())
+                        .profileImage(m.getProfileImage())
+                        .followed(followMap.getOrDefault(m.getMemberId(), false))
+                        .build())
+                .toList();
     }
 
     @Transactional
@@ -298,7 +285,7 @@ public class MemberService {
         memberRepository.findById(partnerMemberId)
                 .orElseThrow(MemberException.NotFoundMember::new);
 
-        followClient.follow(memberId, partnerMemberId);
+        followClient.unfollow(memberId, partnerMemberId);
     }
 
     public List<FollowingResponseDto> getMyFollowing(Long memberId) {

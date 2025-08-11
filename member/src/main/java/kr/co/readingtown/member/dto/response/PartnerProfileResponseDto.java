@@ -13,6 +13,5 @@ public class PartnerProfileResponseDto {
     private Double userRating;
     private int userRatingCount;
     private String availableTime;
-    private Long bookhouseId;
     private boolean isFollowing;
 }

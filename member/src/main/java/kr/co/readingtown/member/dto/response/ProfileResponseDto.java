@@ -13,5 +13,4 @@ public class ProfileResponseDto {
     private Double userRating;
     private int userRatingCount;
     private String availableTime;
-    private Long bookhouseId;
 }

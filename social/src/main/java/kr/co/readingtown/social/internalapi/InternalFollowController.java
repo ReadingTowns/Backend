@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,5 +30,27 @@ public class InternalFollowController {
                 followBulkCheckRequestDto.getFromMemberId(),
                 followBulkCheckRequestDto.getTargetMemberIds()
         );
+    }
+
+    @PostMapping
+    public void follow(@RequestParam("fromMemberId") Long fromMemberId, @RequestParam("toMemberId") Long toMemberId){
+        followService.follow(fromMemberId, toMemberId);
+    }
+
+    @DeleteMapping
+    public void unfollow(@RequestParam("fromMemberId") Long fromMemberId, @RequestParam("toMemberId") Long toMemberId){
+        followService.unfollow(fromMemberId, toMemberId);
+    }
+
+    // 내가 팔로우 중인 대상들의 ID 목록
+    @GetMapping("/following-ids")
+    public List<Long> getFollowingIds(@RequestParam("memberId") Long memberId){
+        return followService.getFollowingIds(memberId);
+    }
+
+    // 나를 팔로우하는 대상들의 ID 목록
+    @GetMapping("/follower-ids")
+    public List<Long> getFollowerIds(@RequestParam("memberId") Long memberId){
+        return followService.getFollowerIds(memberId);
     }
 }

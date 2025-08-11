@@ -9,5 +9,5 @@ public class StarRatingResponseDto {
     private Long memberId;
     private int userRatingSum;
     private int userRatingCount;
-    private double userRating;
+    private Double userRating;
 }

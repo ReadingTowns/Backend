@@ -51,7 +51,7 @@ public class ExternalMemberController {
     @GetMapping("/town")
     public Map<String, String> getTown(@AuthenticationPrincipal Long memberId) {
         String currentTown = memberService.getTown(memberId);
-        return Map.of("",currentTown);
+        return Map.of("currentTown",currentTown);
     }
 
     //동네 수정
@@ -59,7 +59,7 @@ public class ExternalMemberController {
     public Map<String, String> updateTown(@AuthenticationPrincipal Long memberId,
                                       @Valid @RequestBody UpdateTownRequestDto updateTownRequestDto) {
         String currentTown = memberService.updateTown(memberId, updateTownRequestDto);
-        return Map.of("",currentTown);
+        return Map.of("currentTown",currentTown);
 
     }
 
@@ -105,10 +105,9 @@ public class ExternalMemberController {
 
     // 유저 검색 (부분 일치)
     @GetMapping("/search")
-    public Page<MemberSearchResponseDto> searchMembers(@AuthenticationPrincipal Long loginMemberId,
-                                                       @RequestParam @NotBlank String nickname,
-                                                       @PageableDefault(size = 20) Pageable pageable) {
-        return memberService.searchByNickname(loginMemberId, nickname, pageable);
+    public List<MemberSearchResponseDto> searchMembers(@AuthenticationPrincipal Long loginMemberId,
+                                                       @RequestParam @NotBlank String nickname) {
+        return memberService.searchByNickname(loginMemberId, nickname);
     }
 
     // 팔로우 생성

@@ -2,9 +2,9 @@ package kr.co.readingtown.member.repository;
 
 import kr.co.readingtown.member.domain.Member;
 import kr.co.readingtown.member.domain.enums.LoginType;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
@@ -15,6 +15,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     boolean existsByNickname(String candidate);
 
     //유저 검색
-    Page<Member> findByNicknameContainingIgnoreCase(String nickname, Pageable pageable);
+    List<Member> findByNicknameContainingIgnoreCase(String nickname);
 
 }
