@@ -39,10 +39,9 @@ public class SecurityWebConfig {
     private final String[] PermitAllPatterns = {
             "/",
             "/login**",
-            "/v3/**",
-            "/swagger**",
+            "/v3/api-docs/**",
             "/swagger-ui/**",
-            "/v3/api-docs/**"
+            "/swagger-ui.html"
     };
 
     @Bean

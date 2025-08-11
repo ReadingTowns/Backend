@@ -5,6 +5,9 @@ import kr.co.readingtown.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/internal/members")
@@ -27,5 +30,17 @@ public class InternalMemberController {
             @RequestParam("providerId") String loginId) {
 
         return memberService.getMemberId(loginType, loginId);
+    }
+
+    @PostMapping("/names")
+    public Map<Long, String> getMembersName(@RequestBody List<Long> memberIds) {
+
+        return memberService.getMembersName(memberIds);
+    }
+
+    @GetMapping("/{memberId}/exists")
+    public boolean existsMember(@PathVariable("memberId") Long memberId) {
+
+        return memberService.getMemberExists(memberId);
     }
 }
