@@ -20,8 +20,20 @@ public class Bookhouse extends BaseEntity {
     @Column(name = "member_id")
     private Long memberId;
 
+    @Column(name = "book_id")
+    private Long bookId;
+
+    @Enumerated(EnumType.STRING)
+    private IsExchanged isExchanged;
+
+    @Column(name = "chatroom_id")
+    private Long chatRoomId;
+
     @Builder
-    public Bookhouse(Long memberId) {
+    public Bookhouse(Long memberId, Long bookId, IsExchanged isExchanged, Long chatRoomId) {
         this.memberId = memberId;
+        this.bookId = bookId;
+        this.isExchanged = isExchanged;
+        this.chatRoomId = chatRoomId;
     }
 }

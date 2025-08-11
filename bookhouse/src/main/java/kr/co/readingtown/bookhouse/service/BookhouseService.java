@@ -13,25 +13,4 @@ import org.springframework.transaction.annotation.Transactional;
 public class BookhouseService {
 
     private final BookhouseRepository bookhouseRepository;
-
-    @Transactional
-    public void registerBookhouse(Long memberId) {
-        // 이미 존재하면 생성 실패 처리
-        if (bookhouseRepository.existsByMemberId(memberId)) {
-            throw new BookhouseException.BookhouseCreateFailed();
-        }
-
-        Bookhouse newBookhouse = new Bookhouse(memberId);
-        bookhouseRepository.save(newBookhouse);
-
-        // 저장 직후에도 보장 검증
-        if (!bookhouseRepository.existsByMemberId(memberId)) {
-            throw new BookhouseException.BookhouseCreateFailed();
-        }
-    }
-
-    public Long getBookhouseId(Long memberId) {
-        return bookhouseRepository.findBookhouseIdByMemberId(memberId)
-                .orElseThrow(BookhouseException.BookhouseNotFound::new);
-    }
 }

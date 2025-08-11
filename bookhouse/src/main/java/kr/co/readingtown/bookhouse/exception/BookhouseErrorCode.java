@@ -8,9 +8,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum BookhouseErrorCode implements ErrorCode {
 
-    BOOKHOUSE_CREATE_FAILED(7001,"서재 생성에 실패하였습니다." ),
-    BOOKHOUSE_NOT_FOUND(7002, "서재가 존재하지 않습니다.");
-
     private final int errorCode;
     private final String errorMessage;
 };
