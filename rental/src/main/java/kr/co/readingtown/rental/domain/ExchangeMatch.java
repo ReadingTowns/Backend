@@ -15,7 +15,7 @@ public class ExchangeMatch extends BaseEntity {
     @Column(name = "exchange_match_id")
     private Long exchangeMatchId;
 
-    @Column(name = "chat_room_id")
+    @Column(name = "chatroom_id")
     private Long chatroomId;
 
     @Column(name = "requester_id")
