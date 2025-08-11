@@ -1,9 +1,9 @@
 package kr.co.readingtown.social.internalapi;
 
+import jakarta.validation.Valid;
 import kr.co.readingtown.social.dto.request.FollowBulkCheckRequestDto;
 import kr.co.readingtown.social.service.FollowService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,7 +25,7 @@ public class InternalFollowController {
 
     // 대량 체크: targets=1,2,3
     @PostMapping("/is-following-bulk")
-    public Map<Long, Boolean> isFollowingBulk(@RequestBody @Validated FollowBulkCheckRequestDto followBulkCheckRequestDto) {
+    public Map<Long, Boolean> isFollowingBulk(@RequestBody @Valid FollowBulkCheckRequestDto followBulkCheckRequestDto) {
         return followService.isFollowingMany(
                 followBulkCheckRequestDto.getFromMemberId(),
                 followBulkCheckRequestDto.getTargetMemberIds()
