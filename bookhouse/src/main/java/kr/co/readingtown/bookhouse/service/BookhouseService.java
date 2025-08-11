@@ -6,7 +6,10 @@ import kr.co.readingtown.bookhouse.dto.response.BookPreviewResponseDto;
 import kr.co.readingtown.bookhouse.exception.BookhouseException;
 import kr.co.readingtown.bookhouse.integration.book.BookReader;
 import kr.co.readingtown.bookhouse.repository.BookhouseRepository;
+import kr.co.readingtown.common.response.PageResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,14 +46,16 @@ public class BookhouseService {
     }
 
     // 특정 회원의 서재 책 리스트 조회
-    public List<BookPreviewResponseDto> getBookhouseBooks(Long memberId) {
+    public PageResponse<BookPreviewResponseDto> getBookhouseBooks(Long memberId, int page, int size) {
 
-        List<Bookhouse> bookhouses = bookhouseRepository.findAllByMemberId(memberId);
+        Page<Bookhouse> bookhousePage = bookhouseRepository.findAllByMemberId(memberId, PageRequest.of(page, size));
 
-        List<Long> bookIds = bookhouses.stream()
+        List<Long> bookIds = bookhousePage.stream()
                 .map(Bookhouse::getBookId)
                 .toList();
 
-        return bookReader.getBookInfo(bookIds);
+        List<BookPreviewResponseDto> content = bookReader.getBookInfo(bookIds);
+
+        return PageResponse.of(content, bookhousePage);
     }
 }
