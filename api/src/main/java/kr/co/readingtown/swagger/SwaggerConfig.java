@@ -24,7 +24,8 @@ public class SwaggerConfig {
                 .packagesToScan(
                         "kr.co.readingtown.member.externalapi",
                         "kr.co.readingtown.review.externalapi",
-                        "kr.co.readingtown.book.externalapi"
+                        "kr.co.readingtown.book.externalapi",
+                        "kr.co.readingtown.bookhouse.externalapi"
                 )
                 .build();
     }
