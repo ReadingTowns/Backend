@@ -79,6 +79,7 @@ public class Member extends BaseEntity {
 
     @Builder
     public Member(String username, LoginType loginType, String loginId, String nickname, String profileImage, String phoneNumber, Integer userRatingSum, Integer userRatingCount, Double userRating, String currentTown, BigDecimal longitude, BigDecimal latitude, Double chatResponseRate, Integer chatAvgResponseMinutes, String availableTime) {
+
         this.username = username;
         this.nickname = nickname;
         this.loginType = loginType;
