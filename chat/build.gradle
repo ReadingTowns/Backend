@@ -1,4 +1,7 @@
 
 dependencies {
     implementation project(':common')
+
+    // web socket
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
 }

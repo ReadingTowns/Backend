@@ -3,6 +3,7 @@ package kr.co.readingtown.swagger;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
+import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +15,20 @@ public class SwaggerConfig {
 
     @Value("${server.base-uri}")
     private String serverUri;
+
+    // TODO : 앞으로 외부 API 문서화가 필요한 api의 패키지를 packagesToScan에 추가해주세요!!
+    @Bean
+    public GroupedOpenApi externalApiGroup() {
+        return GroupedOpenApi.builder()
+                .group("external-api")
+                .packagesToScan(
+                        "kr.co.readingtown.member.externalapi",
+                        "kr.co.readingtown.review.externalapi",
+                        "kr.co.readingtown.book.externalapi",
+                        "kr.co.readingtown.bookhouse.externalapi"
+                )
+                .build();
+    }
 
     @Bean
     public OpenAPI openAPI() {
