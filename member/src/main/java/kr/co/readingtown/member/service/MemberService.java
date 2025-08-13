@@ -5,8 +5,9 @@ import kr.co.readingtown.member.client.FollowClient;
 import kr.co.readingtown.member.domain.Member;
 import kr.co.readingtown.member.domain.enums.LoginType;
 
-import kr.co.readingtown.member.dto.*
-import kr.co.readingtown.member.dto.*
+import kr.co.readingtown.member.dto.query.MemberIdNameDto;
+import kr.co.readingtown.member.dto.request.*;
+import kr.co.readingtown.member.dto.response.*;
 import kr.co.readingtown.member.exception.MemberException;
 import kr.co.readingtown.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
