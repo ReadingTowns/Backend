@@ -21,15 +21,15 @@ public class Member extends BaseEntity {
 
     private String username;
 
+    @Column(name = "nickname", length = 20, unique = true)
+    private String nickname;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "login_type")
     private LoginType loginType;
 
     @Column(name = "login_id")
     private String loginId;
-
-    @Column(name = "nickname", length = 20, unique = true)
-    private String nickname;
 
     @Lob
     @Column(name = "profile_image")
