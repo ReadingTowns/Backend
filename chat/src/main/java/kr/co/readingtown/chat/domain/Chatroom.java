@@ -20,13 +20,9 @@ public class Chatroom extends BaseEntity {
     @Column(name = "requester_id")
     private Long requesterId;
 
-    @Column(name = "rental_id")
-    private Long rentalId;
-
     @Builder
-    public Chatroom(Long ownerId, Long requesterId, Long rentalId) {
+    public Chatroom(Long ownerId, Long requesterId) {
         this.ownerId = ownerId;
         this.requesterId = requesterId;
-        this.rentalId = rentalId;
     }
 }
