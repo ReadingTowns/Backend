@@ -7,7 +7,6 @@ dependencies {
 	implementation project(':member')
 	implementation project(':social')
 	implementation project(':bookhouse')
-	implementation project(':bookstore')
 	implementation project(':rental')
 	implementation project(':book')
 	implementation project(':review')
