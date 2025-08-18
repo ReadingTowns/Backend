@@ -1,4 +1,4 @@
-package kr.co.readingtown.rental.domain.enums;
+package kr.co.readingtown.bookhouse.domain.enums;
 
 public enum RequestStatus {
 

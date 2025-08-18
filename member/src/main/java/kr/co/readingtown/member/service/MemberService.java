@@ -68,6 +68,14 @@ public class MemberService {
         return memberRepository.existsById(memberId);
     }
 
+    public ChatProfileResponseDto getMemberInfo(Long memberId) {
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberException.NotFoundMember::new);
+
+        return ChatProfileResponseDto.of(member);
+    }
+
     @Transactional
     public void completeOnboarding(Long memberId, OnboardingRequestDto onboardingRequestDto) {
 
