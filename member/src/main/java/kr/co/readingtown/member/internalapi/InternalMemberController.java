@@ -1,6 +1,7 @@
 package kr.co.readingtown.member.internalapi;
 
 import kr.co.readingtown.member.domain.enums.LoginType;
+import kr.co.readingtown.member.dto.response.ChatProfileResponseDto;
 import kr.co.readingtown.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -42,5 +43,11 @@ public class InternalMemberController {
     public boolean existsMember(@PathVariable("memberId") Long memberId) {
 
         return memberService.getMemberExists(memberId);
+    }
+
+    @GetMapping("/{memberId}/info")
+    public ChatProfileResponseDto getMemberInfo(@PathVariable Long memberId) {
+
+        return memberService.getMemberInfo(memberId);
     }
 }
