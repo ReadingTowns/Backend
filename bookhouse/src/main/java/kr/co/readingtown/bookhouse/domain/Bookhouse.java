@@ -1,6 +1,7 @@
 package kr.co.readingtown.bookhouse.domain;
 
 import jakarta.persistence.*;
+import kr.co.readingtown.bookhouse.domain.enums.IsExchanged;
 import kr.co.readingtown.common.entity.BaseEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
