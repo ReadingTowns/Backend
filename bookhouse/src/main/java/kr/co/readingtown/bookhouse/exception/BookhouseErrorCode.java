@@ -9,7 +9,14 @@ import lombok.Getter;
 public enum BookhouseErrorCode implements ErrorCode {
 
     BOOKHOUSE_NOT_FOUND(7001, "서재에 해당 책에 대한 정보가 존재하지 않습니다."),
-    BOOKHOUSE_ALREADY_EXISTS(7002, "서재에 해당 책이 이미 존재합니다.");
+    BOOKHOUSE_ALREADY_EXISTS(7002, "서재에 해당 책이 이미 존재합니다."),
+
+    EXCHANGE_NOT_FOUND(7011, "해당 교환 요청에 대한 정보가 존재하지 않습니다."),
+    INVALID_EXCHANGE_TRANSITION_CANCEL(7012, "요청 상태에서만 취소 가능합니다."),
+    INVALID_EXCHANGE_TRANSITION_REJECT(7012, "요청 상태에서만 거절 가능합니다."),
+    DOMAIN_INVARIANT_BROKEN(7013, "맞교환할 서재 수가 2건이 아닙니다."),
+    INVALID_EXCHANGE_TRANSITION_ALREADY_REJECTED(7014, "이미 거절한 요청입니다.");
+
 
     private final int errorCode;
     private final String errorMessage;

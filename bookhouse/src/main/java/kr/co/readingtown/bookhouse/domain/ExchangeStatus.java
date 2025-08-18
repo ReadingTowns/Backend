@@ -34,4 +34,8 @@ public class ExchangeStatus extends BaseEntity {
         this.bookhouseId = bookhouseId;
         this.requestStatus = requestStatus;
     }
+
+    public void updateRequestStatus(RequestStatus requestStatus) {
+        this.requestStatus = requestStatus;
+    }
 }
