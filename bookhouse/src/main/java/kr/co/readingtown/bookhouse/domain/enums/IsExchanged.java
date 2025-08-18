@@ -1,4 +1,4 @@
-package kr.co.readingtown.bookhouse.domain;
+package kr.co.readingtown.bookhouse.domain.enums;
 
 public enum IsExchanged {
     PENDING, //반납 완료 또는 취소

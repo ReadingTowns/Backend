@@ -1,8 +1,8 @@
-package kr.co.readingtown.rental.domain;
+package kr.co.readingtown.bookhouse.domain;
 
 import jakarta.persistence.*;
 import kr.co.readingtown.common.entity.BaseEntity;
-import kr.co.readingtown.rental.domain.enums.RequestStatus;
+import kr.co.readingtown.bookhouse.domain.enums.RequestStatus;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
