@@ -25,7 +25,8 @@ public class SwaggerConfig {
                         "kr.co.readingtown.member.externalapi",
                         "kr.co.readingtown.review.externalapi",
                         "kr.co.readingtown.book.externalapi",
-                        "kr.co.readingtown.bookhouse.externalapi"
+                        "kr.co.readingtown.bookhouse.externalapi",
+                        "kr.co.readingtown.chat.externalapi"
                 )
                 .build();
     }
