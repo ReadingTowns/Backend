@@ -12,19 +12,19 @@ public record ChatExchangedBookInfoResponse(
             BookInfoResponse partnerBookInfo
     ) {
         ExchangedBookDetail myBook = new ExchangedBookDetail(
-                exchangedBookResponse.myBook().exchangeStatusId(),
-                exchangedBookResponse.myBook().bookhouseId(),
-                myBookInfo.bookName(),
-                myBookInfo.bookImage(),
-                exchangedBookResponse.myBook().isAccepted()
+                exchangedBookResponse.myBook() != null ? exchangedBookResponse.myBook().exchangeStatusId() : null,
+                exchangedBookResponse.myBook() != null ? exchangedBookResponse.myBook().bookhouseId() : null,
+                myBookInfo != null ? myBookInfo.bookName() : null,
+                myBookInfo != null ? myBookInfo.bookImage() : null,
+                exchangedBookResponse.myBook() != null ? exchangedBookResponse.myBook().isAccepted() : null
         );
 
         ExchangedBookDetail partnerBook = new ExchangedBookDetail(
-                exchangedBookResponse.partnerBook().exchangeStatusId(),
-                exchangedBookResponse.partnerBook().bookhouseId(),
-                partnerBookInfo.bookName(),
-                partnerBookInfo.bookImage(),
-                exchangedBookResponse.partnerBook().isAccepted()
+                exchangedBookResponse.partnerBook() != null ? exchangedBookResponse.partnerBook().exchangeStatusId() : null,
+                exchangedBookResponse.partnerBook() != null ? exchangedBookResponse.partnerBook().bookhouseId() : null,
+                partnerBookInfo != null ? partnerBookInfo.bookName() : null,
+                partnerBookInfo != null ? partnerBookInfo.bookImage() : null,
+                exchangedBookResponse.partnerBook() != null ? exchangedBookResponse.partnerBook().isAccepted() : null
         );
 
         return new ChatExchangedBookInfoResponse(myBook, partnerBook);
