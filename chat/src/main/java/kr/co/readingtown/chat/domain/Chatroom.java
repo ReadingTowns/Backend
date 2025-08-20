@@ -20,6 +20,18 @@ public class Chatroom extends BaseEntity {
     @Column(name = "requester_id")
     private Long requesterId;
 
+    public void removeOwnerId() {
+        this.ownerId = null;
+    }
+
+    public void removeRequesterId() {
+        this.requesterId = null;
+    }
+
+    public boolean isEmpty() {
+        return ownerId == null && requesterId == null;
+    }
+
     @Builder
     public Chatroom(Long ownerId, Long requesterId) {
         this.ownerId = ownerId;
