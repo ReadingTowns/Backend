@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import kr.co.readingtown.common.entity.BaseEntity;
 import lombok.*;
 
+import java.util.Objects;
+
 @Entity
 @Getter
 @Table(name = "chatrooms")
@@ -19,6 +21,22 @@ public class Chatroom extends BaseEntity {
 
     @Column(name = "requester_id")
     private Long requesterId;
+
+    public void removeOwnerId() {
+        this.ownerId = null;
+    }
+
+    public void removeRequesterId() {
+        this.requesterId = null;
+    }
+
+    public boolean hasMember(Long memberId) {
+        return Objects.equals(ownerId, memberId) || Objects.equals(requesterId, memberId);
+    }
+
+    public boolean isEmpty() {
+        return ownerId == null && requesterId == null;
+    }
 
     @Builder
     public Chatroom(Long ownerId, Long requesterId) {

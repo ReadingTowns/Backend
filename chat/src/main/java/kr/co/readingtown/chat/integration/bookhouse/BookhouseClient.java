@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 )
 public interface BookhouseClient {
 
+    // TODO : 이거 삭제 고려
     @PostMapping("/internal/exchange-status")
     void createExchangeStatus(@RequestBody ChatRequestDto chatRequestDto);
 
