@@ -51,10 +51,10 @@ public class ExternalChatController {
             @PathVariable Long chatroomId,
 
             @Parameter(description = "가져올 메시지 개수 (ex.50)")
-            @RequestParam int limit,
+            @RequestParam(defaultValue = "50") int limit,
 
-            @Parameter(description = "이 커서(메시지 ID) 이전의 메시지를 조회")
-            @RequestParam Long before,
+            @Parameter(description = "이 커서(메시지 ID) 이전의 메시지를 조회 (선택)")
+            @RequestParam(required = false) Long before,
 
             @AuthenticationPrincipal Long myId) {
 
