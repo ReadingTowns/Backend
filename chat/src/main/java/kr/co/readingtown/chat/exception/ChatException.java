@@ -13,4 +13,10 @@ public class ChatException extends CustomException {
             super(ChatErrorCode.CHATROOM_NOT_FOUND);
         }
     }
+
+    public static class MemberNotInChatroom extends ChatException {
+        public MemberNotInChatroom() {
+            super(ChatErrorCode.MEMBER_NOT_IN_CHATROOM);
+        }
+    }
 }
