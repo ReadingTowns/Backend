@@ -145,6 +145,8 @@ public class ChatService {
 
         Chatroom chatroom = chatroomRepository.findById(chatroomId)
                 .orElseThrow(ChatException.ChatroomNotFound::new);
+        if (!chatroom.hasMember(myId))
+            throw new ChatException.MemberNotInChatroom();
 
         if (Objects.equals(chatroom.getOwnerId(), myId)) {
             chatroom.removeOwnerId();
