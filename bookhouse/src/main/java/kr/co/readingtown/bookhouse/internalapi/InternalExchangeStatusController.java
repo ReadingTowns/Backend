@@ -9,16 +9,27 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/internal/exchange-status")
 public class InternalExchangeStatusController {
 
     private final ExchangeStatusService exchangeStatusService;
 
-    @GetMapping("/{chatroomId}/book")
+    @GetMapping("/internal/exchange-status/{chatroomId}/book")
     public ExchangedBookResponse getBookIdByChatroomId(
             @PathVariable Long chatroomId,
             @AuthenticationPrincipal Long myId) {
 
         return exchangeStatusService.getBookIdByChatroomId(chatroomId, myId);
+    }
+
+    @PatchMapping("/internal/chatrooms/{chatroomId}/books/complete-exchange")
+    public void completeExchange(@PathVariable Long chatroomId) {
+
+        exchangeStatusService.completeExchange(chatroomId);
+    }
+
+    @PatchMapping("/internal/chatrooms/{chatroomId}/books/return-exchange")
+    public void returnExchange(@PathVariable Long chatroomId) {
+
+        exchangeStatusService.returnExchange(chatroomId);
     }
 }

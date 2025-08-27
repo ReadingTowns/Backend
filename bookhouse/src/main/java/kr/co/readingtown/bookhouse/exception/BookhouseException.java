@@ -53,4 +53,16 @@ public class BookhouseException extends CustomException {
     public static class MemberIsNotBookOwner extends BookhouseException {
         public MemberIsNotBookOwner() { super(BookhouseErrorCode.MEMBER_IS_NOT_BOOK_OWNER);}
     }
+
+    public static class InvalidExchangeStatusCount extends BookhouseException {
+        public InvalidExchangeStatusCount() { super(BookhouseErrorCode.INVALID_EXCHANGE_STATUS_COUNT);}
+    }
+
+    public static class InvalidExchangeStatusForComplete extends BookhouseException {
+        public InvalidExchangeStatusForComplete() { super(BookhouseErrorCode.INVALID_EXCHANGE_STATUS_FOR_COMPLETE);}
+    }
+
+    public static class InvalidExchangeStatusForReturn extends BookhouseException {
+        public InvalidExchangeStatusForReturn() { super(BookhouseErrorCode.INVALID_EXCHANGE_STATUS_FOR_RETURN);}
+    }
 }

@@ -78,4 +78,15 @@ public class ExternalChatController {
         chatService.leaveChatroom(chatroomId, myId);
     }
 
+    @PatchMapping("/{chatroomId}/exchange/complete")
+    public void completeExchange(@PathVariable Long chatroomId, @AuthenticationPrincipal Long myId) {
+        chatService.completeExchange(chatroomId, myId);
+    }
+
+
+    @PatchMapping("/{chatroomId}/exchange/return")
+    public void returnExchange(@PathVariable Long chatroomId, @AuthenticationPrincipal Long myId) {
+        chatService.returnExchange(chatroomId, myId);
+    }
+
 }
