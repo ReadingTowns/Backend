@@ -21,4 +21,6 @@ public interface ExchangeStatusRepository extends JpaRepository<ExchangeStatus, 
         where e.chatroomId = :chatroomId and e.requestStatus = :requestStatus
     """)
     List<ExchangeStatus> findAllAcceptedByChatRoomId(@Param("chatroomId") Long chatroomId, @Param("requestStatus") RequestStatus requestStatus);
+
+    boolean existsByChatroomIdAndBookhouseId(Long chatRoomId, Long bookhouseId);
 }

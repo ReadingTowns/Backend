@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import kr.co.readingtown.bookhouse.domain.enums.RequestStatus;
 import kr.co.readingtown.bookhouse.dto.request.ExchangeRequestDto;
+import kr.co.readingtown.bookhouse.dto.response.AcceptExchangeResponseDto;
 import kr.co.readingtown.bookhouse.dto.response.ExchangeResponseDto;
 import kr.co.readingtown.bookhouse.service.ExchangeStatusService;
 import lombok.RequiredArgsConstructor;
@@ -28,26 +29,21 @@ public class ExternalExchangeStatusController {
     }
 
     // 교환 요청 수락
-    @PostMapping("/{exchangeRequestId}/accept")
-    public Map<String, String> acceptExchangeStatus(@AuthenticationPrincipal Long memberId, @PathVariable Long exchangeRequestId) {
-        RequestStatus requestStatus = exchangeStatusService.acceptExchangeStatus(memberId, exchangeRequestId);
-        return Map.of("requestStatus", requestStatus.name());
+    @PatchMapping("/{exchangeStatusId}/accept")
+    public AcceptExchangeResponseDto acceptExchangeStatus(@AuthenticationPrincipal Long memberId, @PathVariable Long exchangeStatusId) {
+        return exchangeStatusService.acceptExchangeStatus(memberId, exchangeStatusId);
     }
 
     // 교환 요청 거절
-    @PostMapping("/{exchangeRequestId}/reject")
-    public Map<String, String> reject(@AuthenticationPrincipal Long memberId,
-                       @PathVariable Long exchangeRequestId) {
-        RequestStatus requestStatus = exchangeStatusService.rejectExchangeStatus(memberId, exchangeRequestId);
+    @PatchMapping("/{exchangeStatusId}/reject")
+    public Map<String, String> reject(@AuthenticationPrincipal Long memberId, @PathVariable Long exchangeStatusId) {
+        RequestStatus requestStatus = exchangeStatusService.rejectExchangeStatus(memberId, exchangeStatusId);
         return Map.of("requestStatus", requestStatus.name());
     }
 
     // 교환 요청 취소
-    @PostMapping("/{exchangeRequestId}/cancel")
-    public Map<String, String> cancel(@AuthenticationPrincipal Long memberId,
-                                      @PathVariable Long exchangeRequestId) {
-        RequestStatus requestStatus = exchangeStatusService.cancelExchangeStatus(memberId, exchangeRequestId);
-        return Map.of("requestStatus", requestStatus.name());
+    @DeleteMapping("/{exchangeStatusId}/cancel")
+    public void cancel(@AuthenticationPrincipal Long memberId, @PathVariable Long exchangeStatusId) {
+        exchangeStatusService.cancelExchangeStatus(memberId, exchangeStatusId);
     }
-
 }

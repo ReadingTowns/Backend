@@ -38,7 +38,19 @@ public class BookhouseException extends CustomException {
         public DomainInvariantBroken() { super(BookhouseErrorCode.DOMAIN_INVARIANT_BROKEN);}
     }
 
-    public static class InvalidExchangeTransitionAlreadyRejected extends BookhouseException {
-        public InvalidExchangeTransitionAlreadyRejected() { super(BookhouseErrorCode.INVALID_EXCHANGE_TRANSITION_ALREADY_REJECTED);}
+    public static class InvalidExchangeStatusForTransition extends BookhouseException {
+        public InvalidExchangeStatusForTransition() { super(BookhouseErrorCode.INVALID_EXCHANGE_STATUS_FOR_TRANSITION);}
+    }
+
+    public static class ForbiddenAcceptRequest extends BookhouseException {
+        public ForbiddenAcceptRequest() { super(BookhouseErrorCode.FORBIDDEN_ACCEPT_REQUEST);}
+    }
+
+    public static class DuplicateExchangeRequest extends BookhouseException {
+        public DuplicateExchangeRequest() { super(BookhouseErrorCode.DUPLICATE_EXCHANGE_REQUEST);}
+    }
+
+    public static class MemberIsNotBookOwner extends BookhouseException {
+        public MemberIsNotBookOwner() { super(BookhouseErrorCode.MEMBER_IS_NOT_BOOK_OWNER);}
     }
 }

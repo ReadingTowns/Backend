@@ -14,12 +14,6 @@ public class InternalExchangeStatusController {
 
     private final ExchangeStatusService exchangeStatusService;
 
-    @PostMapping
-    public void createExchangeStatus(@RequestBody ChatRequestDto chatRequestDto) {
-
-        exchangeStatusService.createExchangeStatus(chatRequestDto);
-    }
-
     @GetMapping("/{chatroomId}/book")
     public ExchangedBookResponse getBookIdByChatroomId(
             @PathVariable Long chatroomId,
