@@ -31,7 +31,14 @@ public class ExternalMemberController {
         return memberService.getDefaultProfile(memberId);
     }
 
-    //온보딩 저장
+    //온보딩 완료 여부 확인
+    @GetMapping("/onboarding/check")
+    public Map<String, Boolean> isOnboardingCompleted(@AuthenticationPrincipal Long memberId) {
+        Boolean isOnboarded = memberService.isOnboardingCompleted(memberId);
+        return Map.of("isOnboarded", isOnboarded);
+    }
+
+    //온보딩 저장 및 온보딩 완료 여부 true로 수정
     @PostMapping("/onboarding/complete")
     public void completeOnboarding(@AuthenticationPrincipal Long memberId,
                                    @Valid @RequestBody OnboardingRequestDto onboardingRequestDto) {

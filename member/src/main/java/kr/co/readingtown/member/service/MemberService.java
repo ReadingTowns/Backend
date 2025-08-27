@@ -77,6 +77,14 @@ public class MemberService {
     }
 
     @Transactional
+    public Boolean isOnboardingCompleted(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberException.NoAuthMember::new);
+
+        return member.getIsOnboarded();
+    }
+
+    @Transactional
     public void completeOnboarding(Long memberId, OnboardingRequestDto onboardingRequestDto) {
 
         Member member = memberRepository.findById(memberId)
