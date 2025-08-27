@@ -79,12 +79,13 @@ public class ExternalChatController {
     }
 
     @PatchMapping("/{chatroomId}/exchange/complete")
+    @Operation(summary = "대면 교환 완료", description = "대면 교환을 완료하고 책 상태를 EXCHANGED로 변경합니다.")
     public void completeExchange(@PathVariable Long chatroomId, @AuthenticationPrincipal Long myId) {
         chatService.completeExchange(chatroomId, myId);
     }
 
-
     @PatchMapping("/{chatroomId}/exchange/return")
+    @Operation(summary = "대면 반납 완료", description = "대면 반납을 완료하고 책 상태를 PENDING으로 변경합니다.")
     public void returnExchange(@PathVariable Long chatroomId, @AuthenticationPrincipal Long myId) {
         chatService.returnExchange(chatroomId, myId);
     }
