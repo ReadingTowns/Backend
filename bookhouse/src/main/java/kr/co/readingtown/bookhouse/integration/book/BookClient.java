@@ -1,7 +1,7 @@
 package kr.co.readingtown.bookhouse.integration.book;
 
 import kr.co.readingtown.bookhouse.dto.request.BookInfoRequestDto;
-import kr.co.readingtown.bookhouse.dto.response.BookPreviewResponseDto;
+import kr.co.readingtown.bookhouse.dto.response.ExchangingBookResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,7 +15,7 @@ import java.util.List;
 public interface BookClient {
 
     @PostMapping("/internal/books/preview")
-    List<BookPreviewResponseDto> getBooksPreview(@RequestBody List<Long> bookIds);
+    List<ExchangingBookResponseDto> getBooksPreview(@RequestBody List<Long> bookIds);
 
     @PostMapping("/internal/books")
     Long saveIfNotExistsAndGetBookId(@RequestBody BookInfoRequestDto bookInfoRequestDto);

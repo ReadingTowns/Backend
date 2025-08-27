@@ -7,11 +7,10 @@ import kr.co.readingtown.member.dto.request.StarRatingRequestDto;
 import kr.co.readingtown.member.dto.request.UpdateProfileRequestDto;
 import kr.co.readingtown.member.dto.request.UpdateTownRequestDto;
 import kr.co.readingtown.member.dto.response.*;
+import kr.co.readingtown.member.integration.bookhouse.BookhouseReader;
+import kr.co.readingtown.member.integration.bookhouse.ExchangingBookResponse;
 import kr.co.readingtown.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +23,7 @@ import java.util.Map;
 public class ExternalMemberController {
 
     private final MemberService memberService;
+    private final BookhouseReader bookhouseReader;
 
     @GetMapping("/onboarding/default-profile")
     public DefaultProfileResponseDto getDefaultProfile(@AuthenticationPrincipal Long memberId) {
@@ -140,5 +140,11 @@ public class ExternalMemberController {
     @GetMapping("/me/followers")
     public List<FollowerResponseDto> getMyFollowers(@AuthenticationPrincipal Long loginMemberId) {
         return memberService.getMyFollowers(loginMemberId);
+    }
+    
+    // 교환 중인 책 리스트 조회
+    @GetMapping("/me/exchanges")
+    public List<ExchangingBookResponse> getMyExchangingBooks(@AuthenticationPrincipal Long memberId) {
+        return bookhouseReader.getExchangingBooks(memberId);
     }
 }
