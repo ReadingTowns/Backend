@@ -3,7 +3,7 @@ package kr.co.readingtown.bookhouse.externalapi;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.co.readingtown.bookhouse.dto.request.BookInfoRequestDto;
-import kr.co.readingtown.bookhouse.dto.response.ExchangingBookResponseDto;
+import kr.co.readingtown.bookhouse.dto.response.BookPreviewResponseDto;
 import kr.co.readingtown.bookhouse.service.BookhouseService;
 import kr.co.readingtown.common.response.PageResponse;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +38,7 @@ public class ExternalBookhouseController {
 
     @GetMapping("/members/me")
     @Operation(summary = "내 서재 조회", description = "현재 로그인한 회원의 서재를 조회합니다.")
-    public PageResponse<ExchangingBookResponseDto> getMyBookhouse(
+    public PageResponse<BookPreviewResponseDto> getMyBookhouse(
             @AuthenticationPrincipal Long memberId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -48,7 +48,7 @@ public class ExternalBookhouseController {
 
     @GetMapping("/members/{memberId}")
     @Operation(summary = "회원의 서재 조회", description = "특정 회원의 서재를 조회합니다.")
-    public PageResponse<ExchangingBookResponseDto> getBookhouseByMemberId(
+    public PageResponse<BookPreviewResponseDto> getBookhouseByMemberId(
             @PathVariable Long memberId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {

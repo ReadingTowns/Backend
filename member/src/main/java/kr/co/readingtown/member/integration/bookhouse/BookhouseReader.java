@@ -1,5 +1,6 @@
 package kr.co.readingtown.member.integration.bookhouse;
 
+import kr.co.readingtown.member.dto.response.internal.ExchangingBookResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -12,9 +13,9 @@ public class BookhouseReader {
     
     private final BookhouseClient bookhouseClient;
     
-    public List<ExchangingBookResponse> getExchangingBooks(Long memberId) {
+    public List<ExchangingBookResponseDto> getExchangingBooks(Long memberId) {
 
-        List<ExchangingBookResponse> exchangingBookResponses = bookhouseClient.getExchangingBooks(memberId);
+        List<ExchangingBookResponseDto> exchangingBookResponses = bookhouseClient.getExchangingBooks(memberId);
 
         if (exchangingBookResponses.isEmpty()) {
             return Collections.emptyList();

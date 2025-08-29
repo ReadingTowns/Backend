@@ -1,7 +1,7 @@
 package kr.co.readingtown.member.service;
 
 import kr.co.readingtown.common.config.AppProperties;
-import kr.co.readingtown.member.client.FollowClient;
+import kr.co.readingtown.member.integration.bookhouse.FollowClient;
 import kr.co.readingtown.member.domain.Member;
 import kr.co.readingtown.member.domain.enums.LoginType;
 
@@ -80,7 +80,7 @@ public class MemberService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(MemberException.NoAuthMember::new);
 
-        return member.getIsOnboarded();
+        return member.isOnboarded();
     }
 
     @Transactional

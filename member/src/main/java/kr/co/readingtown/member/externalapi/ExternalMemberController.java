@@ -10,7 +10,7 @@ import kr.co.readingtown.member.dto.request.UpdateProfileRequestDto;
 import kr.co.readingtown.member.dto.request.UpdateTownRequestDto;
 import kr.co.readingtown.member.dto.response.*;
 import kr.co.readingtown.member.integration.bookhouse.BookhouseReader;
-import kr.co.readingtown.member.integration.bookhouse.ExchangingBookResponse;
+import kr.co.readingtown.member.dto.response.internal.ExchangingBookResponseDto;
 import kr.co.readingtown.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -148,7 +148,7 @@ public class ExternalMemberController {
     
     @GetMapping("/me/exchanges")
     @Operation(summary = "교환 중인 책 리스트 조회", description = "로그인한 회원이 현재 교환 중인 도서 정보를 조회합니다. 교환한 나의 책과 파트너의 책 정보를 모두 반환합니다.")
-    public List<ExchangingBookResponse> getMyExchangingBooks(@AuthenticationPrincipal Long memberId) {
+    public List<ExchangingBookResponseDto> getMyExchangingBooks(@AuthenticationPrincipal Long memberId) {
         return bookhouseReader.getExchangingBooks(memberId);
     }
 }

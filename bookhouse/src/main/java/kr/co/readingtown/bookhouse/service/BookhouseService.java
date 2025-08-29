@@ -3,7 +3,7 @@ package kr.co.readingtown.bookhouse.service;
 import kr.co.readingtown.bookhouse.domain.Bookhouse;
 import kr.co.readingtown.bookhouse.domain.enums.IsExchanged;
 import kr.co.readingtown.bookhouse.dto.request.BookInfoRequestDto;
-import kr.co.readingtown.bookhouse.dto.response.ExchangingBookResponseDto;
+import kr.co.readingtown.bookhouse.dto.response.BookPreviewResponseDto;
 import kr.co.readingtown.bookhouse.dto.response.ExchangingBookDetail;
 import kr.co.readingtown.bookhouse.dto.response.ExchangingBookResponse;
 import kr.co.readingtown.bookhouse.exception.BookhouseException;
@@ -52,7 +52,7 @@ public class BookhouseService {
     }
 
     // 특정 회원의 서재 책 리스트 조회
-    public PageResponse<ExchangingBookResponseDto> getBookhouseBooks(Long memberId, int page, int size) {
+    public PageResponse<BookPreviewResponseDto> getBookhouseBooks(Long memberId, int page, int size) {
 
         Page<Bookhouse> bookhousePage = bookhouseRepository.findAllByMemberId(memberId, PageRequest.of(page, size));
 
@@ -60,7 +60,7 @@ public class BookhouseService {
                 .map(Bookhouse::getBookId)
                 .toList();
 
-        List<ExchangingBookResponseDto> content = bookReader.getBookInfo(bookIds);
+        List<BookPreviewResponseDto> content = bookReader.getBookInfo(bookIds);
 
         return PageResponse.of(content, bookhousePage);
     }
@@ -94,8 +94,8 @@ public class BookhouseService {
                     .orElse(null);
             
             // 책 정보 조회
-            ExchangingBookResponseDto myBookInfo = bookReader.getBookInfo(List.of(myBook.getBookId())).get(0);
-            ExchangingBookResponseDto partnerBookInfo = null;
+            BookPreviewResponseDto myBookInfo = bookReader.getBookInfo(List.of(myBook.getBookId())).get(0);
+            BookPreviewResponseDto partnerBookInfo = null;
             
             if (partnerBook != null) {
                 partnerBookInfo = bookReader.getBookInfo(List.of(partnerBook.getBookId())).get(0);
