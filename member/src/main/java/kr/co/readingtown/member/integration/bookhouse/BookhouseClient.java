@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import java.util.List;
 
 @FeignClient(
-        name = "member-bookhouse-client",
+        name = "bookhouse-client",
         url = "${server.base-uri}"
 )
 public interface BookhouseClient {

@@ -93,7 +93,7 @@ class BookhouseServiceTest {
         assertThat(result).hasSize(1);
         
         ExchangingBookResponse response = result.get(0);
-        assertThat(response.chatRoomId()).isEqualTo(chatroomId);
+        assertThat(response.chatroomId()).isEqualTo(chatroomId);
         
         // 내 책 정보 확인
         assertThat(response.myBook().bookhouseId()).isEqualTo(1L);
@@ -101,9 +101,9 @@ class BookhouseServiceTest {
         assertThat(response.myBook().bookImage()).isEqualTo("http://image1.jpg");
         
         // 상대방 책 정보 확인  
-        assertThat(response.yourBook().bookhouseId()).isEqualTo(2L);
-        assertThat(response.yourBook().bookName()).isEqualTo("상대방 책 제목");
-        assertThat(response.yourBook().bookImage()).isEqualTo("http://image2.jpg");
+        assertThat(response.partnerBook().bookhouseId()).isEqualTo(2L);
+        assertThat(response.partnerBook().bookName()).isEqualTo("상대방 책 제목");
+        assertThat(response.partnerBook().bookImage()).isEqualTo("http://image2.jpg");
     }
     
     @Test
@@ -153,7 +153,7 @@ class BookhouseServiceTest {
         assertThat(result).hasSize(2);
         
         // 모든 채팅방이 포함되었는지 확인
-        assertThat(result.stream().map(ExchangingBookResponse::chatRoomId))
+        assertThat(result.stream().map(ExchangingBookResponse::chatroomId))
                 .containsExactlyInAnyOrder(chatroomId, chatroomId2);
     }
     
@@ -184,9 +184,9 @@ class BookhouseServiceTest {
         assertThat(response.myBook().bookName()).isEqualTo("내 책");
         
         // 상대방 책 정보가 null
-        assertThat(response.yourBook().bookhouseId()).isNull();
-        assertThat(response.yourBook().bookName()).isNull();
-        assertThat(response.yourBook().bookImage()).isNull();
+        assertThat(response.partnerBook().bookhouseId()).isNull();
+        assertThat(response.partnerBook().bookName()).isNull();
+        assertThat(response.partnerBook().bookImage()).isNull();
     }
     
     // === 헬퍼 메소드 ===

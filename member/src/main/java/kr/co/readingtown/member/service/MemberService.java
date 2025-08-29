@@ -76,8 +76,7 @@ public class MemberService {
         return ChatProfileResponseDto.of(member);
     }
 
-    @Transactional
-    public Boolean isOnboardingCompleted(Long memberId) {
+    public boolean isOnboardingCompleted(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(MemberException.NoAuthMember::new);
 

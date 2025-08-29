@@ -66,7 +66,7 @@ public class Member extends BaseEntity {
     private String availableTime;
 
     @Column(name = "is_onboarded")
-    private Boolean isOnboarded = false;
+    private boolean isOnboarded = false;
 
     public void updateProfile(String nickname, String profileImage, String availableTime) {
         this.nickname = nickname;
@@ -81,7 +81,7 @@ public class Member extends BaseEntity {
     }
 
     @Builder
-    public Member(String username, LoginType loginType, String loginId, String nickname, String profileImage, String phoneNumber, Integer userRatingSum, Integer userRatingCount, Double userRating, String currentTown, BigDecimal longitude, BigDecimal latitude, Double chatResponseRate, Integer chatAvgResponseMinutes, String availableTime, Boolean isOnboarded) {
+    public Member(String username, LoginType loginType, String loginId, String nickname, String profileImage, String phoneNumber, Integer userRatingSum, Integer userRatingCount, Double userRating, String currentTown, BigDecimal longitude, BigDecimal latitude, Double chatResponseRate, Integer chatAvgResponseMinutes, String availableTime, boolean isOnboarded) {
 
         this.username = username;
         this.nickname = nickname;
@@ -110,10 +110,6 @@ public class Member extends BaseEntity {
         this.profileImage = profileImage;
         this.availableTime = availableTime;
         this.isOnboarded = true;
-    }
-
-    public void updateIsOnboarded(Boolean isOnboarded) {
-        this.isOnboarded = isOnboarded;
     }
 
     public void updateTown(BigDecimal longitude, BigDecimal latitude, String currentTown) {

@@ -1,8 +1,8 @@
 package kr.co.readingtown.bookhouse.dto.response;
 
 public record ExchangingBookResponse(
-        Long chatRoomId,
+        Long chatroomId,
         ExchangingBookDetail myBook,
-        ExchangingBookDetail yourBook
+        ExchangingBookDetail partnerBook
 ) {
 }
