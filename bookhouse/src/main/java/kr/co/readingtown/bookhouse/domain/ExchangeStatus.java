@@ -36,6 +36,7 @@ public class ExchangeStatus extends BaseEntity {
     }
 
     public void updateRequestStatus(RequestStatus requestStatus) {
-        this.requestStatus = requestStatus;
+            if (this.requestStatus == requestStatus ) return;
+            this.requestStatus = requestStatus;
     }
 }
