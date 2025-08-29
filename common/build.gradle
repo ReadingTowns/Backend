@@ -30,4 +30,10 @@ dependencies {
 
     // swagger
     api 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
+
+    // test
+    api 'org.springframework.boot:spring-boot-starter-test'
+    api 'org.mockito:mockito-junit-jupiter'
+    api 'org.assertj:assertj-core'
+    api 'org.springframework.security:spring-security-test'
 }

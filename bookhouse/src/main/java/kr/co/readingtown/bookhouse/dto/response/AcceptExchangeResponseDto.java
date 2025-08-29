@@ -4,6 +4,6 @@ import kr.co.readingtown.bookhouse.domain.enums.RequestStatus;
 
 public record AcceptExchangeResponseDto(
         RequestStatus requestStatus,
-        Boolean isExchangeStarted
+        Boolean isReserved
 ) {
 }

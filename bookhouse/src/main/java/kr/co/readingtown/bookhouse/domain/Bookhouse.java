@@ -46,4 +46,5 @@ public class Bookhouse extends BaseEntity {
     public void updateChatroomId(Long chatroomId) {
         this.chatroomId = chatroomId;
     }
+
 }
