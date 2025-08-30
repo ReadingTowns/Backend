@@ -164,7 +164,7 @@ public class ExchangeStatusService {
 
         // 요청 대상 책의 소유자는 취소할 수 없음 (요청자만 취소 가능)
         if (bookhouse.getMemberId().equals(memberId)) {
-            throw new BookhouseException.MemberIsNotBookOwner();
+            throw new BookhouseException.ForbiddenCancelByBookOwner();
         }
 
         if (exchangeStatus.getRequestStatus() != RequestStatus.REQUEST) {

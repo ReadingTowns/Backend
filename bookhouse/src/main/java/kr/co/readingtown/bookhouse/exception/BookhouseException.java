@@ -50,8 +50,8 @@ public class BookhouseException extends CustomException {
         public DuplicateExchangeRequest() { super(BookhouseErrorCode.DUPLICATE_EXCHANGE_REQUEST);}
     }
 
-    public static class MemberIsNotBookOwner extends BookhouseException {
-        public MemberIsNotBookOwner() { super(BookhouseErrorCode.MEMBER_IS_NOT_BOOK_OWNER);}
+    public static class ForbiddenCancelByBookOwner extends BookhouseException {
+        public ForbiddenCancelByBookOwner() { super(BookhouseErrorCode.FORBIDDEN_CANCEL_BY_BOOK_OWNER);}
     }
 
     public static class InvalidExchangeStatusCount extends BookhouseException {

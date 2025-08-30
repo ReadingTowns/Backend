@@ -19,7 +19,7 @@ public enum BookhouseErrorCode implements ErrorCode {
     INVALID_EXCHANGE_STATUS_FOR_TRANSITION(7015, "교환 요청 상태가 아닙니다."),
     FORBIDDEN_ACCEPT_REQUEST(7016, "로그인된 멤버와 해당 교환 요청을 받은 멤버와 달라 권한이 없습니다."),
     DUPLICATE_EXCHANGE_REQUEST(7017, "이미 해당 채팅방에 해당 책에 대해 교환 요청이 생성되어 있습니다."),
-    MEMBER_IS_NOT_BOOK_OWNER(7018,"책의 소유자가 아닌 요청자만 요청 취소가 가능합니다." ),
+    FORBIDDEN_CANCEL_BY_BOOK_OWNER(7018, "책의 소유자가 요청을 취소할 수 없습니다."),
 
     //대면 교환
     INVALID_EXCHANGE_STATUS_COUNT(7021, "채팅 방 내 생성된 교환 요청 개수가 2개가 아닙니다."),
