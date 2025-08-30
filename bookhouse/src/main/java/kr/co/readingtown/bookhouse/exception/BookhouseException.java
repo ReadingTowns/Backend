@@ -65,4 +65,14 @@ public class BookhouseException extends CustomException {
     public static class InvalidExchangeStatusForReturn extends BookhouseException {
         public InvalidExchangeStatusForReturn() { super(BookhouseErrorCode.INVALID_EXCHANGE_STATUS_FOR_RETURN);}
     }
+
+    public static class BookAlreadyReserved extends BookhouseException {
+        public BookAlreadyReserved() { super(BookhouseErrorCode.BOOK_ALREADY_RESERVED);}
+    }
+
+    public static class InvalidExchangeStatusForRequest extends BookhouseException {
+        public InvalidExchangeStatusForRequest() {
+            super(BookhouseErrorCode.INVALID_EXCHANGE_STATUS_FOR_REQUEST);
+        }
+    }
 }

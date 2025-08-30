@@ -60,13 +60,15 @@ public class ExchangeStatusService {
     @Transactional
     public ExchangeResponseDto createExchangeStatus(Long memberId, ExchangeRequestDto exchangeRequestDto) {
 
-        boolean exists = exchangeStatusRepository.existsByChatroomIdAndBookhouseId(
-                exchangeRequestDto.chatroomId(),
-                exchangeRequestDto.bookhouseId()
-        );
+        boolean exists = exchangeStatusRepository.existsByChatroomIdAndBookhouseId(exchangeRequestDto.chatroomId(), exchangeRequestDto.bookhouseId());
+        if (exists) { throw new BookhouseException.DuplicateExchangeRequest();}
 
-        if (exists) {
-            throw new BookhouseException.DuplicateExchangeRequest();
+        // 이미 bookhouse의 isExchanged 칸이 null 이 아니거나, PENDING이 아닐 때 교환 생성 불가(예약 or 교환중)
+        Bookhouse bookhouse = bookhouseRepository.findById(exchangeRequestDto.bookhouseId())
+                .orElseThrow(BookhouseException.BookhouseNotFound::new);
+
+        if (bookhouse.getIsExchanged() == null || bookhouse.getIsExchanged() != IsExchanged.PENDING) {
+            throw new BookhouseException.InvalidExchangeStatusForRequest();
         }
 
         ExchangeStatus newExchangeStatus = ExchangeStatus.builder()
@@ -84,7 +86,7 @@ public class ExchangeStatusService {
     @Transactional
     public AcceptExchangeResponseDto acceptExchangeStatus(Long memberId, Long exchangeStatusId) {
 
-        ExchangeStatus exchangeStatus = exchangeStatusRepository.findById(exchangeStatusId)
+        ExchangeStatus exchangeStatus = exchangeStatusRepository.findByIdForUpdate(exchangeStatusId)
                 .orElseThrow(BookhouseException.ExchangeStatusNotFound::new);
 
         Bookhouse bookhouse = bookhouseRepository.findById(exchangeStatus.getBookhouseId())
@@ -95,46 +97,57 @@ public class ExchangeStatusService {
             throw new BookhouseException.ForbiddenAcceptRequest();
         }
 
-        // Request 상태에서만 교환 요청 수락 가능
+        // 1) 채팅방의 모든 교환행을 잠금
+        List<ExchangeStatus> allInRoom = exchangeStatusRepository.findAllByChatroomIdForUpdate(exchangeStatus.getChatroomId());
+
+
+        // 2) Request 상태에서만 교환 요청 수락 가능
         if (exchangeStatus.getRequestStatus() != RequestStatus.REQUEST) {
             throw new BookhouseException.InvalidExchangeStatusForTransition();
         }
 
+        // 3) 수락으로 전환
         exchangeStatus.updateRequestStatus(RequestStatus.ACCEPTED);
 
-        // 같은 채팅방 내 ACCEPTED 개수 확인하여 예약 중으로 변경
-        List<ExchangeStatus> acceptedInRoom = exchangeStatusRepository.findAllAcceptedByChatRoomId(
-                exchangeStatus.getChatroomId(),
-                RequestStatus.ACCEPTED
-        );
+        // 4) 같은 트랜잭션/잠금 하에서 메모리 상으로 ACCEPTED 개수 계산
+        long acceptedCount = allInRoom.stream()
+                .map(ExchangeStatus::getRequestStatus)
+                .filter(RequestStatus.ACCEPTED::equals)
+                .count();
 
-        if (acceptedInRoom.size() >= 2) {
-            if (acceptedInRoom.size() != 2) {
+        boolean reserved = false;
+
+        if (acceptedCount >= 2) {
+            if (acceptedCount != 2) {
                 throw new BookhouseException.DomainInvariantBroken();
             }
-
-            // 두 건의 bookhouse에 예약(RESERVED) 상태, 채팅룸id 저장
-            List<Long> bookhouseIds = acceptedInRoom.stream()
+            // 5) 두 책 예약(RESERVED) 전환 (Bookhouse도 잠금)
+            List<Long> bookhouseIds = allInRoom.stream()
+                    .filter(es -> es.getRequestStatus() == RequestStatus.ACCEPTED)
                     .map(ExchangeStatus::getBookhouseId)
                     .toList();
 
-            List<Bookhouse> bookhouses = bookhouseRepository.findAllById(bookhouseIds);
-
-            // 해당 채팅방으로 예약 상태 설정
-            for (Bookhouse reservedBookhouse : bookhouses) {
-                reservedBookhouse.updateIsExchanged(IsExchanged.RESERVED);
-                reservedBookhouse.updateChatroomId(exchangeStatus.getChatroomId());
+            List<Bookhouse> books = bookhouseRepository.findAllByIdForUpdate(bookhouseIds);
+            for (Bookhouse b : books) {
+                //이미 예약된 책에 대해 교환 수락을 시도하는 경우, 다시 REQUEST 상태로 되돌려놓음
+                if (b.getIsExchanged() == IsExchanged.RESERVED){
+                    exchangeStatus.updateRequestStatus(RequestStatus.REQUEST);
+                    throw new BookhouseException.BookAlreadyReserved();
+                }
+                b.updateIsExchanged(IsExchanged.RESERVED);
+                b.updateChatroomId(exchangeStatus.getChatroomId());
             }
-            return new AcceptExchangeResponseDto(exchangeStatus.getRequestStatus(), true);
+            reserved = true;
         }
-        return new AcceptExchangeResponseDto(exchangeStatus.getRequestStatus(), false);
+
+        return new AcceptExchangeResponseDto(exchangeStatus.getRequestStatus(), reserved);
     }
 
     // 교환 요청 거절
     @Transactional
     public RequestStatus rejectExchangeStatus(Long memberId, Long exchangeRequestId) {
 
-        ExchangeStatus exchangeStatus = exchangeStatusRepository.findById(exchangeRequestId)
+        ExchangeStatus exchangeStatus = exchangeStatusRepository.findByIdForUpdate(exchangeRequestId)
                 .orElseThrow(BookhouseException.ExchangeStatusNotFound::new);
 
         Bookhouse bookhouse = bookhouseRepository.findById(exchangeStatus.getBookhouseId())
@@ -156,7 +169,7 @@ public class ExchangeStatusService {
     // 교환 요청 취소
     @Transactional
     public void cancelExchangeStatus(Long memberId, Long exchangeRequestId) {
-        ExchangeStatus exchangeStatus = exchangeStatusRepository.findById(exchangeRequestId)
+        ExchangeStatus exchangeStatus = exchangeStatusRepository.findByIdForUpdate(exchangeRequestId)
                 .orElseThrow(BookhouseException.ExchangeStatusNotFound::new);
 
         Bookhouse bookhouse = bookhouseRepository.findById(exchangeStatus.getBookhouseId())
@@ -174,50 +187,51 @@ public class ExchangeStatusService {
         exchangeStatusRepository.delete(exchangeStatus);
     }
 
-    // 교환 완료 - RESERVED -> EXCHANGED
+    // 교환 시작 - RESERVED -> EXCHANGED
     @Transactional
     public void completeExchange(Long chatroomId) {
-        List<ExchangeStatus> exchangeStatusList = exchangeStatusRepository.findByChatroomId(chatroomId);
-        
+        List<ExchangeStatus> exchangeStatusList = exchangeStatusRepository.findAllByChatroomIdForUpdate(chatroomId);
+
+
         if (exchangeStatusList.size() != 2) {
             throw new BookhouseException.InvalidExchangeStatusCount();
         }
 
-        // 두 개의 Bookhouse를 모두 EXCHANGED로 변경
-        for (ExchangeStatus status : exchangeStatusList) {
-            Bookhouse bookhouse = bookhouseRepository.findById(status.getBookhouseId())
-                    .orElseThrow(BookhouseException.BookhouseNotFound::new);
-            
-            if (bookhouse.getIsExchanged() != IsExchanged.RESERVED) {
+        // 두 개의 Bookhouse를 모두 RESERVED -> EXCHANGED로 변경
+        List<Long> bookhouseIds = exchangeStatusList.stream().map(ExchangeStatus::getBookhouseId).toList();
+        List<Bookhouse> books = bookhouseRepository.findAllByIdForUpdate(bookhouseIds);
+
+        for (Bookhouse b : books) {
+            if (b.getIsExchanged() != IsExchanged.RESERVED) {
                 throw new BookhouseException.InvalidExchangeStatusForComplete();
             }
-            
-            bookhouse.updateIsExchanged(IsExchanged.EXCHANGED);
         }
+        books.forEach(b -> b.updateIsExchanged(IsExchanged.EXCHANGED));
     }
 
     // 교환 반납 - EXCHANGED -> PENDING
     @Transactional
     public void returnExchange(Long chatroomId) {
-        List<ExchangeStatus> exchangeStatusList = exchangeStatusRepository.findByChatroomId(chatroomId);
-        
+        List<ExchangeStatus> exchangeStatusList =
+                exchangeStatusRepository.findAllByChatroomIdForUpdate(chatroomId);
+
         if (exchangeStatusList.size() != 2) {
             throw new BookhouseException.InvalidExchangeStatusCount();
         }
 
-        // 두 개의 Bookhouse를 모두 PENDING으로 변경
-        for (ExchangeStatus status : exchangeStatusList) {
-            Bookhouse bookhouse = bookhouseRepository.findById(status.getBookhouseId())
-                    .orElseThrow(BookhouseException.BookhouseNotFound::new);
-            
-            if (bookhouse.getIsExchanged() != IsExchanged.EXCHANGED) {
+        List<Long> ids = exchangeStatusList.stream().map(ExchangeStatus::getBookhouseId).toList();
+        List<Bookhouse> books = bookhouseRepository.findAllByIdForUpdate(ids);
+
+        for (Bookhouse b : books) {
+            if (b.getIsExchanged() != IsExchanged.EXCHANGED) {
                 throw new BookhouseException.InvalidExchangeStatusForReturn();
             }
-            
-            bookhouse.updateIsExchanged(IsExchanged.PENDING);
-            bookhouse.updateChatroomId(null);  // 채팅방 연결 해제
         }
+        books.forEach(b -> {
+            b.updateIsExchanged(IsExchanged.PENDING);
+            b.updateChatroomId(null);
+        });
         
-        // TODO ExchangeStatus 레코드 삭제 필요?
+        // TODO ExchangeStatus 레코드 삭제 필요할지
     }
 }

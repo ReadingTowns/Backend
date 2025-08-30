@@ -147,7 +147,7 @@ class ExchangeStatusServiceTest {
                 .thenReturn(Optional.of(mockExchangeStatus));
         when(bookhouseRepository.findById(partnerBookhouseId))
                 .thenReturn(Optional.of(mockBookhouse));
-        when(exchangeStatusRepository.findAllAcceptedByChatRoomId(chatroomId, RequestStatus.ACCEPTED))
+        when(exchangeStatusRepository.findAllByChatroomIdForUpdate(chatroomId))
                 .thenReturn(List.of(mockExchangeStatus));  // 1개만 수락됨
         
         // Then - 소유자가 수락하면 성공

@@ -24,8 +24,9 @@ public enum BookhouseErrorCode implements ErrorCode {
     //대면 교환
     INVALID_EXCHANGE_STATUS_COUNT(7021, "채팅 방 내 생성된 교환 요청 개수가 2개가 아닙니다."),
     INVALID_EXCHANGE_STATUS_FOR_COMPLETE(7022, "책 교환 상태가 'RESERVED'이어야 대면 교환이 가능합니다."),
-    INVALID_EXCHANGE_STATUS_FOR_RETURN(7023, "책이 'EXCHANGED'인 상태가 아니라 반납이 불가합니다.");
-
+    INVALID_EXCHANGE_STATUS_FOR_RETURN(7023, "책이 'EXCHANGED'인 상태가 아니라 반납이 불가합니다."),
+    BOOK_ALREADY_RESERVED(7024, "이미 예약된 책이라 교환 수락이 불가합니다."),
+    INVALID_EXCHANGE_STATUS_FOR_REQUEST(7025, "예약 또는 교환 중인 책이라 교환 요청이 불가합니다.");
 
     private final int errorCode;
     private final String errorMessage;
