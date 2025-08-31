@@ -38,4 +38,13 @@ public class Bookhouse extends BaseEntity {
         this.isExchanged = isExchanged;
         this.chatroomId = chatroomId;
     }
+
+    public void updateIsExchanged(IsExchanged isExchanged) {
+        this.isExchanged = isExchanged;
+    }
+
+    public void updateChatroomId(Long chatroomId) {
+        this.chatroomId = chatroomId;
+    }
+
 }

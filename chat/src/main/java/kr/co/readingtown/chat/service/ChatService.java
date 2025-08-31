@@ -7,6 +7,7 @@ import kr.co.readingtown.chat.dto.response.*;
 import kr.co.readingtown.chat.exception.ChatException;
 import kr.co.readingtown.chat.integration.book.BookClient;
 import kr.co.readingtown.chat.integration.bookhouse.BookhouseClient;
+import kr.co.readingtown.chat.integration.bookhouse.BookhouseUpdater;
 import kr.co.readingtown.chat.integration.member.MemberClient;
 import kr.co.readingtown.chat.repository.ChatroomRepository;
 import kr.co.readingtown.chat.repository.MessageRepository;
@@ -26,6 +27,7 @@ public class ChatService {
     public final BookClient bookClient;
     public final MemberClient memberClient;
     public final BookhouseClient bookhouseClient;
+    public final BookhouseUpdater bookhouseUpdater;
 
     public final MessageRepository messageRepository;
     public final ChatroomRepository chatroomRepository;
@@ -156,5 +158,35 @@ public class ChatService {
 
         if (chatroom.isEmpty())
             chatroomRepository.delete(chatroom);
+    }
+
+    // 대면 교환 완료
+    @Transactional
+    public void completeExchange(Long chatroomId, Long myId) {
+        // 채팅방 존재 및 권한 확인
+        Chatroom chatroom = chatroomRepository.findById(chatroomId)
+                .orElseThrow(ChatException.ChatroomNotFound::new);
+        
+        if (!chatroom.hasMember(myId)) {
+            throw new ChatException.MemberNotInChatroom();
+        }
+        
+        // Bookhouse 서비스에 교환 완료 요청 (두 Bookhouse 모두 EXCHANGED으로 변경)
+        bookhouseUpdater.completeExchange(chatroomId);
+    }
+
+    // 대면 반납 완료
+    @Transactional
+    public void returnExchange(Long chatroomId, Long myId) {
+        // 채팅방 존재 및 권한 확인
+        Chatroom chatroom = chatroomRepository.findById(chatroomId)
+                .orElseThrow(ChatException.ChatroomNotFound::new);
+        
+        if (!chatroom.hasMember(myId)) {
+            throw new ChatException.MemberNotInChatroom();
+        }
+        
+        // Bookhouse 서비스에 교환 반납 요청 (두 Bookhouse 모두 PENDING으로 변경)
+        bookhouseUpdater.returnExchange(chatroomId);
     }
 }

@@ -1,4 +1,4 @@
-package kr.co.readingtown.member.client;
+package kr.co.readingtown.member.integration.bookhouse;
 
 import kr.co.readingtown.member.dto.request.FollowBulkCheckRequestDto;
 import org.springframework.cloud.openfeign.FeignClient;
