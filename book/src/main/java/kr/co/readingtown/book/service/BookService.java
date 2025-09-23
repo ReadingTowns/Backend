@@ -6,6 +6,7 @@ import kr.co.readingtown.book.dto.query.BookPreviewDto;
 import kr.co.readingtown.book.dto.request.BookInfoRequestDto;
 import kr.co.readingtown.book.dto.response.BookPreviewResponseDto;
 import kr.co.readingtown.book.dto.response.BookResponseDto;
+import kr.co.readingtown.book.dto.response.ChatBookResponseDto;
 import kr.co.readingtown.book.exception.BookException;
 import kr.co.readingtown.book.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
@@ -56,5 +57,13 @@ public class BookService {
                     bookRepository.save(newBook);
                     return newBook.getBookId();
                 });
+    }
+
+    public ChatBookResponseDto getBookNameAndImage(Long bookId) {
+
+        BookInfoDto bookInfoDto = bookRepository.findBookInfoById(bookId)
+                .orElseThrow(BookException.BookNotFound::new);
+
+        return ChatBookResponseDto.toChatBookResponseDto(bookInfoDto);
     }
 }

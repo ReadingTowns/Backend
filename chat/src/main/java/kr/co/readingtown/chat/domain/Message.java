@@ -18,9 +18,8 @@ public class Message extends BaseEntity {
     @Column(name = "message_id")
     private Long messageId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "chatroom_id")
-    private Chatroom chatroom;
+    @Column(name = "chatroom_id")
+    private Long chatroomId;
 
     @Column(name = "sender_id")
     private Long senderId;
@@ -33,8 +32,8 @@ public class Message extends BaseEntity {
     private LocalDateTime sentTime;
 
     @Builder
-    public Message(Chatroom chatroom, Long senderId, String content) {
-        this.chatroom = chatroom;
+    public Message(Long chatroomId, Long senderId, String content) {
+        this.chatroomId = chatroomId;
         this.senderId = senderId;
         this.content = content;
     }

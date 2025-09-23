@@ -2,6 +2,7 @@ package kr.co.readingtown.book.internalapi;
 
 import kr.co.readingtown.book.dto.request.BookInfoRequestDto;
 import kr.co.readingtown.book.dto.response.BookPreviewResponseDto;
+import kr.co.readingtown.book.dto.response.ChatBookResponseDto;
 import kr.co.readingtown.book.service.BookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -31,5 +32,11 @@ public class InternalBookController {
     public Long saveIfNotExistsAndGetBookId(@RequestBody BookInfoRequestDto bookInfoRequestDto) {
 
         return bookService.saveIfNotExistsAndGetBookId(bookInfoRequestDto);
+    }
+
+    @GetMapping("/{bookId}")
+    public ChatBookResponseDto getBookInfo(@PathVariable Long bookId) {
+
+        return bookService.getBookNameAndImage(bookId);
     }
 }

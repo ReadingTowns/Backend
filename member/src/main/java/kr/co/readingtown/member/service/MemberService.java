@@ -1,7 +1,7 @@
 package kr.co.readingtown.member.service;
 
 import kr.co.readingtown.common.config.AppProperties;
-import kr.co.readingtown.member.client.FollowClient;
+import kr.co.readingtown.member.integration.bookhouse.FollowClient;
 import kr.co.readingtown.member.domain.Member;
 import kr.co.readingtown.member.domain.enums.LoginType;
 
@@ -66,6 +66,21 @@ public class MemberService {
     public boolean getMemberExists(Long memberId) {
 
         return memberRepository.existsById(memberId);
+    }
+
+    public ChatProfileResponseDto getMemberInfo(Long memberId) {
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberException.NotFoundMember::new);
+
+        return ChatProfileResponseDto.of(member);
+    }
+
+    public boolean isOnboardingCompleted(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberException.NoAuthMember::new);
+
+        return member.isOnboarded();
     }
 
     @Transactional
