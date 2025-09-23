@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 @FeignClient(
-        name = "follow-client",
+        name = "bookhouse-follow-client",
         url = "${server.base-uri}"
 )
 public interface FollowClient {
