@@ -5,3 +5,10 @@ spring:
 app:
   profile:
     default-image-url: ${DEFAULT_PROFILE_URL}
+
+aws:
+  s3:
+    accessKey: ${S3_ACCESS_KEY}
+    secretKey: ${S3_SECRET_KEY}
+    region: ap-northeast-2
+    bucket: readingtown
