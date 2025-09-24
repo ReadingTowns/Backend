@@ -36,4 +36,7 @@ dependencies {
     api 'org.mockito:mockito-junit-jupiter'
     api 'org.assertj:assertj-core'
     api 'org.springframework.security:spring-security-test'
+
+    // aws s3
+    api 'com.amazonaws:aws-java-sdk-s3:1.12.730'
 }
