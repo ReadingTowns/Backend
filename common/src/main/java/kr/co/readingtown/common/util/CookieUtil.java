@@ -28,16 +28,20 @@ public class CookieUtil {
 
         // accessToken 쿠키 설정
         Cookie accessTokenCookie = new Cookie(ACCESS_TOKEN_COOKIE_NAME, accessToken);
-        // accessTokenCookie.setHttpOnly(true);
-        // accessTokenCookie.setSecure(true);
+        accessTokenCookie.setDomain(".readingtown.site");
+        accessTokenCookie.setHttpOnly(true);
+        accessTokenCookie.setSecure(true);
         accessTokenCookie.setPath("/");
+        accessTokenCookie.setAttribute("SameSite", "Lax"); //크로스 사이트 요청 시 쿠키 전송 허용
         accessTokenCookie.setMaxAge(15 * 60);
 
         // refreshToken 쿠키 설정
         Cookie refreshTokenCookie = new Cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken);
-        // refreshTokenCookie.setHttpOnly(true);
-        // refreshTokenCookie.setSecure(true);
+        refreshTokenCookie.setDomain(".readingtown.site");
+        refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setSecure(true);
         refreshTokenCookie.setPath("/");
+        refreshTokenCookie.setAttribute("SameSite", "Lax");
         refreshTokenCookie.setMaxAge(7 * 24 * 60 * 60);
 
         response.addCookie(accessTokenCookie);
