@@ -13,6 +13,8 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -33,8 +35,6 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         String accessToken = tokenProvider.createAccessToken(oauthUser.getProvider(), oauthUser.getName());
         String refreshToken = tokenProvider.createRefreshToken(oauthUser.getProvider(), oauthUser.getName());
 
-        cookieUtil.saveTokenToCookie(response, accessToken, refreshToken);
-
         // redirectUri 추출
         String redirectUri = Arrays.stream(Optional.ofNullable(request.getCookies()).orElse(new Cookie[]{}))
                 .filter(cookie -> "redirect_uri".equals(cookie.getName()))
@@ -42,6 +42,19 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                 .map(Cookie::getValue)
                 .orElse("https://readingtown.site/auth/callback");
 
+        // Origin 정보를 이용해 적절한 쿠키 설정
+        String origin = getOriginFromRedirectUri(redirectUri);
+        cookieUtil.saveTokenToCookie(response, accessToken, refreshToken, origin);
+
         response.sendRedirect(redirectUri);
+    }
+
+    private String getOriginFromRedirectUri(String redirectUri) {
+        try {
+            URI uri = new URI(redirectUri);
+            return uri.getScheme() + "://" + uri.getHost() + (uri.getPort() != -1 ? ":" + uri.getPort() : "");
+        } catch (URISyntaxException e) {
+            return null;
+        }
     }
 }
