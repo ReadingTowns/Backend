@@ -2,16 +2,17 @@ package kr.co.readingtown.handler;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,20 +32,19 @@ public class OAuth2RedirectUriFilter extends OncePerRequestFilter {
             String redirectUri = request.getParameter("redirect_uri");
 
             if (redirectUri != null && isValidRedirectUri(redirectUri)) {
-                Cookie cookie = new Cookie("redirect_uri", redirectUri);
-                cookie.setPath("/");
-                cookie.setHttpOnly(true);
-                cookie.setMaxAge(180); // 3분 유효
-                
                 // Origin에 따라 쿠키 도메인 설정
                 String origin = request.getHeader("Origin");
-                if (origin != null && isLocalhost(origin)) {
-                    // localhost의 경우 도메인 설정하지 않음
-                } else {
-                    cookie.setDomain(".readingtown.site");
-                }
+                boolean isLocalhost = origin != null && isLocalhost(origin);
                 
-                response.addCookie(cookie);
+                ResponseCookie cookie = ResponseCookie.from("redirect_uri", redirectUri)
+                        .domain(isLocalhost ? null : ".readingtown.site")
+                        .path("/")
+                        .httpOnly(true)
+                        .secure(!isLocalhost)
+                        .maxAge(Duration.ofMinutes(3))
+                        .build();
+                
+                response.addHeader("Set-Cookie", cookie.toString());
             }
         }
         filterChain.doFilter(request, response);
