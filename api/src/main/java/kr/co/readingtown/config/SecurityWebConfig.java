@@ -35,6 +35,7 @@ public class SecurityWebConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2RedirectUriFilter oAuth2RedirectUriFilter;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final CsrfProtectionFilter csrfProtectionFilter;
 
     @Value("${cors.allowed-origins}")
     private List<String> allowedOrigins;
@@ -76,6 +77,7 @@ public class SecurityWebConfig {
                         )
                         .successHandler(oAuth2LoginSuccessHandler)
                 )
+                .addFilterBefore(csrfProtectionFilter, OAuth2AuthorizationRequestRedirectFilter.class)
                 .addFilterBefore(oAuth2RedirectUriFilter, OAuth2AuthorizationRequestRedirectFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtExceptionFilter, JwtAuthenticationFilter.class);
