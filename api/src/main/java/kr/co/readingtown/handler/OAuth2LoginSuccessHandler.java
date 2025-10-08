@@ -1,6 +1,7 @@
 package kr.co.readingtown.handler;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import kr.co.readingtown.authentication.domain.CustomOAuth2User;
@@ -12,6 +13,8 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -31,12 +34,14 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         String refreshToken = tokenProvider.createRefreshToken(oauthUser.getProvider(), oauthUser.getName());
 
         cookieUtil.saveTokenToCookie(response, accessToken, refreshToken);
-        
-        String redirectUri = request.getParameter("redirect_uri");
-        if (redirectUri != null && !redirectUri.isEmpty()) {
-            response.sendRedirect(redirectUri);
-        } else {
-            response.sendRedirect("https://readingtown.site/auth/callback");
-        }
+
+        // redirectUri 추출
+        String redirectUri = Arrays.stream(Optional.ofNullable(request.getCookies()).orElse(new Cookie[]{}))
+                .filter(cookie -> "redirect_uri".equals(cookie.getName()))
+                .findFirst()
+                .map(Cookie::getValue)
+                .orElse("https://readingtown.site/auth/callback");
+
+        response.sendRedirect(redirectUri);
     }
 }

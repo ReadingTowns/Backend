@@ -5,6 +5,7 @@ import kr.co.readingtown.authentication.jwt.JwtExceptionFilter;
 import kr.co.readingtown.authentication.oauth.CustomOAuth2UserService;
 import kr.co.readingtown.authentication.jwt.JwtAuthenticationFilter;
 import kr.co.readingtown.handler.OAuth2LoginSuccessHandler;
+import kr.co.readingtown.handler.OAuth2RedirectUriFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +14,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -31,6 +33,7 @@ public class SecurityWebConfig {
     private final JwtAuthenticationEntryPoint authenticationEntryPoint;
 
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2RedirectUriFilter oAuth2RedirectUriFilter;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
     @Value("${cors.allowed-origins}")
@@ -73,6 +76,7 @@ public class SecurityWebConfig {
                         )
                         .successHandler(oAuth2LoginSuccessHandler)
                 )
+                .addFilterBefore(oAuth2RedirectUriFilter, OAuth2AuthorizationRequestRedirectFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtExceptionFilter, JwtAuthenticationFilter.class);
 
