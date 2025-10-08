@@ -22,6 +22,12 @@ public class CsrfProtectionFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
+        // 내부 API 경로는 CSRF 검증 제외
+        if (isInternalApiRequest(httpRequest)) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         // 수정 요청만 검증 (GET, HEAD, OPTIONS 제외)
         if (isModifyingRequest(httpRequest)) {
             String origin = httpRequest.getHeader("Origin");
@@ -54,5 +60,10 @@ public class CsrfProtectionFilter implements Filter {
         if (referer == null) return false;
         return allowedOrigins.stream()
                 .anyMatch(allowed -> referer.startsWith(allowed));
+    }
+
+    private boolean isInternalApiRequest(HttpServletRequest request) {
+        String requestURI = request.getRequestURI();
+        return requestURI.startsWith("/internal/");
     }
 }
