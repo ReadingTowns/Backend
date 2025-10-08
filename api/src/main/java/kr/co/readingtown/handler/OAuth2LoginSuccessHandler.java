@@ -31,6 +31,12 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         String refreshToken = tokenProvider.createRefreshToken(oauthUser.getProvider(), oauthUser.getName());
 
         cookieUtil.saveTokenToCookie(response, accessToken, refreshToken);
-        response.sendRedirect("https://readingtown.site/auth/callback");
+        
+        String redirectUri = request.getParameter("redirect_uri");
+        if (redirectUri != null && !redirectUri.isEmpty()) {
+            response.sendRedirect(redirectUri);
+        } else {
+            response.sendRedirect("https://readingtown.site/auth/callback");
+        }
     }
 }
