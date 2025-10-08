@@ -15,4 +15,4 @@ server:
   base-uri: ${SERVER_URI}
 
 cors:
-  allowed-origins: http://localhost:3000, https://readingtown.site
+  allowed-origins: http://localhost:3000, https://readingtown.site, https://dev.readingtown.site

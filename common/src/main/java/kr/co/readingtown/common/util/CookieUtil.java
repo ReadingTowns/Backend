@@ -31,25 +31,23 @@ public class CookieUtil {
     }
 
     public void saveTokenToCookie(HttpServletResponse response, String accessToken, String refreshToken, String origin) {
-        boolean isLocalhost = origin != null && (origin.contains("localhost") || origin.contains("127.0.0.1"));
-
         // accessToken 쿠키 설정
         ResponseCookie accessTokenCookie = ResponseCookie.from(ACCESS_TOKEN_COOKIE_NAME, accessToken)
-                .domain(isLocalhost ? null : ".readingtown.site")
+                .domain(".readingtown.site")
                 .httpOnly(true)
-                .secure(!isLocalhost)
+                .secure(true)
                 .path("/")
-                .sameSite(isLocalhost ? "Lax" : "None")
+                .sameSite("None")
                 .maxAge(Duration.ofMinutes(15))
                 .build();
 
         // refreshToken 쿠키 설정
         ResponseCookie refreshTokenCookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, refreshToken)
-                .domain(isLocalhost ? null : ".readingtown.site")
+                .domain(".readingtown.site")
                 .httpOnly(true)
-                .secure(!isLocalhost)
+                .secure(true)
                 .path("/")
-                .sameSite(isLocalhost ? "Lax" : "None")
+                .sameSite("None")
                 .maxAge(Duration.ofDays(7))
                 .build();
 
