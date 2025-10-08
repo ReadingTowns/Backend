@@ -32,15 +32,11 @@ public class OAuth2RedirectUriFilter extends OncePerRequestFilter {
             String redirectUri = request.getParameter("redirect_uri");
 
             if (redirectUri != null && isValidRedirectUri(redirectUri)) {
-                // Origin에 따라 쿠키 도메인 설정
-                String origin = request.getHeader("Origin");
-                boolean isLocalhost = origin != null && isLocalhost(origin);
-                
                 ResponseCookie cookie = ResponseCookie.from("redirect_uri", redirectUri)
-                        .domain(isLocalhost ? null : ".readingtown.site")
+                        .domain(".readingtown.site")
                         .path("/")
                         .httpOnly(true)
-                        .secure(!isLocalhost)
+                        .secure(true)
                         .maxAge(Duration.ofMinutes(3))
                         .build();
                 
@@ -57,9 +53,8 @@ public class OAuth2RedirectUriFilter extends OncePerRequestFilter {
             
             // 허용된 호스트 목록
             List<String> allowedHosts = Arrays.asList(
-                "localhost",
-                "127.0.0.1", 
-                "readingtown.site"
+                "readingtown.site",
+                "dev.readingtown.site"
             );
             
             return allowedHosts.contains(host);
@@ -68,7 +63,4 @@ public class OAuth2RedirectUriFilter extends OncePerRequestFilter {
         }
     }
     
-    private boolean isLocalhost(String origin) {
-        return origin != null && (origin.contains("localhost") || origin.contains("127.0.0.1"));
-    }
 }
