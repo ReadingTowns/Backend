@@ -27,24 +27,29 @@ public class CookieUtil {
     }
 
     public void saveTokenToCookie(HttpServletResponse response, String accessToken, String refreshToken) {
+        saveTokenToCookie(response, accessToken, refreshToken, null);
+    }
+
+    public void saveTokenToCookie(HttpServletResponse response, String accessToken, String refreshToken, String origin) {
+        boolean isLocalhost = origin != null && (origin.contains("localhost") || origin.contains("127.0.0.1"));
 
         // accessToken 쿠키 설정
         ResponseCookie accessTokenCookie = ResponseCookie.from(ACCESS_TOKEN_COOKIE_NAME, accessToken)
-                .domain(".readingtown.site")
+                .domain(isLocalhost ? null : ".readingtown.site")
                 .httpOnly(true)
-                .secure(true)
+                .secure(!isLocalhost)
                 .path("/")
-                .sameSite("None")
+                .sameSite(isLocalhost ? "Lax" : "None")
                 .maxAge(Duration.ofMinutes(15))
                 .build();
 
         // refreshToken 쿠키 설정
         ResponseCookie refreshTokenCookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, refreshToken)
-                .domain(".readingtown.site")
+                .domain(isLocalhost ? null : ".readingtown.site")
                 .httpOnly(true)
-                .secure(true)
+                .secure(!isLocalhost)
                 .path("/")
-                .sameSite("None")
+                .sameSite(isLocalhost ? "Lax" : "None")
                 .maxAge(Duration.ofDays(7))
                 .build();
 
