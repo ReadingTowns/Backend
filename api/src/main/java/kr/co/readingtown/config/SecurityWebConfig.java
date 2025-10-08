@@ -77,8 +77,8 @@ public class SecurityWebConfig {
                         )
                         .successHandler(oAuth2LoginSuccessHandler)
                 )
-                .addFilterBefore(csrfProtectionFilter, OAuth2AuthorizationRequestRedirectFilter.class)
                 .addFilterBefore(oAuth2RedirectUriFilter, OAuth2AuthorizationRequestRedirectFilter.class)
+                .addFilterBefore(csrfProtectionFilter, OAuth2AuthorizationRequestRedirectFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtExceptionFilter, JwtAuthenticationFilter.class);
 
