@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 
+@Slf4j
 @Component
 public class OAuth2RedirectUriFilter extends OncePerRequestFilter {
 
@@ -28,10 +30,14 @@ public class OAuth2RedirectUriFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         String requestURI = request.getRequestURI();
-        if (requestURI.equals("/oauth2/authorization/google")) {
+        if (requestURI.equals("/oauth2/authorization/google") || requestURI.equals("/oauth2/authorization/kakao")) {
             String redirectUri = request.getParameter("redirect_uri");
 
             if (redirectUri != null && isValidRedirectUri(redirectUri)) {
+
+                log.info("===save redirect uri in cookie===");
+                log.info("redirect_uri = {}", redirectUri);
+
                 ResponseCookie cookie = ResponseCookie.from("redirect_uri", redirectUri)
                         .domain(".readingtown.site")
                         .path("/")
