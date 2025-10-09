@@ -48,6 +48,7 @@ public class OAuth2RedirectUriFilter extends OncePerRequestFilter {
                         .path("/")
                         .httpOnly(true)
                         .secure(true)
+                        .sameSite("None")
                         .maxAge(Duration.ofMinutes(3))
                         .build();
                 
