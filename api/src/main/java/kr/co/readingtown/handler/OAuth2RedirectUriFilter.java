@@ -30,6 +30,11 @@ public class OAuth2RedirectUriFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         String requestURI = request.getRequestURI();
+
+        log.info("===requestURI===");
+        log.info("request_uri = {}", requestURI);
+        log.info("parameter = {}", request.getParameter("redirect_uri"));
+
         if (requestURI.equals("/oauth2/authorization/google") || requestURI.equals("/oauth2/authorization/kakao")) {
             String redirectUri = request.getParameter("redirect_uri");
 
