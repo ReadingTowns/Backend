@@ -8,6 +8,7 @@ import kr.co.readingtown.authentication.domain.CustomOAuth2User;
 import kr.co.readingtown.authentication.jwt.TokenProvider;
 import kr.co.readingtown.common.util.CookieUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,7 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Optional;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
@@ -41,6 +43,8 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                 .findFirst()
                 .map(Cookie::getValue)
                 .orElse("https://readingtown.site/auth/callback");
+
+        log.info("redirectUri in login handler = {}", redirectUri);
 
         // Origin 정보를 이용해 적절한 쿠키 설정
         String origin = getOriginFromRedirectUri(redirectUri);
