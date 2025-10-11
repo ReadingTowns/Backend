@@ -38,6 +38,7 @@ public class BookhouseService {
         Bookhouse newBookhouse = Bookhouse.builder()
                 .memberId(memberId)
                 .bookId(bookId)
+                .isExchanged(IsExchanged.PENDING)
                 .build();
         bookhouseRepository.save(newBookhouse);
     }
