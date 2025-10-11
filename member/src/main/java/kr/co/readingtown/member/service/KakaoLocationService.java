@@ -68,11 +68,23 @@ public class KakaoLocationService implements LocationService {
             }
             if (selected == null) selected = docs.get(0);
 
+            String depth1 = selected.path("region_1depth_name").asText("");
+            String depth2 = selected.path("region_2depth_name").asText("");
             String depth3 = selected.path("region_3depth_name").asText("");
-            if (!depth3.isBlank()) return depth3;
-
-            // fallback: 구 단위라도
-            return selected.path("region_2depth_name").asText("");
+            
+            // 시 구 동 조합
+            StringBuilder fullAddress = new StringBuilder();
+            if (!depth1.isBlank()) fullAddress.append(depth1);
+            if (!depth2.isBlank()) {
+                if (fullAddress.length() > 0) fullAddress.append(" ");
+                fullAddress.append(depth2);
+            }
+            if (!depth3.isBlank()) {
+                if (fullAddress.length() > 0) fullAddress.append(" ");
+                fullAddress.append(depth3);
+            }
+            
+            return fullAddress.toString();
         } catch (Exception e) {
             log.warn("[KAKAO coord2region] request failed: {}", e.toString());
             return "";
@@ -96,12 +108,25 @@ public class KakaoLocationService implements LocationService {
             if (!docs.isArray() || docs.size() == 0) return "";
 
             JsonNode addr = docs.get(0).path("address");
+            String depth1 = addr.path("region_1depth_name").asText("");
+            String depth2 = addr.path("region_2depth_name").asText("");
             String depth3 = addr.path("region_3depth_name").asText("");
-            if (!depth3.isBlank()) return depth3;
-
-            return addr.path("region_2depth_name").asText("");
+            
+            // 시 구 동 조합
+            StringBuilder fullAddress = new StringBuilder();
+            if (!depth1.isBlank()) fullAddress.append(depth1);
+            if (!depth2.isBlank()) {
+                if (fullAddress.length() > 0) fullAddress.append(" ");
+                fullAddress.append(depth2);
+            }
+            if (!depth3.isBlank()) {
+                if (fullAddress.length() > 0) fullAddress.append(" ");
+                fullAddress.append(depth3);
+            }
+            
+            return fullAddress.toString();
         } catch (Exception e) {
-            log.warn("[KAKAO coord2region] request failed: {}", e.toString());
+            log.warn("[KAKAO coord2address] request failed: {}", e.toString());
             return "";
         }
     }
