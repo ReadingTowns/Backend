@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -238,11 +239,23 @@ public class MemberService {
             throw new MemberException.TownResolvedFailed();
         }
 
-        // 경위도 -> 동네명 해석 (coord2region → 실패 시 coord2address → 둘 다 실패 시 LocationException.TownResolveFailed)
+        // 경위도 -> 동네명
         String currentTown = locationService.resolveTown(updateTownRequestDto.getLongitude(), updateTownRequestDto.getLatitude());
 
         member.updateTown(updateTownRequestDto.getLongitude(), updateTownRequestDto.getLatitude(), currentTown);
         return currentTown;
+    }
+    
+    public String getTownByCoordinates(BigDecimal longitude, BigDecimal latitude) {
+        // 범위 검증 (-90~90, -180~180)
+        if (latitude != null && longitude != null) {
+            double lat = latitude.doubleValue();
+            double lon = longitude.doubleValue();
+            if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+                throw new MemberException.TownResolvedFailed();
+            }
+        }
+        return locationService.resolveTown(longitude, latitude);
     }
 
     public ProfileResponseDto getProfile(Long memberId) {
