@@ -37,6 +37,7 @@ public class Bookhouse extends BaseEntity {
         this.bookId = bookId;
         this.isExchanged = isExchanged;
         this.chatroomId = chatroomId;
+        this.isExchanged = IsExchanged.PENDING;
     }
 
     public void updateIsExchanged(IsExchanged isExchanged) {
