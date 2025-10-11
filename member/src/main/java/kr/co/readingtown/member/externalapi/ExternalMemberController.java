@@ -19,6 +19,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -67,6 +68,15 @@ public class ExternalMemberController {
         String currentTown = memberService.getTown(memberId);
         return Map.of("currentTown",currentTown);
     }
+    
+    @GetMapping("/town/coordinates")
+    @Operation(summary = "위경도로 동네 조회", description = "위경도 좌표로 동네 정보를 조회합니다.")
+    public Map<String, String> getTownByCoordinates(@RequestParam BigDecimal longitude,
+                                                    @RequestParam BigDecimal latitude) {
+        String currentTown = memberService.getTownByCoordinates(longitude, latitude);
+        return Map.of("currentTown", currentTown);
+    }
+
 
     @PutMapping("/town")
     @Operation(summary = "동네 수정", description = "동네 정보를 수정합니다.")

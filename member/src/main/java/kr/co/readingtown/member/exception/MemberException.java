@@ -49,8 +49,6 @@ public class MemberException extends CustomException {
     }
 
     public static class TownResolvedFailed extends MemberException {
-        public TownResolvedFailed() {
-            super(MemberErrorCode.TOWN_RESOLVED_FAILED);
-        }
+        public TownResolvedFailed() { super(MemberErrorCode.TOWN_RESOLVED_FAILED); }
     }
 }
