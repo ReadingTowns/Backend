@@ -102,7 +102,7 @@ public class ReviewService {
             List<ReviewContentAndAuthorNameDto> reviews, Map<Long, String> memberNames) {
 
         return reviews.stream()
-                .map(review -> new ReviewWithAuthorResponseDto(review.content(), memberNames.get(review.memberId())))
+                .map(review -> new ReviewWithAuthorResponseDto(memberNames.get(review.memberId()), review.content()))
                 .toList();
     }
 }
