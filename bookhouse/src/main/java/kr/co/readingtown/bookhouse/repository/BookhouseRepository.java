@@ -15,13 +15,13 @@ import java.util.Optional;
 
 public interface BookhouseRepository extends JpaRepository<Bookhouse, Long> {
 
-    Page<Bookhouse> findAllByMemberId(Long memberId, Pageable pageable);
+    Page<Bookhouse> findAllByMemberIdOrderByCreatedAtDesc(Long memberId, Pageable pageable);
 
     Optional<Bookhouse> findByMemberIdAndBookId(Long memberId, Long bookId);
 
     boolean existsByMemberIdAndBookId(Long memberId, Long bookId);
 
-    List<Bookhouse> findByMemberIdAndIsExchanged(Long memberId, IsExchanged isExchanged);
+    List<Bookhouse> findByMemberIdAndIsExchangedOrderByCreatedAtDesc(Long memberId, IsExchanged isExchanged);
 
     List<Bookhouse> findAllByChatroomId(Long chatroomId);
 
