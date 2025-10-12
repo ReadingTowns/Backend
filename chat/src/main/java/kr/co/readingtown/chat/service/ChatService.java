@@ -132,6 +132,15 @@ public class ChatService {
                 ? chatroom.getOwnerId()
                 : chatroom.getRequesterId();
 
+        // 상대방이 채팅방을 나간 경우 처리
+        if (partnerId == null) {
+            Message message = latestMessageMap.get(chatroom.getChatroomId());
+            return ChatroomPreviewResponseDto.of(
+                    chatroom.getChatroomId(),
+                    "(알 수 없음)",
+                    message);
+        }
+
         ChatMemberInfoResponse partnerInfo = memberClient.getMemberInfo(partnerId);
         Message message = latestMessageMap.get(chatroom.getChatroomId());
 
@@ -149,6 +158,17 @@ public class ChatService {
                 .orElseThrow(ChatException.ChatroomNotFound::new);
         if (!chatroom.hasMember(myId))
             throw new ChatException.MemberNotInChatroom();
+
+        // 예약/교환 상태 확인
+        ExchangeStatusResponse exchangeStatus = bookhouseClient.getExchangeStatus(chatroomId);
+        if (exchangeStatus != null && exchangeStatus.status() != null) {
+            String status = exchangeStatus.status();
+            if ("RESERVED".equals(status)) {
+                throw new ChatException.CannotLeaveDuringReservation();
+            } else if ("EXCHANGED".equals(status)) {
+                throw new ChatException.CannotLeaveDuringExchange();
+            }
+        }
 
         if (Objects.equals(chatroom.getOwnerId(), myId)) {
             chatroom.removeOwnerId();

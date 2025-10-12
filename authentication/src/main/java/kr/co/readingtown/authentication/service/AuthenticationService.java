@@ -46,7 +46,7 @@ public class AuthenticationService {
         cookieUtil.saveTokenToCookie(response, newAccessToken, newRefreshToken);
     }
 
-    public void logout(HttpServletRequest request) {
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
 
         // 1. 쿠키에서 access token 추출
         String accessToken = cookieUtil.extractTokenFromCookie(request, ACCESS_TOKEN_COOKIE_NAME);
@@ -61,5 +61,8 @@ public class AuthenticationService {
         // 4. redis 블랙리스트에 access token 저장
         long expiration = tokenProvider.getExpiration(accessToken);  // access token 남은 유효기간
         tokenBlacklistService.addToBlacklist(accessToken, expiration);
+        
+        // 5. 브라우저의 모든 쿠키 삭제
+        cookieUtil.deleteAllCookies(response);
     }
 }
