@@ -372,7 +372,11 @@ public class MemberService {
         // 2) 대상 회원 프로필 일괄 조회
         List<Member> members = memberRepository.findAllById(followerIds);
 
-        // 3) 요청 순서 유지하여 DTO 매핑
+        // 3) 내가 팔로우하는 ID 목록 조회
+        List<Long> followingIds = followClient.getFollowingIds(memberId);
+        Set<Long> followingSet = new HashSet<>(followingIds);
+
+        // 4) 요청 순서 유지하여 DTO 매핑
         Map<Long, Member> byId = members.stream()
                 .collect(Collectors.toMap(Member::getMemberId, m -> m));
 
@@ -384,6 +388,7 @@ public class MemberService {
                     .memberId(m.getMemberId())
                     .nickname(m.getNickname())
                     .profileImage(m.getProfileImage())
+                    .following(followingSet.contains(id))
                     .build());
         }
         return result;
