@@ -27,7 +27,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Query("""
     SELECT new kr.co.readingtown.member.dto.query.MemberIdNameDto(
         m.memberId,
-        m.username
+        m.nickname
     )
     FROM Member m
     WHERE m.memberId IN :memberIds
