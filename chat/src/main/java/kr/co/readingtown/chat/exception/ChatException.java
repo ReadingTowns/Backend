@@ -19,4 +19,14 @@ public class ChatException extends CustomException {
             super(ChatErrorCode.MEMBER_NOT_IN_CHATROOM);
         }
     }
+    
+    public static class CannotLeaveDuringExchange extends ChatException {
+        public CannotLeaveDuringExchange() {
+            super(ChatErrorCode.CANNOT_LEAVE_DURING_EXCHANGE);
+        }
+    }
+    
+    public static class CannotLeaveDuringReservation extends ChatException {
+        public CannotLeaveDuringReservation() { super(ChatErrorCode.CANNOT_LEAVE_DURING_RESERVATION); }
+    }
 }

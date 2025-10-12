@@ -2,6 +2,7 @@ package kr.co.readingtown.chat.integration.bookhouse;
 
 import kr.co.readingtown.chat.dto.request.ChatRequestDto;
 import kr.co.readingtown.chat.dto.response.ExchangedBookResponse;
+import kr.co.readingtown.chat.dto.response.ExchangeStatusResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +14,12 @@ public interface BookhouseClient {
 
     @GetMapping("/internal/exchange-status/{chatroomId}/book")
     ExchangedBookResponse getBookIdByChatroomId(@PathVariable Long chatroomId);
+
+    @GetMapping("/internal/chatrooms/{chatroomId}/exchange-status")
+    Boolean isExchanging(@PathVariable Long chatroomId);
+    
+    @GetMapping("/internal/chatrooms/{chatroomId}/status")
+    ExchangeStatusResponse getExchangeStatus(@PathVariable Long chatroomId);
 
     @PatchMapping("/internal/chatrooms/{chatroomId}/books/complete-exchange")
     void completeExchange(@PathVariable("chatroomId") Long chatroomId);
