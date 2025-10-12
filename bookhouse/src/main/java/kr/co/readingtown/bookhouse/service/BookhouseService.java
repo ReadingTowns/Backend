@@ -55,7 +55,7 @@ public class BookhouseService {
     // 특정 회원의 서재 책 리스트 조회
     public PageResponse<BookPreviewResponseDto> getBookhouseBooks(Long memberId, int page, int size) {
 
-        Page<Bookhouse> bookhousePage = bookhouseRepository.findAllByMemberId(memberId, PageRequest.of(page, size));
+        Page<Bookhouse> bookhousePage = bookhouseRepository.findAllByMemberIdOrderByCreatedAtDesc(memberId, PageRequest.of(page, size));
 
         List<Long> bookIds = bookhousePage.stream()
                 .map(Bookhouse::getBookId)
@@ -70,7 +70,7 @@ public class BookhouseService {
     public List<ExchangingBookResponse> getMyExchangingBooks(Long memberId) {
         
         // EXCHANGED 상태인 내 책들 조회
-        List<Bookhouse> myExchangedBooks = bookhouseRepository.findByMemberIdAndIsExchanged(memberId, IsExchanged.EXCHANGED);
+        List<Bookhouse> myExchangedBooks = bookhouseRepository.findByMemberIdAndIsExchangedOrderByCreatedAtDesc(memberId, IsExchanged.EXCHANGED);
         
         if (myExchangedBooks.isEmpty()) {
             return new ArrayList<>();
