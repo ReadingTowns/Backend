@@ -61,7 +61,24 @@ public class BookhouseService {
                 .map(Bookhouse::getBookId)
                 .toList();
 
-        List<BookPreviewResponseDto> content = bookReader.getBookInfo(bookIds);
+        List<BookPreviewResponseDto> bookInfoList = bookReader.getBookInfo(bookIds);
+        
+        // bookhouseId를 포함한 새로운 리스트 생성
+        List<BookPreviewResponseDto> content = new ArrayList<>();
+        List<Bookhouse> bookhouseList = bookhousePage.getContent();
+        
+        for (int i = 0; i < bookhouseList.size(); i++) {
+            Bookhouse bookhouse = bookhouseList.get(i);
+            BookPreviewResponseDto bookInfo = bookInfoList.get(i);
+            
+            content.add(new BookPreviewResponseDto(
+                    bookhouse.getBookhouseId(),
+                    bookInfo.bookId(),
+                    bookInfo.bookImage(),
+                    bookInfo.bookName(),
+                    bookInfo.author()
+            ));
+        }
 
         return PageResponse.of(content, bookhousePage);
     }
