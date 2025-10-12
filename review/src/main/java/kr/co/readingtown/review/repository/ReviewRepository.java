@@ -34,4 +34,15 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     WHERE rv.bookId = :bookId
     """)
     List<ReviewContentAndAuthorNameDto> findReviewByBookId(@Param("bookId") Long bookId);
+
+    @Query("""
+    SELECT new kr.co.readingtown.review.dto.query.ReviewContentAndAuthorNameDto(
+        rv.memberId,
+        rv.content
+    )
+    FROM Review rv
+    WHERE rv.bookId = :bookId
+        AND rv.memberId <> :memberId
+    """)
+    List<ReviewContentAndAuthorNameDto> findReviewByBookIdExcludingMe(@Param("bookId") Long bookId, @Param("memberId") Long memberId);
 }
