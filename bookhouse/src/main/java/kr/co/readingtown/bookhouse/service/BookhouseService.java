@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -63,13 +64,16 @@ public class BookhouseService {
 
         List<BookPreviewResponseDto> bookInfoList = bookReader.getBookInfo(bookIds);
         
+        // bookId를 키로 하는 Map 생성
+        Map<Long, BookPreviewResponseDto> bookInfoMap = bookInfoList.stream()
+                .collect(Collectors.toMap(BookPreviewResponseDto::bookId, Function.identity()));
+        
         // bookhouseId를 포함한 새로운 리스트 생성
         List<BookPreviewResponseDto> content = new ArrayList<>();
         List<Bookhouse> bookhouseList = bookhousePage.getContent();
         
-        for (int i = 0; i < bookhouseList.size(); i++) {
-            Bookhouse bookhouse = bookhouseList.get(i);
-            BookPreviewResponseDto bookInfo = bookInfoList.get(i);
+        for (Bookhouse bookhouse : bookhouseList) {
+            BookPreviewResponseDto bookInfo = bookInfoMap.get(bookhouse.getBookId());
             
             content.add(new BookPreviewResponseDto(
                     bookhouse.getBookhouseId(),
