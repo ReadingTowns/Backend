@@ -189,4 +189,16 @@ public class ChatService {
         // Bookhouse 서비스에 교환 반납 요청 (두 Bookhouse 모두 PENDING으로 변경)
         bookhouseUpdater.returnExchange(chatroomId);
     }
+
+    // 채팅 메시지 저장
+    @Transactional
+    public void saveChatMessage(Long senderId, String roomId, String content) {
+
+        Message message = Message.builder()
+                .chatroomId(Long.parseLong(roomId))
+                .senderId(senderId)
+                .content(content)
+                .build();
+        messageRepository.save(message);
+    }
 }

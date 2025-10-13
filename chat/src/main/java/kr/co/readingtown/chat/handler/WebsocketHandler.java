@@ -2,8 +2,12 @@ package kr.co.readingtown.chat.handler;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import kr.co.readingtown.chat.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -25,6 +29,10 @@ public class WebsocketHandler extends TextWebSocketHandler {
     // 해당 세션에 어떤 채팅방에 속해있는지 알기위한
     private final Map<WebSocketSession, String> sessionRoomMap = new ConcurrentHashMap<>();
 
+    private final ChatService chatService;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
 
     // 소켓 연결 확인
     // 프론트에서 /ws/conn으로 연결 요청하면
@@ -34,7 +42,6 @@ public class WebsocketHandler extends TextWebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 
         log.info("{} 연결됨", session.getId());
-//        session.sendMessage(new TextMessage("WebSocket 연결 완료"));
     }
 
     // 소켓 메시지 처리
@@ -45,8 +52,6 @@ public class WebsocketHandler extends TextWebSocketHandler {
         log.info("payload {}", payload);
 
         // JSON 파싱
-        // TODO : sender id도 함께
-        ObjectMapper objectMapper = new ObjectMapper();
         JsonNode node = objectMapper.readTree(payload);
         String roomId = node.get("roomId").asText();
         String chatMessage = node.get("message").asText();
@@ -58,10 +63,28 @@ public class WebsocketHandler extends TextWebSocketHandler {
         // 세션에 방 ID 등록
         sessionRoomMap.put(session, roomId);
 
+        // sender 가져오기 + TODO: 리플렉션 공부
+        Long senderId = null;
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Object principal = auth.getPrincipal();
+        try {
+            senderId = (Long) principal.getClass().getMethod("getId").invoke(principal);
+        } catch (Exception e) {
+            log.warn("[SecurityContextHolder] principal 에서 user id 추출 실패: {}", e.getMessage());
+        }
+
+        // 프론트에게 전달할 JSON 생성
+        ObjectNode broadcastMsg = objectMapper.createObjectNode();
+        broadcastMsg.put("senderId", senderId);
+        broadcastMsg.put("message", chatMessage);
+
+        // DB에 메시지 저장
+        chatService.saveChatMessage(senderId, roomId, chatMessage);
+
         // 같은 방 세션에게만 전송
         for (WebSocketSession s : chatRooms.get(roomId)) {
             if (s.isOpen()) {
-                s.sendMessage(new TextMessage(chatMessage));
+                s.sendMessage(new TextMessage(broadcastMsg.toString()));
             }
         }
     }
