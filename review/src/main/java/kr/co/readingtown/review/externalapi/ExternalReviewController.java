@@ -44,9 +44,11 @@ public class ExternalReviewController {
     }
 
     @GetMapping("/{bookId}/reviews")
-    public List<ReviewWithAuthorResponseDto> getReviews(@PathVariable Long bookId) {
+    public List<ReviewWithAuthorResponseDto> getReviews(
+            @PathVariable Long bookId,
+            @AuthenticationPrincipal Long memberId) {
 
-        return reviewService.getReviews(bookId);
+        return reviewService.getReviews(bookId, memberId);
     }
 
     @GetMapping("/{bookId}/reviews/{memberId}")

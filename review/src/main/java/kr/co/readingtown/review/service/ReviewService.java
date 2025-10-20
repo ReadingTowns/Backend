@@ -76,11 +76,11 @@ public class ReviewService {
         return ReviewResponseDto.toReviewResponseDto(myReview);
     }
 
-    // 특정 책의 모든 감상평 조회
-    public List<ReviewWithAuthorResponseDto> getReviews(Long bookId) {
+    // 특정 책의 모든 감상평 조회 (자기 자신 제외)
+    public List<ReviewWithAuthorResponseDto> getReviews(Long bookId, Long memberId) {
 
         bookValidator.validateBookExists(bookId);
-        List<ReviewContentAndAuthorNameDto> reviews = reviewRepository.findReviewByBookId(bookId);
+        List<ReviewContentAndAuthorNameDto> reviews = reviewRepository.findReviewByBookIdExcludingMe(bookId, memberId);
         if (reviews.isEmpty()) {
             return Collections.emptyList();
         }
@@ -102,7 +102,7 @@ public class ReviewService {
             List<ReviewContentAndAuthorNameDto> reviews, Map<Long, String> memberNames) {
 
         return reviews.stream()
-                .map(review -> new ReviewWithAuthorResponseDto(review.content(), memberNames.get(review.memberId())))
+                .map(review -> new ReviewWithAuthorResponseDto(memberNames.get(review.memberId()), review.content()))
                 .toList();
     }
 }

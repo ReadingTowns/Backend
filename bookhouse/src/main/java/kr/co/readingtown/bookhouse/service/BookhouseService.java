@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -67,7 +68,27 @@ public class BookhouseService {
                 .map(Bookhouse::getBookId)
                 .toList();
 
-        List<BookPreviewResponseDto> content = bookReader.getBookInfo(bookIds);
+        List<BookPreviewResponseDto> bookInfoList = bookReader.getBookInfo(bookIds);
+        
+        // bookId를 키로 하는 Map 생성
+        Map<Long, BookPreviewResponseDto> bookInfoMap = bookInfoList.stream()
+                .collect(Collectors.toMap(BookPreviewResponseDto::bookId, Function.identity()));
+        
+        // bookhouseId를 포함한 새로운 리스트 생성
+        List<BookPreviewResponseDto> content = new ArrayList<>();
+        List<Bookhouse> bookhouseList = bookhousePage.getContent();
+        
+        for (Bookhouse bookhouse : bookhouseList) {
+            BookPreviewResponseDto bookInfo = bookInfoMap.get(bookhouse.getBookId());
+            
+            content.add(new BookPreviewResponseDto(
+                    bookhouse.getBookhouseId(),
+                    bookInfo.bookId(),
+                    bookInfo.bookImage(),
+                    bookInfo.bookName(),
+                    bookInfo.author()
+            ));
+        }
 
         return PageResponse.of(content, bookhousePage);
     }
@@ -180,5 +201,9 @@ public class BookhouseService {
         }
         
         return responses;
+    // 유저가 서재에 가지고있는 책의 id 조회
+    public List<Long> getMembersBookId(Long memberId) {
+
+        return bookhouseRepository.findBookIdByMember(memberId);
     }
 }
