@@ -4,10 +4,14 @@ import kr.co.readingtown.bookhouse.domain.Bookhouse;
 import kr.co.readingtown.bookhouse.domain.enums.IsExchanged;
 import kr.co.readingtown.bookhouse.dto.request.BookInfoRequestDto;
 import kr.co.readingtown.bookhouse.dto.response.BookPreviewResponseDto;
+import kr.co.readingtown.bookhouse.dto.response.BookhouseOwnerResponseDto;
+import kr.co.readingtown.bookhouse.dto.response.BookhouseSearchResponseDto;
 import kr.co.readingtown.bookhouse.dto.response.ExchangingBookDetail;
 import kr.co.readingtown.bookhouse.dto.response.ExchangingBookResponse;
 import kr.co.readingtown.bookhouse.exception.BookhouseException;
 import kr.co.readingtown.bookhouse.integration.book.BookReader;
+import kr.co.readingtown.bookhouse.dto.response.MemberProfileResponseDto;
+import kr.co.readingtown.bookhouse.integration.member.MemberReader;
 import kr.co.readingtown.bookhouse.repository.BookhouseRepository;
 import kr.co.readingtown.common.response.PageResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,6 +32,7 @@ import java.util.stream.Collectors;
 public class BookhouseService {
 
     private final BookReader bookReader;
+    private final MemberReader memberReader;
     private final BookhouseRepository bookhouseRepository;
 
     // 서재에 책 등록
@@ -120,6 +126,59 @@ public class BookhouseService {
             responses.add(new ExchangingBookResponse(chatroomId, myBookDetail, yourBookDetail));
         }
 
+        return responses;
+    }
+
+    // 키워드로 Bookhouse에 등록된 책 검색
+    public List<BookhouseSearchResponseDto> searchBooksInBookhouse(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return List.of();
+        }
+        
+        return bookhouseRepository.searchBooksInBookhouse(keyword.trim());
+    }
+
+    // 특정 책을 가진 서재 리스트 조회
+    public List<BookhouseOwnerResponseDto> getBookhousesByBookId(Long bookId, Long currentMemberId) {
+        List<Bookhouse> bookhouses = bookhouseRepository.findAllByBookIdOrderByCreatedAtDesc(bookId);
+        
+        if (bookhouses.isEmpty()) {
+            return List.of();
+        }
+        
+        List<Long> memberIds = bookhouses.stream()
+                .map(Bookhouse::getMemberId)
+                .distinct()
+                .toList();
+        
+        // 멤버 프로필 정보 한번에 조회 (이름, 프로필 이미지, 별점)
+        Map<Long, MemberProfileResponseDto> memberProfiles = memberReader.getMembersProfile(memberIds);
+        
+        // 팔로우 여부 조회 (로그인한 사용자가 있을 경우)
+        Map<Long, Boolean> followingMap = new HashMap<>();
+        if (currentMemberId != null) {
+            followingMap = memberReader.checkFollowing(currentMemberId, memberIds);
+        }
+        
+        List<BookhouseOwnerResponseDto> responses = new ArrayList<>();
+        for (Bookhouse bookhouse : bookhouses) {
+            Long memberId = bookhouse.getMemberId();
+            MemberProfileResponseDto profile = memberProfiles.get(memberId);
+            
+            if (profile == null) {
+                profile = new MemberProfileResponseDto("알 수 없음", null, 0.0);
+            }
+            
+            responses.add(new BookhouseOwnerResponseDto(
+                    bookhouse.getBookhouseId(),
+                    memberId,
+                    profile.nickname(),
+                    profile.profileImage(),
+                    followingMap.getOrDefault(memberId, false),
+                    profile.starRating() != null ? profile.starRating() : 0.0
+            ));
+        }
+        
         return responses;
     }
 }

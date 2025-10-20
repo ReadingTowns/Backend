@@ -77,6 +77,25 @@ public class MemberService {
         return ChatProfileResponseDto.of(member);
     }
 
+    public Map<Long, MemberProfileResponseDto> getMembersProfile(List<Long> memberIds) {
+        
+        if (memberIds == null || memberIds.isEmpty()) {
+            return Map.of();
+        }
+        
+        List<Member> members = memberRepository.findAllById(memberIds);
+        
+        return members.stream()
+                .collect(Collectors.toMap(
+                        Member::getMemberId,
+                        member -> new MemberProfileResponseDto(
+                                member.getNickname(),
+                                member.getProfileImage(),
+                                member.getUserRating()
+                        )
+                ));
+    }
+
     public boolean isOnboardingCompleted(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(MemberException.NoAuthMember::new);

@@ -2,6 +2,7 @@ package kr.co.readingtown.member.internalapi;
 
 import kr.co.readingtown.member.domain.enums.LoginType;
 import kr.co.readingtown.member.dto.response.ChatProfileResponseDto;
+import kr.co.readingtown.member.dto.response.MemberProfileResponseDto;
 import kr.co.readingtown.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -49,5 +50,11 @@ public class InternalMemberController {
     public ChatProfileResponseDto getMemberInfo(@PathVariable Long memberId) {
 
         return memberService.getMemberInfo(memberId);
+    }
+
+    @PostMapping("/profiles")
+    public Map<Long, MemberProfileResponseDto> getMembersProfile(@RequestBody List<Long> memberIds) {
+        
+        return memberService.getMembersProfile(memberIds);
     }
 }
