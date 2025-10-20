@@ -30,9 +30,13 @@ public class RecommendationService {
 
         // 유저 서재 책 id 추출
         List<Long> bookIds = bookhouseClient.getMembersBookId(memberId);
+        if (bookIds.isEmpty())
+            return List.of();
 
         // 유저 키워드 추출
         List<String> keywords = keywordRepository.findContentsByMemberId(memberId);
+        if (keywords.isEmpty())
+            return List.of();
 
         // 파라미터로 넘길 수 있도록 가공
         String bookIdsParam = bookIds.stream()
