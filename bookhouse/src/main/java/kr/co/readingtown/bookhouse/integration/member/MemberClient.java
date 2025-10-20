@@ -11,7 +11,7 @@ import java.util.Map;
 
 @FeignClient(
         name = "bookhouse-member-client",
-        url = "${SERVER_URI}"
+        url = "${server.base-uri}"
 )
 public interface MemberClient {
     
