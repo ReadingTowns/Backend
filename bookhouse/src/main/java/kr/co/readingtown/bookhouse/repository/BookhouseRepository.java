@@ -48,4 +48,11 @@ public interface BookhouseRepository extends JpaRepository<Bookhouse, Long> {
     List<BookhouseSearchResponseDto> searchBooksInBookhouse(@Param("keyword") String keyword);
 
     List<Bookhouse> findAllByBookIdOrderByCreatedAtDesc(Long bookId);
+
+    @Query("""
+    SELECT bh.bookId
+    FROM Bookhouse bh
+    WHERE bh.memberId = :memberId
+    """)
+    List<Long> findBookIdByMember(@Param("memberId") Long memberId);
 }

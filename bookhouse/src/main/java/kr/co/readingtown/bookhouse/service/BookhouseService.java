@@ -162,34 +162,34 @@ public class BookhouseService {
     // 특정 책을 가진 서재 리스트 조회
     public List<BookhouseOwnerResponseDto> getBookhousesByBookId(Long bookId, Long currentMemberId) {
         List<Bookhouse> bookhouses = bookhouseRepository.findAllByBookIdOrderByCreatedAtDesc(bookId);
-        
+
         if (bookhouses.isEmpty()) {
             return List.of();
         }
-        
+
         List<Long> memberIds = bookhouses.stream()
                 .map(Bookhouse::getMemberId)
                 .distinct()
                 .toList();
-        
+
         // 멤버 프로필 정보 한번에 조회 (이름, 프로필 이미지, 별점)
         Map<Long, MemberProfileResponseDto> memberProfiles = memberReader.getMembersProfile(memberIds);
-        
+
         // 팔로우 여부 조회 (로그인한 사용자가 있을 경우)
         Map<Long, Boolean> followingMap = new HashMap<>();
         if (currentMemberId != null) {
             followingMap = memberReader.checkFollowing(currentMemberId, memberIds);
         }
-        
+
         List<BookhouseOwnerResponseDto> responses = new ArrayList<>();
         for (Bookhouse bookhouse : bookhouses) {
             Long memberId = bookhouse.getMemberId();
             MemberProfileResponseDto profile = memberProfiles.get(memberId);
-            
+
             if (profile == null) {
                 profile = new MemberProfileResponseDto("알 수 없음", null, 0.0);
             }
-            
+
             responses.add(new BookhouseOwnerResponseDto(
                     bookhouse.getBookhouseId(),
                     memberId,
@@ -199,11 +199,11 @@ public class BookhouseService {
                     profile.starRating() != null ? profile.starRating() : 0.0
             ));
         }
-        
+
         return responses;
+    }
     // 유저가 서재에 가지고있는 책의 id 조회
     public List<Long> getMembersBookId(Long memberId) {
-
         return bookhouseRepository.findBookIdByMember(memberId);
     }
 }
