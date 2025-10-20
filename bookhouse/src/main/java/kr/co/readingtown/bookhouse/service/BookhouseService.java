@@ -143,4 +143,10 @@ public class BookhouseService {
 
         return responses;
     }
+
+    // 유저가 서재에 가지고있는 책의 id 조회
+    public List<Long> getMembersBookId(Long memberId) {
+
+        return bookhouseRepository.findBookIdByMember(memberId);
+    }
 }

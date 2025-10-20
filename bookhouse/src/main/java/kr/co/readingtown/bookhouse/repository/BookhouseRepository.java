@@ -28,4 +28,11 @@ public interface BookhouseRepository extends JpaRepository<Bookhouse, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select b from Bookhouse b where b.bookhouseId in :bookhouseIds")
     List<Bookhouse> findAllByIdForUpdate(@Param("bookhouseIds")List<Long> bookhouseIds);
+
+    @Query("""
+    SELECT bh.bookId
+    FROM Bookhouse bh
+    WHERE bh.memberId = :memberId
+    """)
+    List<Long> findBookIdByMember(@Param("memberId") Long memberId);
 }
