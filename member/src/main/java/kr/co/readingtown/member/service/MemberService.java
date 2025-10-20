@@ -392,10 +392,9 @@ public class MemberService {
         List<Member> members = memberRepository.findAllById(followerIds);
 
         // 3) 내가 팔로우하는지 여부 확인 (bulk)
-        Map<Long, Boolean> followMap = followerIds.isEmpty() 
-                ? Map.of()
-                : followClient.isFollowingBulk(new FollowBulkCheckRequestDto(memberId, followerIds));
-
+        Map<Long, Boolean> followMap = followClient.isFollowingBulk(
+                new FollowBulkCheckRequestDto(memberId, followerIds));
+        
         // 4) 요청 순서 유지하여 DTO 매핑
         Map<Long, Member> byId = members.stream()
                 .collect(Collectors.toMap(Member::getMemberId, m -> m));
