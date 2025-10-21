@@ -50,6 +50,26 @@ public class BookhouseService {
         bookhouseRepository.save(newBookhouse);
     }
 
+    // 서재에 책 등록 (bookId만 사용)
+    @Transactional
+    public void addBooksToBookhouseByBookId(Long memberId, Long bookId) {
+        
+        // 책이 존재하는지 확인 (BookReader에서 예외 발생)
+        bookReader.validateBookExists(bookId);
+
+        // 이미 등록된 책인지 확인
+        if (bookhouseRepository.existsByMemberIdAndBookId(memberId, bookId)) {
+            throw new BookhouseException.AlreadyExistsBook();
+        }
+
+        Bookhouse newBookhouse = Bookhouse.builder()
+                .memberId(memberId)
+                .bookId(bookId)
+                .isExchanged(IsExchanged.PENDING)
+                .build();
+        bookhouseRepository.save(newBookhouse);
+    }
+
     // 서재에서 책 삭제
     @Transactional
     public void deleteBookFromBookhouse(Long memberId, Long bookId) {

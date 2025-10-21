@@ -76,4 +76,11 @@ public class BookService {
                 .map(BookPreviewResponseDto::toBookPreviewResponseDto)
                 .toList();
     }
+
+    // 책 존재 여부 검증 (없으면 예외 발생)
+    public void validateBookExists(Long bookId) {
+        if (!bookRepository.existsById(bookId)) {
+            throw new BookException.BookNotFound();
+        }
+    }
 }

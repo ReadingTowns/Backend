@@ -75,4 +75,10 @@ public class BookhouseException extends CustomException {
             super(BookhouseErrorCode.INVALID_EXCHANGE_STATUS_FOR_REQUEST);
         }
     }
+
+    public static class AlreadyExistsBook extends BookhouseException {
+        public AlreadyExistsBook() {
+            super(BookhouseErrorCode.BOOK_ALREADY_EXISTS);
+        }
+    }
 }

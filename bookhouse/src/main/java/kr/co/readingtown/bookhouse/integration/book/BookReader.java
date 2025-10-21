@@ -27,4 +27,9 @@ public class BookReader {
 
         return bookClient.saveIfNotExistsAndGetBookId(bookInfoRequestDto);
     }
+
+    public void validateBookExists(Long bookId) {
+        // BookClient에서 책이 없으면 예외를 발생시킴
+        bookClient.validateBookExists(bookId);
+    }
 }

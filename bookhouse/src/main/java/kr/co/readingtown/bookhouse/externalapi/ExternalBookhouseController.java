@@ -31,6 +31,15 @@ public class ExternalBookhouseController {
         bookhouseService.addBooksToBookhouse(memberId, bookInfoRequestDto);
     }
 
+    @PostMapping("/books/{bookId}")
+    @Operation(summary = "서재에 책 추가 (bookId)", description = "bookId를 사용하여 현재 로그인한 회원의 서재에 책을 추가합니다.")
+    public void addBooksToBookhouseByBookId(
+            @PathVariable Long bookId,
+            @AuthenticationPrincipal Long memberId) {
+
+        bookhouseService.addBooksToBookhouseByBookId(memberId, bookId);
+    }
+
     @DeleteMapping("/books/{bookId}")
     @Operation(summary = "서재에서 책 삭제", description = "현재 로그인한 회원의 서재에서 특정 책을 삭제합니다.")
     public void deleteBookFromBookhouse(
