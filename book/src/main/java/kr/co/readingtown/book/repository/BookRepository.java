@@ -52,7 +52,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
         b.author
     )
     FROM Book b
-    WHERE b.bookName LIKE %:bookName%
+    WHERE REPLACE(b.bookName, ' ', '') LIKE %:bookName%
     """)
     List<BookPreviewDto> findByBookNameContaining(@Param("bookName") String bookName);
 }
