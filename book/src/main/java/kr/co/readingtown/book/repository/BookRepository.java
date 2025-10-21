@@ -43,4 +43,16 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     WHERE b.bookId IN :bookIds
     """)
     List<BookPreviewDto> findAllPreviewByIds(@Param("bookIds") List<Long> bookIds);
+
+    @Query("""
+    SELECT new kr.co.readingtown.book.dto.query.BookPreviewDto(
+        b.bookId,
+        b.bookImage,
+        b.bookName,
+        b.author
+    )
+    FROM Book b
+    WHERE b.bookName LIKE %:bookName%
+    """)
+    List<BookPreviewDto> findByBookNameContaining(@Param("bookName") String bookName);
 }

@@ -66,4 +66,12 @@ public class BookService {
 
         return ChatBookResponseDto.toChatBookResponseDto(bookInfoDto);
     }
+
+    // 책 이름으로 검색
+    public List<BookPreviewResponseDto> searchBooks(String bookname) {
+        List<BookPreviewDto> books = bookRepository.findByBookNameContaining(bookname);
+        return books.stream()
+                .map(BookPreviewResponseDto::toBookPreviewResponseDto)
+                .toList();
+    }
 }
