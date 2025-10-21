@@ -69,8 +69,14 @@ public class BookService {
 
     // 책 이름으로 검색
     public List<BookPreviewResponseDto> searchBooks(String bookname) {
+        if (bookname == null || bookname.isBlank()) {
+            return List.of();
+        }
         // 검색어에서 띄어쓰기 제거
         String searchKeyword = bookname.replaceAll("\\s+", "");
+        if (searchKeyword.isEmpty()) {
+            return List.of();
+        }
         List<BookPreviewDto> books = bookRepository.findByBookNameContaining(searchKeyword);
         return books.stream()
                 .map(BookPreviewResponseDto::toBookPreviewResponseDto)

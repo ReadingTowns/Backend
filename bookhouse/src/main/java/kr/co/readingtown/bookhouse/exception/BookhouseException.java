@@ -76,8 +76,8 @@ public class BookhouseException extends CustomException {
         }
     }
 
-    public static class AlreadyExistsBook extends BookhouseException {
-        public AlreadyExistsBook() {
+    public static class BookAlreadyExists extends BookhouseException {
+        public BookAlreadyExists() {
             super(BookhouseErrorCode.BOOK_ALREADY_EXISTS);
         }
     }

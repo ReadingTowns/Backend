@@ -59,7 +59,7 @@ public class BookhouseService {
 
         // 이미 등록된 책인지 확인
         if (bookhouseRepository.existsByMemberIdAndBookId(memberId, bookId)) {
-            throw new BookhouseException.AlreadyExistsBook();
+            throw new BookhouseException.BookAlreadyExists();
         }
 
         Bookhouse newBookhouse = Bookhouse.builder()
