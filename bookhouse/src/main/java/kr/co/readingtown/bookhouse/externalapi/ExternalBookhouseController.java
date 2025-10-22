@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.co.readingtown.bookhouse.dto.request.BookInfoRequestDto;
 import kr.co.readingtown.bookhouse.dto.response.BookPreviewResponseDto;
+import kr.co.readingtown.bookhouse.dto.response.BookhouseOwnerResponseDto;
+import kr.co.readingtown.bookhouse.dto.response.BookhouseSearchResponseDto;
 import kr.co.readingtown.bookhouse.service.BookhouseService;
 import kr.co.readingtown.common.response.PageResponse;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,15 @@ public class ExternalBookhouseController {
             @RequestBody BookInfoRequestDto bookInfoRequestDto) {
 
         bookhouseService.addBooksToBookhouse(memberId, bookInfoRequestDto);
+    }
+
+    @PostMapping("/books/{bookId}")
+    @Operation(summary = "서재에 책 추가 (bookId)", description = "bookId를 사용하여 현재 로그인한 회원의 서재에 책을 추가합니다.")
+    public void addBooksToBookhouseByBookId(
+            @PathVariable Long bookId,
+            @AuthenticationPrincipal Long memberId) {
+
+        bookhouseService.addBooksToBookhouseByBookId(memberId, bookId);
     }
 
     @DeleteMapping("/books/{bookId}")
@@ -58,4 +69,21 @@ public class ExternalBookhouseController {
         return bookhouseService.getBookhouseBooks(memberId, page, size);
     }
 
+    @GetMapping("/books/search")
+    @Operation(summary = "서재에 등록된 책 검색", description = "사용자가 입력한 내용으로 서재에 등록된 책들을 검색합니다.")
+    public List<BookhouseSearchResponseDto> searchBooksInBookhouse(
+            @RequestParam("bookname") String bookname,
+            @AuthenticationPrincipal Long memberId) {
+        
+        return bookhouseService.searchBooksInBookhouse(bookname, memberId);
+    }
+
+    @GetMapping("/books/{bookId}")
+    @Operation(summary = "특정 책을 가진 서재 리스트 조회", description = "특정 책을 서재에 등록한 사용자들의 정보를 조회합니다.")
+    public List<BookhouseOwnerResponseDto> getMembersBookhouseByBookId(
+            @PathVariable Long bookId,
+            @AuthenticationPrincipal Long memberId) {
+        
+        return bookhouseService.getBookhousesByBookId(bookId, memberId);
+    }
 }

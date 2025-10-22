@@ -27,4 +27,8 @@ public class BookReader {
 
         return bookClient.saveIfNotExistsAndGetBookId(bookInfoRequestDto);
     }
+
+    public boolean existsBook(Long bookId) {
+        return bookClient.existsBook(bookId);
+    }
 }
