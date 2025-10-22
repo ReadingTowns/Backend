@@ -22,7 +22,7 @@ public interface BookClient {
     @PostMapping("/internal/books")
     Long saveIfNotExistsAndGetBookId(@RequestBody BookInfoRequestDto bookInfoRequestDto);
 
-    @GetMapping("/internal/books/{bookId}/validate")
-    void validateBookExists(@PathVariable Long bookId);
+    @GetMapping("/internal/books/{bookId}/exists")
+    boolean existsBook(@PathVariable Long bookId);
 
 }

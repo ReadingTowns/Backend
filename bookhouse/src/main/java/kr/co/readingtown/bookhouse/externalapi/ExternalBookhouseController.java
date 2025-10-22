@@ -72,9 +72,10 @@ public class ExternalBookhouseController {
     @GetMapping("/books/search")
     @Operation(summary = "서재에 등록된 책 검색", description = "사용자가 입력한 내용으로 서재에 등록된 책들을 검색합니다.")
     public List<BookhouseSearchResponseDto> searchBooksInBookhouse(
-            @RequestParam("bookname") String bookname) {
+            @RequestParam("bookname") String bookname,
+            @AuthenticationPrincipal Long memberId) {
         
-        return bookhouseService.searchBooksInBookhouse(bookname);
+        return bookhouseService.searchBooksInBookhouse(bookname, memberId);
     }
 
     @GetMapping("/books/{bookId}")

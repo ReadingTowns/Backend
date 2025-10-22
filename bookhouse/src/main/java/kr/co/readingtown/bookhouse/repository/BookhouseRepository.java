@@ -40,12 +40,14 @@ public interface BookhouseRepository extends JpaRepository<Bookhouse, Long> {
     )
     FROM Bookhouse bh
     JOIN Book b ON bh.bookId = b.bookId
-    WHERE LOWER(b.bookName) LIKE LOWER(CONCAT('%', :keyword, '%'))
-       OR LOWER(b.author) LIKE LOWER(CONCAT('%', :keyword, '%'))
-       OR LOWER(b.publisher) LIKE LOWER(CONCAT('%', :keyword, '%'))
+    WHERE (REPLACE(LOWER(b.bookName), ' ', '') LIKE LOWER(CONCAT('%', :keyword, '%'))
+       OR REPLACE(LOWER(b.author), ' ', '') LIKE LOWER(CONCAT('%', :keyword, '%'))
+       OR REPLACE(LOWER(b.publisher), ' ', '') LIKE LOWER(CONCAT('%', :keyword, '%')))
+       AND (:excludeMemberId IS NULL OR bh.memberId != :excludeMemberId)
     ORDER BY bh.createdAt DESC
     """)
-    List<BookhouseSearchResponseDto> searchBooksInBookhouse(@Param("keyword") String keyword);
+    List<BookhouseSearchResponseDto> searchBooksInBookhouse(@Param("keyword") String keyword,
+                                                            @Param("excludeMemberId") Long excludeMemberId);
 
     List<Bookhouse> findAllByBookIdOrderByCreatedAtDesc(Long bookId);
 

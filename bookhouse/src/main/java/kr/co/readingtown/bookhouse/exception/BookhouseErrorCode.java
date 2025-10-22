@@ -29,7 +29,8 @@ public enum BookhouseErrorCode implements ErrorCode {
     INVALID_EXCHANGE_STATUS_FOR_REQUEST(7025, "예약 또는 교환 중인 책이라 교환 요청이 불가합니다."),
     
     //서재 책 관련
-    BOOK_ALREADY_EXISTS(7031, "이미 서재에 등록된 책입니다.");
+    BOOK_ALREADY_EXISTS(7031, "이미 서재에 등록된 책입니다."),
+    BOOK_NOT_FOUND(7032, "존재하지 않는 책입니다.");
 
     private final int errorCode;
     private final String errorMessage;

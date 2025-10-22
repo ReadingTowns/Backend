@@ -54,8 +54,10 @@ public class BookhouseService {
     @Transactional
     public void addBooksToBookhouseByBookId(Long memberId, Long bookId) {
         
-        // 책이 존재하는지 확인 (BookReader에서 예외 발생)
-        bookReader.validateBookExists(bookId);
+        // 책이 존재하는지 확인
+        if (!bookReader.existsBook(bookId)) {
+            throw new BookhouseException.BookNotFound();
+        }
 
         // 이미 등록된 책인지 확인
         if (bookhouseRepository.existsByMemberIdAndBookId(memberId, bookId)) {
@@ -171,12 +173,14 @@ public class BookhouseService {
     }
 
     // 키워드로 Bookhouse에 등록된 책 검색
-    public List<BookhouseSearchResponseDto> searchBooksInBookhouse(String keyword) {
+    public List<BookhouseSearchResponseDto> searchBooksInBookhouse(String keyword, Long currentMemberId) {
         if (keyword == null || keyword.trim().isEmpty()) {
             return List.of();
         }
         
-        return bookhouseRepository.searchBooksInBookhouse(keyword.trim());
+        // 검색 키워드에서 띄어쓰기 제거
+        String normalizedKeyword = keyword.trim().replace(" ", "");
+        return bookhouseRepository.searchBooksInBookhouse(normalizedKeyword, currentMemberId);
     }
 
     // 특정 책을 가진 서재 리스트 조회
