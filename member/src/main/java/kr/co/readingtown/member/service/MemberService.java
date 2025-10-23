@@ -77,6 +77,25 @@ public class MemberService {
         return ChatProfileResponseDto.of(member);
     }
 
+    public Map<Long, MemberProfileResponseDto> getMembersProfile(List<Long> memberIds) {
+        
+        if (memberIds == null || memberIds.isEmpty()) {
+            return Map.of();
+        }
+        
+        List<Member> members = memberRepository.findAllById(memberIds);
+        
+        return members.stream()
+                .collect(Collectors.toMap(
+                        Member::getMemberId,
+                        member -> new MemberProfileResponseDto(
+                                member.getNickname(),
+                                member.getProfileImage(),
+                                member.getUserRating()
+                        )
+                ));
+    }
+
     public boolean isOnboardingCompleted(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(MemberException.NoAuthMember::new);
@@ -372,10 +391,10 @@ public class MemberService {
         // 2) 대상 회원 프로필 일괄 조회
         List<Member> members = memberRepository.findAllById(followerIds);
 
-        // 3) 내가 팔로우하는 ID 목록 조회
-        List<Long> followingIds = followClient.getFollowingIds(memberId);
-        Set<Long> followingSet = new HashSet<>(followingIds);
-
+        // 3) 내가 팔로우하는지 여부 확인 (bulk)
+        Map<Long, Boolean> followMap = followClient.isFollowingBulk(
+                new FollowBulkCheckRequestDto(memberId, followerIds));
+        
         // 4) 요청 순서 유지하여 DTO 매핑
         Map<Long, Member> byId = members.stream()
                 .collect(Collectors.toMap(Member::getMemberId, m -> m));
@@ -388,7 +407,7 @@ public class MemberService {
                     .memberId(m.getMemberId())
                     .nickname(m.getNickname())
                     .profileImage(m.getProfileImage())
-                    .following(followingSet.contains(id))
+                    .isFollowing(followMap.getOrDefault(m.getMemberId(), false))
                     .build());
         }
         return result;

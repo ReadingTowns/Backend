@@ -1,6 +1,5 @@
 package kr.co.readingtown.bookhouse.internalapi;
 
-import kr.co.readingtown.bookhouse.dto.request.ChatRequestDto;
 import kr.co.readingtown.bookhouse.dto.response.ExchangedBookResponse;
 import kr.co.readingtown.bookhouse.dto.response.ExchangingBookResponse;
 import kr.co.readingtown.bookhouse.service.BookhouseService;

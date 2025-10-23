@@ -39,4 +39,9 @@ public class InternalBookController {
 
         return bookService.getBookNameAndImage(bookId);
     }
+
+    @GetMapping("/{bookId}/validate")
+    public void validateBookExists(@PathVariable Long bookId) {
+        bookService.validateBookExists(bookId);
+    }
 }

@@ -16,5 +16,8 @@ server:
 ai:
   server-uri: ${AI_SERVER_URI}
 
+youtube:
+  key: ${YOUTUBE_KEY}
+
 cors:
   allowed-origins: http://localhost:3000, https://readingtown.site, https://dev.readingtown.site
