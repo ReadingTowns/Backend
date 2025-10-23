@@ -74,7 +74,6 @@ public class WebsocketHandler extends TextWebSocketHandler {
         // 프론트에게 전달할 JSON 생성
         ObjectNode broadcastMsg = objectMapper.createObjectNode();
         broadcastMsg.put("senderId", senderId);
-        broadcastMsg.put("senderId", "sender id");
         broadcastMsg.put("message", chatMessage);
 
         // DB에 메시지 저장
