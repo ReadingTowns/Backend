@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.co.readingtown.member.dto.request.KeywordRequest;
 import kr.co.readingtown.member.dto.response.KeywordDetailResponse;
 import kr.co.readingtown.member.dto.response.KeywordResponse;
+import kr.co.readingtown.member.dto.response.YoutubeSearchResponse;
 import kr.co.readingtown.member.service.KeywordService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -42,5 +43,11 @@ public class ExternalKeywordController {
             @AuthenticationPrincipal Long memberId) {
 
         return keywordService.getMemberKeywords(memberId);
+    }
+
+    @GetMapping("/video")
+    public List<YoutubeSearchResponse> searchVideo(@RequestParam(name = "keyword") String keyword) {
+
+        return keywordService.searchVideo(keyword);
     }
 }
