@@ -63,24 +63,22 @@ public class WebsocketHandler extends TextWebSocketHandler {
         // 세션에 방 ID 등록
         sessionRoomMap.put(session, roomId);
 
-        // sender 가져오기 + TODO: 리플렉션 공부
-//        Long senderId = null;
-//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//        Object principal = auth.getPrincipal();
-//        try {
-//            senderId = (Long) principal.getClass().getMethod("getId").invoke(principal);
-//        } catch (Exception e) {
-//            log.warn("[SecurityContextHolder] principal 에서 user id 추출 실패: {}", e.getMessage());
-//        }
-//
+        // 사용자 정보 추출
+        Long senderId = (Long) session.getAttributes().get("memberId");
+        if (senderId == null) {
+            log.warn("인증되지 않은 사용자");
+            session.close(CloseStatus.POLICY_VIOLATION);
+            return;
+        }
+
         // 프론트에게 전달할 JSON 생성
         ObjectNode broadcastMsg = objectMapper.createObjectNode();
-//        broadcastMsg.put("senderId", senderId);
+        broadcastMsg.put("senderId", senderId);
         broadcastMsg.put("senderId", "sender id");
         broadcastMsg.put("message", chatMessage);
-//
-//        // DB에 메시지 저장
-//        chatService.saveChatMessage(senderId, roomId, chatMessage);
+
+        // DB에 메시지 저장
+        chatService.saveChatMessage(senderId, roomId, chatMessage);
 
         // 같은 방 세션에게만 전송
         for (WebSocketSession s : chatRooms.get(roomId)) {
