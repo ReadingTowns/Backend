@@ -11,7 +11,6 @@ public record LocalMemberRecommendationDto(
     String currentTown,
     Double userRating,
     String distance,
-    Double distanceKm,
     String availableTime
 ) {
     public static LocalMemberRecommendationDto from(Member member, double distanceKm) {
@@ -24,7 +23,6 @@ public record LocalMemberRecommendationDto(
                 .currentTown(member.getCurrentTown())
                 .userRating(member.getUserRating())
                 .distance(distanceText)
-                .distanceKm(distanceKm)
                 .availableTime(member.getAvailableTime())
                 .build();
     }
