@@ -1,6 +1,6 @@
 package kr.co.readingtown.member.integration.bookhouse;
 
-import kr.co.readingtown.member.dto.request.FollowBulkCheckRequestDto;
+import kr.co.readingtown.member.dto.request.internal.FollowBulkCheckRequestDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 

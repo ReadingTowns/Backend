@@ -1,18 +1,14 @@
 package kr.co.readingtown.member.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.*;
 
-@Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
-public class UpdateProfileRequestDto {
+public record UpdateProfileRequestDto(
     @NotBlank
-    private String nickname;
+    String nickname,
 
     @NotBlank
-    private String profileImage;
+    String profileImage,
 
-    private String availableTime;
+    String availableTime
+) {
 }

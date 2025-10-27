@@ -1,6 +1,7 @@
 package kr.co.readingtown.member.service;
 
 import kr.co.readingtown.common.config.AppProperties;
+import kr.co.readingtown.member.dto.request.internal.FollowBulkCheckRequestDto;
 import kr.co.readingtown.member.integration.bookhouse.FollowClient;
 import kr.co.readingtown.member.domain.Member;
 import kr.co.readingtown.member.domain.enums.LoginType;
@@ -111,18 +112,18 @@ public class MemberService {
 
         // 카카오 API로 동네명 해석
         String currentTown = locationService.resolveTown(
-                onboardingRequestDto.getLongitude(),
-                onboardingRequestDto.getLatitude()
+                onboardingRequestDto.longitude(),
+                onboardingRequestDto.latitude()
         );
 
         member.completeOnboarding(
-                onboardingRequestDto.getPhoneNumber(),
+                onboardingRequestDto.phoneNumber(),
                 currentTown,
-                onboardingRequestDto.getLongitude(), //경도
-                onboardingRequestDto.getLatitude(), //위도
-                onboardingRequestDto.getNickname(),
-                onboardingRequestDto.getProfileImage(),
-                onboardingRequestDto.getAvailableTime()
+                onboardingRequestDto.longitude(), //경도
+                onboardingRequestDto.latitude(), //위도
+                onboardingRequestDto.nickname(),
+                onboardingRequestDto.profileImage(),
+                onboardingRequestDto.availableTime()
         );
     }
 
@@ -184,16 +185,16 @@ public class MemberService {
         memberRepository.findById(fromMemberId)
                 .orElseThrow(MemberException.NoAuthMember::new);
 
-        Member member = memberRepository.findById(starRatingRequestDto.getMemberId())
+        Member member = memberRepository.findById(starRatingRequestDto.memberId())
                 .orElseThrow(MemberException.NotFoundMember::new);
 
         // 자기 자신을 평가하는 경우 예외 처리 (선택적)
-        if (fromMemberId.equals(starRatingRequestDto.getMemberId())) {
+        if (fromMemberId.equals(starRatingRequestDto.memberId())) {
             throw new MemberException.SelfRatingNotAllowed();
         }
 
         // 평점 추가
-        member.addStarRating(starRatingRequestDto.getStarRating());
+        member.addStarRating(starRatingRequestDto.starRating());
         memberRepository.save(member);
 
         return true;
@@ -206,9 +207,9 @@ public class MemberService {
                 .orElseThrow(MemberException.NoAuthMember::new);
 
         member.updateProfile(
-                updateProfileRequestDto.getNickname(),
-                updateProfileRequestDto.getProfileImage(),
-                updateProfileRequestDto.getAvailableTime()
+                updateProfileRequestDto.nickname(),
+                updateProfileRequestDto.profileImage(),
+                updateProfileRequestDto.availableTime()
         );
     }
 
@@ -252,16 +253,16 @@ public class MemberService {
                 .orElseThrow(MemberException.NoAuthMember::new);
 
         // 범위 검증 (-90~90, -180~180)
-        double lat = updateTownRequestDto.getLatitude().doubleValue();
-        double lon = updateTownRequestDto.getLongitude().doubleValue();
+        double lat = updateTownRequestDto.latitude().doubleValue();
+        double lon = updateTownRequestDto.longitude().doubleValue();
         if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
             throw new MemberException.TownResolvedFailed();
         }
 
         // 경위도 -> 동네명
-        String currentTown = locationService.resolveTown(updateTownRequestDto.getLongitude(), updateTownRequestDto.getLatitude());
+        String currentTown = locationService.resolveTown(updateTownRequestDto.longitude(), updateTownRequestDto.latitude());
 
-        member.updateTown(updateTownRequestDto.getLongitude(), updateTownRequestDto.getLatitude(), currentTown);
+        member.updateTown(updateTownRequestDto.longitude(), updateTownRequestDto.latitude(), currentTown);
         return currentTown;
     }
     
