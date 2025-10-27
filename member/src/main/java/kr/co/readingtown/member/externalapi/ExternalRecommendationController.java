@@ -4,12 +4,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.co.readingtown.member.dto.response.LocalMemberRecommendationDto;
 import kr.co.readingtown.member.dto.response.SimilarMemberRecommendationDto;
+import kr.co.readingtown.member.dto.response.YoutubeSearchResponse;
 import kr.co.readingtown.member.dto.response.ai.BookRecommendationResponseDto;
 import kr.co.readingtown.member.service.RecommendationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -39,5 +41,11 @@ public class ExternalRecommendationController {
     @Operation(summary = "취향 기반 추천 유저 조회", description = "비슷한 취향을 가진 유저 10명을 추천합니다.")
     public List<SimilarMemberRecommendationDto> getSimilarMemberRecommendations(@AuthenticationPrincipal Long memberId) {
         return recommendationService.recommendSimilarMembers(memberId);
+    }
+
+    @GetMapping("/video")
+    public List<YoutubeSearchResponse> searchVideo(@RequestParam(name = "keyword") String keyword) {
+
+        return recommendationService.searchVideo(keyword);
     }
 }

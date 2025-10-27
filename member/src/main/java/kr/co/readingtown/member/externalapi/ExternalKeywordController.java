@@ -44,10 +44,4 @@ public class ExternalKeywordController {
 
         return keywordService.getMemberKeywords(memberId);
     }
-
-    @GetMapping("/video")
-    public List<YoutubeSearchResponse> searchVideo(@RequestParam(name = "keyword") String keyword) {
-
-        return keywordService.searchVideo(keyword);
-    }
 }

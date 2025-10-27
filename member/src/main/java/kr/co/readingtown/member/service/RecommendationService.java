@@ -2,9 +2,12 @@ package kr.co.readingtown.member.service;
 
 import kr.co.readingtown.member.client.AiRecommendClient;
 import kr.co.readingtown.member.client.BookhouseClient;
+import kr.co.readingtown.member.client.YoutubeSearchClient;
 import kr.co.readingtown.member.domain.Member;
 import kr.co.readingtown.member.dto.response.LocalMemberRecommendationDto;
 import kr.co.readingtown.member.dto.response.SimilarMemberRecommendationDto;
+import kr.co.readingtown.member.dto.response.YoutubeSearchResponse;
+import kr.co.readingtown.member.dto.response.YoutubeSearchedData;
 import kr.co.readingtown.member.dto.response.ai.BookRecommendation;
 import kr.co.readingtown.member.dto.response.ai.BookRecommendationResponseDto;
 import kr.co.readingtown.member.dto.response.ai.UserRecommendation;
@@ -14,6 +17,7 @@ import kr.co.readingtown.member.repository.KeywordRepository;
 import kr.co.readingtown.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +37,10 @@ public class RecommendationService {
     private final AiRecommendClient aiRecommendClient;
     private final KeywordRepository keywordRepository;
     private final MemberRepository memberRepository;
+    private final YoutubeSearchClient youtubeSearchClient;
+
+    @Value("${youtube.key}")
+    private String apiKey;
 
     /**
      * 유저 서재에 있는 책 id 리스트
@@ -174,5 +182,30 @@ public class RecommendationService {
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         
         return R * c;
+    }
+
+    /*
+    입력한 키워드 바탕으로 유튜브 영상 10개 반환
+     */
+    public List<YoutubeSearchResponse> searchVideo(String keyword) {
+
+        String searchString = keyword + "관련 책 추천";
+
+        YoutubeSearchedData response = youtubeSearchClient.searchVideos(
+                "snippet",
+                searchString,
+                "video",
+                10,
+                "KR",
+                apiKey
+        );
+
+        return response.items().stream()
+                .map(item -> new YoutubeSearchResponse(
+                        item.snippet().title(),
+                        "https://www.youtube.com/watch?v=" + item.id().videoId(),
+                        item.snippet().thumbnails().defaultThumbnail().url()
+                ))
+                .collect(Collectors.toList());
     }
 }

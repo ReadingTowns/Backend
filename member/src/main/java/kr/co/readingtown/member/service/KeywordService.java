@@ -30,11 +30,7 @@ public class KeywordService {
 
     private final MemberRepository memberRepository;
     private final KeywordRepository keywordRepository;
-    private final YoutubeSearchClient youtubeSearchClient;
     private final MemberKeywordRepository memberKeywordRepository;
-
-    @Value("${youtube.key}")
-    private String apiKey;
 
     // 키워드 후보지 조회
     public KeywordResponse getKeyword() {
@@ -87,29 +83,6 @@ public class KeywordService {
             responses.add(new KeywordDetailResponse(keywordId, keyword.getContent()));
         }
         return responses;
-    }
-
-    // 선택한 키워드 바탕으로 유튜브 영상 조회
-    public List<YoutubeSearchResponse> searchVideo(String keyword) {
-
-        String searchString = keyword + "관련 책 추천";
-
-        YoutubeSearchedData response = youtubeSearchClient.searchVideos(
-                "snippet",
-                searchString,
-                "video",
-                10,
-                "KR",
-                apiKey
-        );
-
-        return response.items().stream()
-                .map(item -> new YoutubeSearchResponse(
-                        item.snippet().title(),
-                        "https://www.youtube.com/watch?v=" + item.id().videoId(),
-                        item.snippet().thumbnails().defaultThumbnail().url()
-                ))
-                .collect(Collectors.toList());
     }
 
 }
