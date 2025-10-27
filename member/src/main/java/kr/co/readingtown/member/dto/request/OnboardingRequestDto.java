@@ -3,10 +3,11 @@ package kr.co.readingtown.member.dto.request;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public record OnboardingRequestDto(
 
-    @NotBlank(message = "전화번호는 필수입니다.") //Todo 패턴 정하기
+    @NotBlank(message = "전화번호는 필수입니다.")
     String phoneNumber,
 
     @NotNull(message = "현재 경도는 필수입니다.")
@@ -25,6 +26,8 @@ public record OnboardingRequestDto(
     @NotBlank(message = "프로필 이미지는 필수입니다.")
     String profileImage,
 
-    String availableTime
+    String availableTime,
+
+    List<Long> keywordIdList
 ) {
 }

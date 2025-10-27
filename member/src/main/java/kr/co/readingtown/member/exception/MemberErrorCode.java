@@ -19,7 +19,9 @@ public enum MemberErrorCode implements ErrorCode {
 
     SELF_RATING_NOT_ALLOWED(4020, "본인에게 유저 평가는 남길 수 없습니다."),
 
-    TOWN_RESOLVED_FAILED(4030, "위치 정보를 해석할 수 없습니다.");
+    TOWN_RESOLVED_FAILED(4030, "위치 정보를 해석할 수 없습니다."),
+    
+    INVALID_KEYWORD(4040, "유효하지 않은 키워드 ID가 포함되어 있습니다.");
   
     private final int errorCode;
     private final String errorMessage;

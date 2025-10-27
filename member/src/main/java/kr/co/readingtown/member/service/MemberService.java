@@ -6,10 +6,13 @@ import kr.co.readingtown.member.integration.bookhouse.FollowClient;
 import kr.co.readingtown.member.domain.Member;
 import kr.co.readingtown.member.domain.enums.LoginType;
 
+import kr.co.readingtown.member.domain.MemberKeyword;
 import kr.co.readingtown.member.dto.query.MemberIdNameDto;
 import kr.co.readingtown.member.dto.request.*;
 import kr.co.readingtown.member.dto.response.*;
 import kr.co.readingtown.member.exception.MemberException;
+import kr.co.readingtown.member.repository.KeywordRepository;
+import kr.co.readingtown.member.repository.MemberKeywordRepository;
 import kr.co.readingtown.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,6 +28,8 @@ import java.util.stream.Collectors;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final MemberKeywordRepository memberKeywordRepository;
+    private final KeywordRepository keywordRepository;
     private final AppProperties appProperties;
     private final LocationService locationService;
     private final FollowClient followClient;
@@ -125,6 +130,29 @@ public class MemberService {
                 onboardingRequestDto.profileImage(),
                 onboardingRequestDto.availableTime()
         );
+
+        // 키워드 저장
+        if (onboardingRequestDto.keywordIdList() != null && !onboardingRequestDto.keywordIdList().isEmpty()) {
+            // 중복 제거
+            List<Long> uniqueKeywordIds = onboardingRequestDto.keywordIdList().stream()
+                    .distinct()
+                    .toList();
+            
+            // 유효성 검증
+            long validKeywordCount = keywordRepository.countByKeywordIdIn(uniqueKeywordIds);
+            if (validKeywordCount != uniqueKeywordIds.size()) {
+                throw new MemberException.InvalidKeyword();
+            }
+            
+            // 저장
+            List<MemberKeyword> memberKeywords = uniqueKeywordIds.stream()
+                    .map(keywordId -> MemberKeyword.builder()
+                            .memberId(memberId)
+                            .keywordId(keywordId)
+                            .build())
+                    .toList();
+            memberKeywordRepository.saveAll(memberKeywords);
+        }
     }
 
     public DefaultProfileResponseDto getDefaultProfile(Long memberId) {
