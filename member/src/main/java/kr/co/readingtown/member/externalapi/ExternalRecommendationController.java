@@ -16,26 +16,26 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/members")
+@RequestMapping("/api/v1/recommendations")
 @Tag(name = "Member Recommendation API", description = "회원 추천 관련 API")
 public class ExternalRecommendationController {
 
     private final RecommendationService recommendationService;
 
-    @GetMapping("/recommendations/books")
+    @GetMapping("/books")
     @Operation(summary = "추천 도서 조회", description = "회원의 서재 책 기반으로 추천된 도서를 조회합니다.")
     public List<BookRecommendationResponseDto> recommendBooks(@AuthenticationPrincipal Long memberId) {
 
         return recommendationService.recommendBooks(memberId);
     }
 
-    @GetMapping("/recommendations/local-members")
+    @GetMapping("/local-members")
     @Operation(summary = "동네 기반 추천 유저 조회", description = "위치 기반으로 가까운 유저 10명을 추천합니다.")
     public List<LocalMemberRecommendationDto> getLocalMemberRecommendations(@AuthenticationPrincipal Long memberId) {
         return recommendationService.recommendLocalMembers(memberId);
     }
 
-    @GetMapping("/recommendations/similar-members")
+    @GetMapping("/similar-members")
     @Operation(summary = "취향 기반 추천 유저 조회", description = "비슷한 취향을 가진 유저 10명을 추천합니다.")
     public List<SimilarMemberRecommendationDto> getSimilarMemberRecommendations(@AuthenticationPrincipal Long memberId) {
         return recommendationService.recommendSimilarMembers(memberId);
