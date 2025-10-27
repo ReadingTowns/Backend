@@ -9,7 +9,11 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Table(name = "member_keywords")
+@Table(name = "member_keywords",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"member_id", "keyword_id"})
+    }
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MemberKeyword extends BaseEntity {
 
