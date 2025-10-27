@@ -139,7 +139,7 @@ public class MemberService {
                     .toList();
             
             // 유효성 검증
-            long validKeywordCount = keywordRepository.countByIdIn(uniqueKeywordIds);
+            long validKeywordCount = keywordRepository.countByKeywordIdIn(uniqueKeywordIds);
             if (validKeywordCount != uniqueKeywordIds.size()) {
                 throw new MemberException.InvalidKeyword();
             }
