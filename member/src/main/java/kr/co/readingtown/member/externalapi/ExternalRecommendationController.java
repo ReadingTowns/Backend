@@ -2,17 +2,14 @@ package kr.co.readingtown.member.externalapi;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import kr.co.readingtown.member.dto.response.LocalMemberRecommendationDto;
-import kr.co.readingtown.member.dto.response.SimilarMemberRecommendationDto;
-import kr.co.readingtown.member.dto.response.YoutubeSearchResponse;
+import kr.co.readingtown.member.domain.enums.KeywordType;
+import kr.co.readingtown.member.dto.request.KeywordRequest;
+import kr.co.readingtown.member.dto.response.*;
 import kr.co.readingtown.member.dto.response.ai.BookRecommendationResponseDto;
 import kr.co.readingtown.member.service.RecommendationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -44,8 +41,33 @@ public class ExternalRecommendationController {
     }
 
     @GetMapping("/video")
+    @Operation(summary = "키워드 기반 유튜브 영상 조회", description = "사용자가 입력한 키워드 기반으로 유튜브 영상 10개를 반환해줍니다.")
     public List<YoutubeSearchResponse> searchVideo(@RequestParam(name = "keyword") String keyword) {
 
         return recommendationService.searchVideo(keyword);
+    }
+
+    @GetMapping("/members/keywords")
+    @Operation(summary = "키워드 후보지 조회", description = "선택할 키워드 후보지를 조회합니다.")
+    public KeywordResponse getKeyword() {
+
+        return recommendationService.getKeyword();
+    }
+
+    @PutMapping("/members/keywords")
+    @Operation(summary = "사용자 키워드 수정", description = "사용자가 키워드를 수정합니다.")
+    public void updateMemberKeyword(
+            @AuthenticationPrincipal Long memberId,
+            @RequestBody KeywordRequest keywordRequest) {
+
+        recommendationService.updateKeyword(memberId, keywordRequest);
+    }
+
+    @GetMapping("/members/me/keywords")
+    @Operation(summary = "사용자의 키워드 조회", description = "사용자가 선택한 키워드를 조회합니다.")
+    public List<KeywordDetailResponse> getMemberKeywords(
+            @AuthenticationPrincipal Long memberId) {
+
+        return recommendationService.getMemberKeywords(memberId);
     }
 }
