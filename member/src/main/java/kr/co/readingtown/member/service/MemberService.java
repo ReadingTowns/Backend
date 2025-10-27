@@ -11,6 +11,7 @@ import kr.co.readingtown.member.dto.query.MemberIdNameDto;
 import kr.co.readingtown.member.dto.request.*;
 import kr.co.readingtown.member.dto.response.*;
 import kr.co.readingtown.member.exception.MemberException;
+import kr.co.readingtown.member.repository.KeywordRepository;
 import kr.co.readingtown.member.repository.MemberKeywordRepository;
 import kr.co.readingtown.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final MemberKeywordRepository memberKeywordRepository;
+    private final KeywordRepository keywordRepository;
     private final AppProperties appProperties;
     private final LocationService locationService;
     private final FollowClient followClient;
@@ -131,7 +133,19 @@ public class MemberService {
 
         // 키워드 저장
         if (onboardingRequestDto.keywordIdList() != null && !onboardingRequestDto.keywordIdList().isEmpty()) {
-            List<MemberKeyword> memberKeywords = onboardingRequestDto.keywordIdList().stream()
+            // 중복 제거
+            List<Long> uniqueKeywordIds = onboardingRequestDto.keywordIdList().stream()
+                    .distinct()
+                    .toList();
+            
+            // 유효성 검증
+            long validKeywordCount = keywordRepository.countByIdIn(uniqueKeywordIds);
+            if (validKeywordCount != uniqueKeywordIds.size()) {
+                throw new MemberException.InvalidKeyword();
+            }
+            
+            // 저장
+            List<MemberKeyword> memberKeywords = uniqueKeywordIds.stream()
                     .map(keywordId -> MemberKeyword.builder()
                             .memberId(memberId)
                             .keywordId(keywordId)

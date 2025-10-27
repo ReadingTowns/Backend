@@ -16,4 +16,7 @@ public interface KeywordRepository extends JpaRepository<Keyword, Long> {
     WHERE mk.memberId = :memberId
     """)
     List<String> findContentsByMemberId(@Param("memberId") Long memberId);
+    
+    @Query("SELECT COUNT(k) FROM Keyword k WHERE k.keywordId IN :ids")
+    long countByIdIn(@Param("ids") List<Long> ids);
 }
