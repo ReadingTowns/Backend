@@ -2,6 +2,8 @@ package kr.co.readingtown.member.externalapi;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kr.co.readingtown.member.dto.response.LocalMemberRecommendationDto;
+import kr.co.readingtown.member.dto.response.SimilarMemberRecommendationDto;
 import kr.co.readingtown.member.dto.response.ai.BookRecommendationResponseDto;
 import kr.co.readingtown.member.service.RecommendationService;
 import lombok.RequiredArgsConstructor;
@@ -27,9 +29,15 @@ public class ExternalRecommendationController {
         return recommendationService.recommendBooks(memberId);
     }
 
-    @GetMapping("/recommendations/members")
-    @Operation(summary = "추천 유저 조회", description = "회원의 서재 책 기반으로 비슷한 책을 가진 유저를 조회합니다.")
-    public void recommendMembers() {
+    @GetMapping("/recommendations/local-members")
+    @Operation(summary = "동네 기반 추천 유저 조회", description = "위치 기반으로 가까운 유저 10명을 추천합니다.")
+    public List<LocalMemberRecommendationDto> getLocalMemberRecommendations(@AuthenticationPrincipal Long memberId) {
+        return recommendationService.recommendLocalMembers(memberId);
+    }
 
+    @GetMapping("/recommendations/similar-members")
+    @Operation(summary = "취향 기반 추천 유저 조회", description = "비슷한 취향을 가진 유저 10명을 추천합니다.")
+    public List<SimilarMemberRecommendationDto> getSimilarMemberRecommendations(@AuthenticationPrincipal Long memberId) {
+        return recommendationService.recommendSimilarMembers(memberId);
     }
 }
