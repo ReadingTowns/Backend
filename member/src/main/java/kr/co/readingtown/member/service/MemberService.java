@@ -1,6 +1,7 @@
 package kr.co.readingtown.member.service;
 
 import kr.co.readingtown.common.config.AppProperties;
+import kr.co.readingtown.member.dto.request.internal.FollowBulkCheckRequestDto;
 import kr.co.readingtown.member.integration.bookhouse.FollowClient;
 import kr.co.readingtown.member.domain.Member;
 import kr.co.readingtown.member.domain.enums.LoginType;
