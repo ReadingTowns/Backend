@@ -16,7 +16,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/recommendations")
-@Tag(name = "Member Recommendation API", description = "회원 추천 관련 API")
+@Tag(name = "Recommendation API", description = "회원 추천 관련 API")
 public class ExternalRecommendationController {
 
     private final RecommendationService recommendationService;
