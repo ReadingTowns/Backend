@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface KeywordRepository extends JpaRepository<Keyword, Long> {
@@ -16,4 +17,6 @@ public interface KeywordRepository extends JpaRepository<Keyword, Long> {
     WHERE mk.memberId = :memberId
     """)
     List<String> findContentsByMemberId(@Param("memberId") Long memberId);
+    
+    long countByKeywordIdIn(Collection<Long> ids);
 }

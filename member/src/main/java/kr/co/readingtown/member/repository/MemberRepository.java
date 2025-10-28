@@ -33,4 +33,13 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     WHERE m.memberId IN :memberIds
     """)
     List<MemberIdNameDto> findIdAndNameByIdIn(@Param("memberIds") List<Long> memberIds);
+    
+    @Query("""
+    SELECT m
+    FROM Member m
+    WHERE m.latitude IS NOT NULL 
+    AND m.longitude IS NOT NULL
+    AND m.isOnboarded = true
+    """)
+    List<Member> findAllWithLocation();
 }
