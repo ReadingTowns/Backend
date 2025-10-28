@@ -2,23 +2,31 @@ package kr.co.readingtown.member.service;
 
 import kr.co.readingtown.member.client.AiRecommendClient;
 import kr.co.readingtown.member.client.BookhouseClient;
+import kr.co.readingtown.member.client.YoutubeSearchClient;
+import kr.co.readingtown.member.domain.Keyword;
 import kr.co.readingtown.member.domain.Member;
-import kr.co.readingtown.member.dto.response.LocalMemberRecommendationDto;
-import kr.co.readingtown.member.dto.response.SimilarMemberRecommendationDto;
+import kr.co.readingtown.member.domain.MemberKeyword;
+import kr.co.readingtown.member.domain.enums.KeywordType;
+import kr.co.readingtown.member.dto.request.KeywordRequest;
+import kr.co.readingtown.member.dto.response.*;
 import kr.co.readingtown.member.dto.response.ai.BookRecommendation;
 import kr.co.readingtown.member.dto.response.ai.BookRecommendationResponseDto;
 import kr.co.readingtown.member.dto.response.ai.UserRecommendation;
 import kr.co.readingtown.member.dto.response.ai.UserRecommendationResponse;
+import kr.co.readingtown.member.exception.KeywordException;
 import kr.co.readingtown.member.exception.MemberException;
 import kr.co.readingtown.member.repository.KeywordRepository;
+import kr.co.readingtown.member.repository.MemberKeywordRepository;
 import kr.co.readingtown.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,6 +41,11 @@ public class RecommendationService {
     private final AiRecommendClient aiRecommendClient;
     private final KeywordRepository keywordRepository;
     private final MemberRepository memberRepository;
+    private final YoutubeSearchClient youtubeSearchClient;
+    private final MemberKeywordRepository memberKeywordRepository;
+
+    @Value("${youtube.key}")
+    private String apiKey;
 
     /**
      * 유저 서재에 있는 책 id 리스트
@@ -66,12 +79,14 @@ public class RecommendationService {
         return recommendations.stream()
                 .map(b -> new BookRecommendationResponseDto(
                         b.bookId(),
+                        b.image(),
                         b.bookName(),
                         b.author(),
                         b.publisher(),
                         BigDecimal.valueOf(b.similarity() * 100)
                                 .setScale(1, RoundingMode.HALF_UP)
-                                .doubleValue()
+                                .doubleValue(),
+                        b.relatedUserKeywords()
                 ))
                 .collect(Collectors.toList());
     }
@@ -174,5 +189,103 @@ public class RecommendationService {
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         
         return R * c;
+    }
+
+    /*
+    입력한 키워드 바탕으로 유튜브 영상 10개 반환
+     */
+    public List<YoutubeSearchResponse> searchVideo(String keyword) {
+
+        String searchString = keyword + "관련 책 추천";
+
+        YoutubeSearchedData response = youtubeSearchClient.searchVideos(
+                "snippet",
+                searchString,
+                "video",
+                10,
+                "KR",
+                apiKey
+        );
+
+        return response.items().stream()
+                .map(item -> new YoutubeSearchResponse(
+                        item.snippet().title(),
+                        "https://www.youtube.com/watch?v=" + item.id().videoId(),
+                        item.snippet().thumbnails().defaultThumbnail().url()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 키워드 후보지를 반환합니다.
+     */
+    public KeywordResponse getKeyword() {
+
+        List<Keyword> keywords = keywordRepository.findAll();
+
+        List<KeywordDetailResponse> moodKeywords = extractKeywordByType(keywords, KeywordType.MOOD);
+        List<KeywordDetailResponse> genreKeywords = extractKeywordByType(keywords, KeywordType.GENRE);
+        List<KeywordDetailResponse> contentKeywords = extractKeywordByType(keywords, KeywordType.CONTENT);
+
+        return new KeywordResponse(moodKeywords, genreKeywords, contentKeywords);
+    }
+
+    private List<KeywordDetailResponse> extractKeywordByType(List<Keyword> keywords, KeywordType type) {
+        return keywords.stream()
+                .filter(keyword -> keyword.getType() == type)
+                .map(keyword -> new KeywordDetailResponse(keyword.getKeywordId(), keyword.getContent()))
+                .toList();
+    }
+
+    /**
+     * 사용자가 선택한 키워드 조회
+     */
+    public List<KeywordDetailResponse> getMemberKeywords(Long memberId) {
+
+        List<Long> keywordIds = memberKeywordRepository.findByMemberId(memberId);
+
+        List<KeywordDetailResponse> responses = new ArrayList<>();
+        for(Long keywordId : keywordIds) {
+
+            Keyword keyword = keywordRepository.findById(keywordId)
+                    .orElseThrow(KeywordException.NotFoundKeyword::new);
+            responses.add(new KeywordDetailResponse(keywordId, keyword.getContent()));
+        }
+        return responses;
+    }
+
+    /**
+     * 사용자 키워드 수정
+     */
+    @Transactional
+    public void updateKeyword(Long memberId, KeywordRequest keywordRequest) {
+        // 요청으로 들어온 키워드 id 목록 조회
+        List<Long> requestedKeywordIds = keywordRequest.keywordIds();
+
+        // 현재 DB에 저장된 키워드 목록 조회
+        List<Long> existingKeywordIds = memberKeywordRepository.findByMemberId(memberId);
+
+        // 새로 추가해야 하는 키워드 ID
+        List<Long> toAdd = requestedKeywordIds.stream()
+                .filter(id -> !existingKeywordIds.contains(id))
+                .toList();
+
+        // 삭제해야 하는 키워드 ID
+        List<Long> toRemove = existingKeywordIds.stream()
+                .filter(id -> !requestedKeywordIds.contains(id))
+                .toList();
+
+        // 삭제
+        if (!toRemove.isEmpty()) {
+            memberKeywordRepository.deleteAllByMemberIdAndKeywordIds(memberId, toRemove);
+        }
+
+        // 추가
+        if (!toAdd.isEmpty()) {
+            List<MemberKeyword> newKeywords = toAdd.stream()
+                    .map(keywordId -> new MemberKeyword(memberId, keywordId))
+                    .toList();
+            memberKeywordRepository.saveAll(newKeywords);
+        }
     }
 }
