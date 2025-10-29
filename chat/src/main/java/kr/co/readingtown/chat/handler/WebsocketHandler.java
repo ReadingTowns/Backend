@@ -75,8 +75,17 @@ public class WebsocketHandler extends TextWebSocketHandler {
             return;
         }
 
-        // ✅ 4. 메시지 저장 및 브로드캐스트
-        chatService.saveAndBroadcastMessage(request);
+        // ✅ 4. senderId를 세션에서 가져온 값으로 대체하여 메시지 저장 및 브로드캐스트
+        // 보안: 클라이언트가 보낸 senderId는 무시하고 인증된 사용자 ID 사용
+        ChatMessageRequestDto authenticatedRequest = new ChatMessageRequestDto(
+                request.chatroomId(),
+                senderId,  // 세션에서 가져온 인증된 사용자 ID 사용
+                request.content(),
+                request.messageType() != null ? request.messageType() : MessageType.TEXT,  // 기본값 TEXT
+                request.relatedBookhouseId(),
+                request.relatedExchangeStatusId()
+        );
+        chatService.saveAndBroadcastMessage(authenticatedRequest);
     }
 
     // 소켓 연결 종료
