@@ -6,6 +6,7 @@ import kr.co.readingtown.member.domain.enums.KeywordType;
 import kr.co.readingtown.member.dto.request.KeywordRequest;
 import kr.co.readingtown.member.dto.response.*;
 import kr.co.readingtown.member.dto.response.ai.BookRecommendationResponseDto;
+import kr.co.readingtown.member.dto.response.ai.BertSearchResponseDto;
 import kr.co.readingtown.member.service.RecommendationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -49,7 +50,7 @@ public class ExternalRecommendationController {
 
     @GetMapping("/books/search")
     @Operation(summary = "키워드 기반 추천 책 조회", description = "사용자가 입력한 키워드 기반으로 추천 책 10권을 반환해줍니다.")
-    public List<BookRecommendationResponseDto> searchBooks(@RequestParam(name = "keyword") String keyword) {
+    public BertSearchResponseDto searchBooks(@RequestParam(name = "keyword") String keyword) {
 
         return recommendationService.recommendBooksByKeyword(keyword);
     }

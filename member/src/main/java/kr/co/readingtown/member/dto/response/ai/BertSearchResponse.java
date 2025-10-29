@@ -1,5 +1,6 @@
 package kr.co.readingtown.member.dto.response.ai;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 public record BertSearchResponse(
@@ -8,12 +9,18 @@ public record BertSearchResponse(
         String method
 ) {
     public record BertSearchResult(
+            @JsonProperty("book_id")
             Long bookId,
+            @JsonProperty("book_name")
             String bookName,
             String author,
             String publisher,
+            @JsonProperty("book_image")
             String bookImage,
+            @JsonProperty("similarity_score")
             Double similarity,
-            List<String> matchedKeywords
+            String keywords,
+            @JsonProperty("review_preview")
+            String reviewPreview
     ) {}
 }
