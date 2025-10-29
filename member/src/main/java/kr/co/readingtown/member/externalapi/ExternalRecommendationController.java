@@ -42,14 +42,14 @@ public class ExternalRecommendationController {
     }
 
     @GetMapping("/video")
-    @Operation(summary = "키워드 기반 유튜브 영상 조회", description = "사용자가 입력한 키워드 기반으로 유튜브 영상 10개를 반환해줍니다.")
+    @Operation(summary = "검색 키워드 기반 유튜브 영상 조회", description = "사용자가 입력한 키워드 기반으로 유튜브 영상 10개를 반환해줍니다.")
     public List<YoutubeSearchResponse> searchVideo(@RequestParam(name = "keyword") String keyword) {
 
         return recommendationService.searchVideo(keyword);
     }
 
     @GetMapping("/books/search")
-    @Operation(summary = "키워드 기반 추천 책 조회", description = "사용자가 입력한 키워드 기반으로 추천 책 10권을 반환해줍니다.")
+    @Operation(summary = "검색 키워드 기반 추천 책 조회", description = "사용자가 입력한 키워드 기반으로 추천 책 10권을 반환해줍니다.")
     public BertSearchResponseDto searchBooks(@RequestParam(name = "keyword") String keyword) {
 
         return recommendationService.recommendBooksByKeyword(keyword);
