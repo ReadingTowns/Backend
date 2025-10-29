@@ -4,7 +4,7 @@ import java.util.List;
 
 public record BookRecommendation(
         Long bookId,
-        String image,
+        String bookImage,
         String bookName,
         String author,
         String publisher,

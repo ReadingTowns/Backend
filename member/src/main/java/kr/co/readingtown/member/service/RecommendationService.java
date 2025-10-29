@@ -79,7 +79,7 @@ public class RecommendationService {
         return recommendations.stream()
                 .map(b -> new BookRecommendationResponseDto(
                         b.bookId(),
-                        b.image(),
+                        b.bookImage(),
                         b.bookName(),
                         b.author(),
                         b.publisher(),
