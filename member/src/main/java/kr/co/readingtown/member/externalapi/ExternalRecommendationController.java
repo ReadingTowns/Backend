@@ -47,6 +47,14 @@ public class ExternalRecommendationController {
         return recommendationService.searchVideo(keyword);
     }
 
+    @GetMapping("/books/search")
+    @Operation(summary = "키워드 기반 추천 책 조회", description = "사용자가 입력한 키워드 기반으로 추천 책 10권을 반환해줍니다.")
+    public List<BookRecommendationResponseDto> searchBooks(@RequestParam(name = "keyword") String keyword) {
+
+        return recommendationService.recommendBooksByKeyword(keyword);
+    }
+
+
     @GetMapping("/members/keywords")
     @Operation(summary = "키워드 후보지 조회", description = "선택할 키워드 후보지를 조회합니다.")
     public KeywordResponse getKeyword() {

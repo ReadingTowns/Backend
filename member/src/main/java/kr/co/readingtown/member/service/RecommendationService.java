@@ -9,6 +9,8 @@ import kr.co.readingtown.member.domain.MemberKeyword;
 import kr.co.readingtown.member.domain.enums.KeywordType;
 import kr.co.readingtown.member.dto.request.KeywordRequest;
 import kr.co.readingtown.member.dto.response.*;
+import kr.co.readingtown.member.dto.request.TextSearchRequest;
+import kr.co.readingtown.member.dto.response.ai.BertSearchResponse;
 import kr.co.readingtown.member.dto.response.ai.BookRecommendation;
 import kr.co.readingtown.member.dto.response.ai.BookRecommendationResponseDto;
 import kr.co.readingtown.member.dto.response.ai.UserRecommendation;
@@ -285,5 +287,26 @@ public class RecommendationService {
                     .toList();
             memberKeywordRepository.saveAll(newKeywords);
         }
+    }
+
+    public List<BookRecommendationResponseDto> recommendBooksByKeyword(String keyword) {
+        // 요청 객체 생성 (기본값: top_k=10, use_combined=true)
+        TextSearchRequest request = new TextSearchRequest(keyword);
+        
+        // AI 서버 호출
+        BertSearchResponse response = aiRecommendClient.searchByBert(request);
+        
+        // response 가공
+        return response.results().stream()
+                .map(result -> new BookRecommendationResponseDto(
+                        result.bookId(),
+                        result.bookImage(),
+                        result.bookName(),
+                        result.author(),
+                        result.publisher(),
+                        result.similarity(),
+                        result.matchedKeywords()
+                ))
+                .collect(Collectors.toList());
     }
 }
