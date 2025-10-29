@@ -79,13 +79,11 @@ public class RecommendationService {
         return recommendations.stream()
                 .map(b -> new BookRecommendationResponseDto(
                         b.bookId(),
-                        b.image(),
+                        b.bookImage(),
                         b.bookName(),
                         b.author(),
                         b.publisher(),
-                        BigDecimal.valueOf(b.similarity() * 100)
-                                .setScale(1, RoundingMode.HALF_UP)
-                                .doubleValue(),
+                        b.similarity(),
                         b.relatedUserKeywords()
                 ))
                 .collect(Collectors.toList());
