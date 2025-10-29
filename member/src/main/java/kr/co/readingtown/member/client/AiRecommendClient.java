@@ -18,7 +18,7 @@ public interface AiRecommendClient {
 
     @GetMapping("/recommend")
     RecommendationResponse recommend(
-            @RequestParam("book_ids") String bookIds,
+            @RequestParam(value = "book_ids", required = false) String bookIds,
             @RequestParam(value = "user_keywords", required = false) String userKeywords
     );
     
