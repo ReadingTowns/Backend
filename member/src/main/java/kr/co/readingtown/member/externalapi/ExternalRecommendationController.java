@@ -6,6 +6,7 @@ import kr.co.readingtown.member.domain.enums.KeywordType;
 import kr.co.readingtown.member.dto.request.KeywordRequest;
 import kr.co.readingtown.member.dto.response.*;
 import kr.co.readingtown.member.dto.response.ai.BookRecommendationResponseDto;
+import kr.co.readingtown.member.dto.response.ai.BertSearchResponseDto;
 import kr.co.readingtown.member.service.RecommendationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -41,11 +42,19 @@ public class ExternalRecommendationController {
     }
 
     @GetMapping("/video")
-    @Operation(summary = "키워드 기반 유튜브 영상 조회", description = "사용자가 입력한 키워드 기반으로 유튜브 영상 10개를 반환해줍니다.")
+    @Operation(summary = "검색 키워드 기반 유튜브 영상 조회", description = "사용자가 입력한 키워드 기반으로 유튜브 영상 10개를 반환해줍니다.")
     public List<YoutubeSearchResponse> searchVideo(@RequestParam(name = "keyword") String keyword) {
 
         return recommendationService.searchVideo(keyword);
     }
+
+    @GetMapping("/books/search")
+    @Operation(summary = "검색 키워드 기반 추천 책 조회", description = "사용자가 입력한 키워드 기반으로 추천 책 10권을 반환해줍니다.")
+    public BertSearchResponseDto searchBooks(@RequestParam(name = "keyword") String keyword) {
+
+        return recommendationService.recommendBooksByKeyword(keyword);
+    }
+
 
     @GetMapping("/members/keywords")
     @Operation(summary = "키워드 후보지 조회", description = "선택할 키워드 후보지를 조회합니다.")
