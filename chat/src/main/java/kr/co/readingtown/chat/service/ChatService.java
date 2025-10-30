@@ -1,7 +1,10 @@
 package kr.co.readingtown.chat.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.co.readingtown.chat.domain.Chatroom;
 import kr.co.readingtown.chat.domain.Message;
+import kr.co.readingtown.chat.domain.MessageType;
+import kr.co.readingtown.chat.dto.request.ChatMessageRequestDto;
 import kr.co.readingtown.chat.dto.request.ChatRequestDto;
 import kr.co.readingtown.chat.dto.response.*;
 import kr.co.readingtown.chat.exception.ChatException;
@@ -12,9 +15,13 @@ import kr.co.readingtown.chat.integration.member.MemberClient;
 import kr.co.readingtown.chat.repository.ChatroomRepository;
 import kr.co.readingtown.chat.repository.MessageRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -22,6 +29,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class ChatService {
 
     public final BookClient bookClient;
@@ -220,5 +228,51 @@ public class ChatService {
                 .content(content)
                 .build();
         messageRepository.save(message);
+    }
+
+    @Setter
+    private Map<String, Set<WebSocketSession>> chatRooms; // 주입받을 대상
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Transactional
+    public void saveAndBroadcastMessage(ChatMessageRequestDto request) {
+        // ✅ 메시지 저장
+        Message saved = messageRepository.save(
+                Message.builder()
+                        .chatroomId(request.chatroomId())
+                        .senderId(request.senderId())
+                        .content(request.content())
+                        .messageType(request.messageType())
+                        .relatedBookhouseId(request.relatedBookhouseId())
+                        .relatedExchangeStatusId(request.relatedExchangeStatusId())
+                        .build()
+        );
+
+        // ✅ 브로드캐스트
+        broadcastToRoom(request.chatroomId(), saved);
+    }
+
+    private void broadcastToRoom(Long chatroomId, Message message) {
+        String roomKey = String.valueOf(chatroomId);
+        Set<WebSocketSession> sessions = chatRooms.get(roomKey);
+
+        if (sessions == null) return;
+
+        try {
+            String json = objectMapper.writeValueAsString(message);
+            for (WebSocketSession s : sessions) {
+                if (s.isOpen()) s.sendMessage(new TextMessage(json));
+            }
+        } catch (Exception e) {
+            log.error("메시지 전송 실패", e);
+        }
+    }
+
+    // ✅ 자동 시스템 메시지 전송 (교환 완료/반납 등)
+    public void sendSystemMessage(Long chatroomId, String content, MessageType type, Long exchangeStatusId) {
+        ChatMessageRequestDto msg = new ChatMessageRequestDto(
+                chatroomId, 0L, content, type, null, exchangeStatusId
+        );
+        saveAndBroadcastMessage(msg);
     }
 }

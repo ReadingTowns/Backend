@@ -10,6 +10,8 @@ import kr.co.readingtown.bookhouse.dto.response.ExchangeResponseDto;
 import kr.co.readingtown.bookhouse.dto.response.ExchangedBookResponse;
 import kr.co.readingtown.bookhouse.dto.response.ExchangedDetail;
 import kr.co.readingtown.bookhouse.exception.BookhouseException;
+import kr.co.readingtown.bookhouse.integration.chat.ChatClient;
+import kr.co.readingtown.bookhouse.dto.request.internal.ExchangeRequestMessageDto;
 import kr.co.readingtown.bookhouse.repository.BookhouseRepository;
 import kr.co.readingtown.bookhouse.repository.ExchangeStatusRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ public class ExchangeStatusService {
 
     private final BookhouseRepository bookhouseRepository;
     private final ExchangeStatusRepository exchangeStatusRepository;
+    private final ChatClient chatClient;
 
     public ExchangedBookResponse getBookIdByChatroomId(Long chatroomId, Long myId) {
 
@@ -77,9 +80,18 @@ public class ExchangeStatusService {
                 .requestStatus(RequestStatus.REQUEST)
                 .build();
 
-        Long exchangeStatusId = exchangeStatusRepository.save(newExchangeStatus).getExchangeStatusId();
+        ExchangeStatus exchangeStatus = exchangeStatusRepository.save(newExchangeStatus);
 
-        return new ExchangeResponseDto(exchangeStatusId, newExchangeStatus.getRequestStatus());
+        // ✅ 채팅방 ID 찾아서 자동 메시지 전송
+        ExchangeRequestMessageDto messageDto = new ExchangeRequestMessageDto(
+                exchangeStatus.getChatroomId(),
+                "교환 신청이 도착했습니다.",
+                "EXCHANGE_REQUEST",  // MessageType.EXCHANGE_REQUEST as String
+                exchangeStatus.getExchangeStatusId()
+        );
+        chatClient.sendSystemMessage(messageDto);
+
+        return new ExchangeResponseDto(exchangeStatus.getExchangeStatusId(), newExchangeStatus.getRequestStatus());
     }
 
     // 교환 요청 수락
@@ -138,6 +150,32 @@ public class ExchangeStatusService {
                 b.updateChatroomId(exchangeStatus.getChatroomId());
             }
             reserved = true;
+            
+            // ✅ 예약 완료 시스템 메시지 전송
+            try {
+                ExchangeRequestMessageDto messageDto = new ExchangeRequestMessageDto(
+                        exchangeStatus.getChatroomId(),
+                        "교환이 예약되었습니다. 대면 교환을 진행해주세요.",
+                        "EXCHANGE_RESERVED",
+                        exchangeStatus.getExchangeStatusId()
+                );
+                chatClient.sendSystemMessage(messageDto);
+            } catch (Exception e) {
+                // 채팅 서비스 장애 시에도 교환 수락은 정상 처리
+            }
+        } else {
+            // ✅ 교환 수락 시스템 메시지 전송 (아직 한 명만 수락한 경우)
+            try {
+                ExchangeRequestMessageDto messageDto = new ExchangeRequestMessageDto(
+                        exchangeStatus.getChatroomId(),
+                        "교환 신청이 수락되었습니다.",
+                        "EXCHANGE_ACCEPTED",
+                        exchangeStatus.getExchangeStatusId()
+                );
+                chatClient.sendSystemMessage(messageDto);
+            } catch (Exception e) {
+                // 채팅 서비스 장애 시에도 교환 수락은 정상 처리
+            }
         }
 
         return new AcceptExchangeResponseDto(exchangeStatus.getRequestStatus(), reserved);
@@ -163,6 +201,20 @@ public class ExchangeStatusService {
         }
 
         exchangeStatus.updateRequestStatus(RequestStatus.REJECTED);
+        
+        // ✅ 교환 거절 시스템 메시지 전송
+        try {
+            ExchangeRequestMessageDto messageDto = new ExchangeRequestMessageDto(
+                    exchangeStatus.getChatroomId(),
+                    "교환 신청이 거절되었습니다.",
+                    "EXCHANGE_REJECTED",
+                    exchangeStatus.getExchangeStatusId()
+            );
+            chatClient.sendSystemMessage(messageDto);
+        } catch (Exception e) {
+            // 채팅 서비스 장애 시에도 교환 거절은 정상 처리
+        }
+        
         return exchangeStatus.getRequestStatus();
     }
 
@@ -184,6 +236,19 @@ public class ExchangeStatusService {
             throw new BookhouseException.InvalidExchangeTransitionCancel();
         }
 
+        // ✅ 교환 취소 시스템 메시지 전송 (삭제 전에 전송)
+        try {
+            ExchangeRequestMessageDto messageDto = new ExchangeRequestMessageDto(
+                    exchangeStatus.getChatroomId(),
+                    "교환 신청이 취소되었습니다.",
+                    "SYSTEM",  // 취소는 일반 시스템 메시지로
+                    exchangeStatus.getExchangeStatusId()
+            );
+            chatClient.sendSystemMessage(messageDto);
+        } catch (Exception e) {
+            // 채팅 서비스 장애 시에도 교환 취소는 정상 처리
+        }
+        
         exchangeStatusRepository.delete(exchangeStatus);
     }
 
@@ -207,6 +272,19 @@ public class ExchangeStatusService {
             }
         }
         books.forEach(b -> b.updateIsExchanged(IsExchanged.EXCHANGED));
+        
+        // ✅ 교환 완료 시스템 메시지 전송
+        try {
+            ExchangeRequestMessageDto messageDto = new ExchangeRequestMessageDto(
+                    chatroomId,
+                    "교환이 완료되었습니다. 즐거운 독서 되세요!",
+                    "EXCHANGE_COMPLETED",
+                    null  // 특정 교환 상태가 아닌 전체 교환 완료
+            );
+            chatClient.sendSystemMessage(messageDto);
+        } catch (Exception e) {
+            // 채팅 서비스 장애 시에도 교환 완료는 정상 처리
+        }
     }
 
     // 교환 반납 - EXCHANGED -> PENDING
@@ -231,6 +309,19 @@ public class ExchangeStatusService {
             b.updateIsExchanged(IsExchanged.PENDING);
             b.updateChatroomId(null);
         });
+        
+        // ✅ 교환 반납 시스템 메시지 전송
+        try {
+            ExchangeRequestMessageDto messageDto = new ExchangeRequestMessageDto(
+                    chatroomId,
+                    "교환이 반납되었습니다. 감사합니다.",
+                    "EXCHANGE_RETURNED",
+                    null  // 특정 교환 상태가 아닌 전체 반납
+            );
+            chatClient.sendSystemMessage(messageDto);
+        } catch (Exception e) {
+            // 채팅 서비스 장애 시에도 교환 반납은 정상 처리
+        }
         
         // TODO ExchangeStatus 레코드 삭제 필요할지
     }
