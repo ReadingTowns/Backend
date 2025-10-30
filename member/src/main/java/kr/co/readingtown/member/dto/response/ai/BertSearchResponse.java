@@ -15,7 +15,7 @@ public record BertSearchResponse(
             String bookName,
             String author,
             String publisher,
-            @JsonProperty("book_image")
+            @JsonProperty("image")
             String bookImage,
             @JsonProperty("similarity_score")
             Double similarity,
