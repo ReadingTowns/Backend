@@ -1,15 +1,8 @@
 package kr.co.readingtown.chat.dto;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotBlank;
 
-@Getter
-@NoArgsConstructor
-public class ChatBotRequest {
-    
-    private String message;
-    
-    public ChatBotRequest(String message) {
-        this.message = message;
-    }
-}
+public record ChatBotRequest(
+    @NotBlank(message = "메시지는 비어있을 수 없습니다")
+    String message
+) {}

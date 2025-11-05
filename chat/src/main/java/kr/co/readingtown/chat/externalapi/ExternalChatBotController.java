@@ -2,6 +2,7 @@ package kr.co.readingtown.chat.externalapi;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import kr.co.readingtown.chat.dto.ChatBotRequest;
 import kr.co.readingtown.chat.dto.ChatBotResponse;
 import kr.co.readingtown.chat.service.ChatBotService;
@@ -23,7 +24,7 @@ public class ExternalChatBotController {
     @PostMapping("/chat")
     @Operation(summary = "챗봇과 대화", description = "사용자가 챗봇에게 메시지를 보내고 응답을 받습니다.")
     public ResponseEntity<ChatBotResponse> chat(
-            @RequestBody ChatBotRequest request,
+            @Valid @RequestBody ChatBotRequest request,
             @AuthenticationPrincipal Long memberId) {
         
         ChatBotResponse response = chatBotService.chat(memberId, request);

@@ -43,7 +43,7 @@ public class ChatBotService {
         ChatBotMessage userMessage = ChatBotMessage.builder()
                 .memberId(memberId)
                 .role(MessageRole.USER)
-                .content(request.getMessage())
+                .content(request.message())
                 .build();
         chatBotMessageRepository.save(userMessage);
         
@@ -51,7 +51,7 @@ public class ChatBotService {
         List<ChatBotMessage> history = chatBotMessageRepository.findTop20ByMemberIdOrderByCreatedAtDesc(memberId);
         
         // OpenAI API 호출
-        String botResponse = callOpenAI(history, request.getMessage());
+        String botResponse = callOpenAI(history, request.message());
         
         // 봇 응답 저장
         ChatBotMessage botMessage = ChatBotMessage.builder()
