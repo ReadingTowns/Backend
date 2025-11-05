@@ -50,7 +50,7 @@ public class ExternalBookhouseController {
     }
 
     @GetMapping("/members/me")
-    @Operation(summary = "내 서재 조회", description = "현재 로그인한 회원의 서재를 조회합니다.")
+    @Operation(summary = "내 서재 조회(믿지마셈)", description = "현재 로그인한 회원의 서재를 조회합니다.")
     public PageResponse<BookPreviewResponseDto> getMyBookhouse(
             @AuthenticationPrincipal Long memberId,
             @RequestParam(defaultValue = "0") int page,
@@ -60,7 +60,7 @@ public class ExternalBookhouseController {
     }
 
     @GetMapping("/members/{memberId}")
-    @Operation(summary = "회원의 서재 조회", description = "특정 회원의 서재를 조회합니다.")
+    @Operation(summary = "회원의 서재 조회(믿지마셈)", description = "특정 회원의 서재를 조회합니다.")
     public PageResponse<BookPreviewResponseDto> getBookhouseByMemberId(
             @PathVariable Long memberId,
             @RequestParam(defaultValue = "0") int page,
