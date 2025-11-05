@@ -1,13 +1,12 @@
 package kr.co.readingtown.chat.handler;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import jakarta.annotation.PostConstruct;
+import kr.co.readingtown.chat.domain.MessageType;
+import kr.co.readingtown.chat.dto.request.ChatMessageRequestDto;
 import kr.co.readingtown.chat.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -33,6 +32,11 @@ public class WebsocketHandler extends TextWebSocketHandler {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    @PostConstruct
+    public void init() {
+        // ✅ ChatService에 주입
+        chatService.setChatRooms(chatRooms);
+    }
 
     // 소켓 연결 확인
     // 프론트에서 /ws/conn으로 연결 요청하면
@@ -51,19 +55,16 @@ public class WebsocketHandler extends TextWebSocketHandler {
         String payload = message.getPayload();
         log.info("payload {}", payload);
 
-        // JSON 파싱
-        JsonNode node = objectMapper.readTree(payload);
-        String roomId = node.get("roomId").asText();
-        String chatMessage = node.get("message").asText();
+        // ✅ 1. JSON → ChatMessageRequestDto로 파싱
+        ChatMessageRequestDto request = objectMapper.readValue(payload, ChatMessageRequestDto.class);
 
-        // 방이 없으면 생성
-        chatRooms.computeIfAbsent(roomId, k -> ConcurrentHashMap.newKeySet());
-        chatRooms.get(roomId).add(session);
+        String roomId = String.valueOf(request.chatroomId());
 
-        // 세션에 방 ID 등록
+        // ✅ 2. 방 등록 및 세션 추가
+        chatRooms.computeIfAbsent(roomId, k -> ConcurrentHashMap.newKeySet()).add(session);
         sessionRoomMap.put(session, roomId);
 
-        // 사용자 정보 추출
+        // ✅ 3. 인증된 사용자 확인
         Long senderId = (Long) session.getAttributes().get("memberId");
         if (senderId == null) {
             log.warn("인증되지 않은 사용자");
@@ -71,20 +72,17 @@ public class WebsocketHandler extends TextWebSocketHandler {
             return;
         }
 
-        // 프론트에게 전달할 JSON 생성
-        ObjectNode broadcastMsg = objectMapper.createObjectNode();
-        broadcastMsg.put("senderId", senderId);
-        broadcastMsg.put("message", chatMessage);
-
-        // DB에 메시지 저장
-        chatService.saveChatMessage(senderId, roomId, chatMessage);
-
-        // 같은 방 세션에게만 전송
-        for (WebSocketSession s : chatRooms.get(roomId)) {
-            if (s.isOpen()) {
-                s.sendMessage(new TextMessage(broadcastMsg.toString()));
-            }
-        }
+        // ✅ 4. senderId를 세션에서 가져온 값으로 대체하여 메시지 저장 및 브로드캐스트
+        // 보안: 클라이언트가 보낸 senderId는 무시하고 인증된 사용자 ID 사용
+        ChatMessageRequestDto authenticatedRequest = new ChatMessageRequestDto(
+                request.chatroomId(),
+                senderId,  // 세션에서 가져온 인증된 사용자 ID 사용
+                request.content(),
+                request.messageType() != null ? request.messageType() : MessageType.TEXT,  // 기본값 TEXT
+                request.relatedBookhouseId(),
+                request.relatedExchangeStatusId()
+        );
+        chatService.saveAndBroadcastMessage(authenticatedRequest);
     }
 
     // 소켓 연결 종료
