@@ -269,6 +269,7 @@ public class ChatService {
     }
 
     // ✅ 자동 시스템 메시지 전송 (교환 완료/반납 등)
+    @Transactional
     public void sendSystemMessage(Long chatroomId, String content, MessageType type, Long exchangeStatusId) {
         ChatMessageRequestDto msg = new ChatMessageRequestDto(
                 chatroomId, 0L, content, type, null, exchangeStatusId
