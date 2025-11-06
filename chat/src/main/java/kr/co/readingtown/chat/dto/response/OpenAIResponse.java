@@ -1,4 +1,4 @@
-package kr.co.readingtown.chat.dto;
+package kr.co.readingtown.chat.dto.response;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

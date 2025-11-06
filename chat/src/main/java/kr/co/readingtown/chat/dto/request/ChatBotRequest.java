@@ -1,4 +1,4 @@
-package kr.co.readingtown.chat.dto;
+package kr.co.readingtown.chat.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 

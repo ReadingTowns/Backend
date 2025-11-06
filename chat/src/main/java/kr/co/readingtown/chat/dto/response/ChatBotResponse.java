@@ -1,4 +1,4 @@
-package kr.co.readingtown.chat.dto;
+package kr.co.readingtown.chat.dto.response;
 
 import kr.co.readingtown.chat.domain.ChatBotMessage;
 import kr.co.readingtown.chat.domain.MessageRole;
