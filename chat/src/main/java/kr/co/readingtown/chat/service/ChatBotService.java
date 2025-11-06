@@ -82,7 +82,7 @@ public class ChatBotService {
     }
 
     @Transactional(timeout = 5)
-    private void saveUserMessage(Long memberId, String content) {
+    protected void saveUserMessage(Long memberId, String content) {
         ChatBotMessage userMessage = ChatBotMessage.builder()
                 .memberId(memberId)
                 .role(MessageRole.USER)
@@ -92,12 +92,12 @@ public class ChatBotService {
     }
 
     @Transactional(readOnly = true, timeout = 5)
-    private List<ChatBotMessage> loadHistory(Long memberId) {
+    protected List<ChatBotMessage> loadHistory(Long memberId) {
         return chatBotMessageRepository.findTop20ByMemberIdOrderByCreatedAtDesc(memberId);
     }
 
     @Transactional(timeout = 5)
-    private ChatBotResponse saveBotResponse(Long memberId, String content) {
+    protected ChatBotResponse saveBotResponse(Long memberId, String content) {
         ChatBotMessage botMessage = ChatBotMessage.builder()
                 .memberId(memberId)
                 .role(MessageRole.BOT)
@@ -151,8 +151,9 @@ public class ChatBotService {
                     .uri("/v1/chat/completions")
                     .bodyValue(openAIRequest)
                     .retrieve()
-                    .bodyToMono(OpenAIResponse.class);
-            
+                    .bodyToMono(OpenAIResponse.class)
+                    .timeout(Duration.ofSeconds(15));
+
             OpenAIResponse response = responseMono.block();
             
             if (response != null && response.getChoices() != null && !response.getChoices().isEmpty()) {
