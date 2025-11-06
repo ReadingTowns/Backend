@@ -4,6 +4,7 @@ import kr.co.readingtown.chat.config.ChatBotPrompt;
 import kr.co.readingtown.chat.domain.ChatBotMessage;
 import kr.co.readingtown.chat.domain.MessageRole;
 import kr.co.readingtown.chat.dto.*;
+import kr.co.readingtown.chat.exception.ChatException;
 import kr.co.readingtown.chat.repository.ChatBotMessageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,30 +38,72 @@ public class ChatBotService {
     @Value("${openai.model:gpt-4o-mini}")
     private String model;
     
-    @Transactional
     public ChatBotResponse chat(Long memberId, ChatBotRequest request) {
-        // 사용자 메시지 저장
+        // Step 1: 사용자 메시지 저장 (독립적인 트랜잭션)
+        try {
+            saveUserMessage(memberId, request.message());
+            log.debug("사용자 메시지 저장 완료: memberId={}, message={}", memberId, request.message());
+        } catch (Exception e) {
+            log.error("사용자 메시지 저장 실패: memberId={}, message={}", memberId, request.message(), e);
+            throw new ChatException.MessageSaveFailed();
+        }
+
+        // Step 2: 대화 내역 조회 (읽기 전용 트랜잭션)
+        List<ChatBotMessage> history;
+        try {
+            history = loadHistory(memberId);
+            log.debug("대화 내역 조회 완료: memberId={}, historySize={}", memberId, history.size());
+        } catch (Exception e) {
+            log.error("대화 내역 조회 실패: memberId={}", memberId, e);
+            // 히스토리 조회 실패 시 빈 리스트로 진행 (치명적이지 않음)
+            history = new ArrayList<>();
+        }
+
+        // Step 3: OpenAI API 호출 (트랜잭션 없음 - DB 커넥션 점유 없음)
+        String botResponse;
+        try {
+            botResponse = callOpenAI(history, request.message());
+            log.debug("OpenAI 응답 수신 완료: memberId={}", memberId);
+        } catch (Exception e) {
+            log.error("OpenAI API 호출 실패: memberId={}, message={}", memberId, request.message(), e);
+            // API 호출 실패 시 에러 메시지를 봇 응답으로 사용 (사용자에게 피드백 제공)
+            botResponse = "죄송합니다. 일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+        }
+
+        // Step 4: 봇 응답 저장 (독립적인 트랜잭션)
+        try {
+            ChatBotResponse response = saveBotResponse(memberId, botResponse);
+            log.debug("봇 응답 저장 완료: memberId={}", memberId);
+            return response;
+        } catch (Exception e) {
+            log.error("봇 응답 저장 실패: memberId={}, response={}", memberId, botResponse, e);
+            throw new ChatException.ResponseSaveFailed();
+        }
+    }
+
+    @Transactional(timeout = 5)
+    private void saveUserMessage(Long memberId, String content) {
         ChatBotMessage userMessage = ChatBotMessage.builder()
                 .memberId(memberId)
                 .role(MessageRole.USER)
-                .content(request.message())
+                .content(content)
                 .build();
         chatBotMessageRepository.save(userMessage);
-        
-        // 이전 대화 내역 조회 (최근 10개)
-        List<ChatBotMessage> history = chatBotMessageRepository.findTop20ByMemberIdOrderByCreatedAtDesc(memberId);
-        
-        // OpenAI API 호출
-        String botResponse = callOpenAI(history, request.message());
-        
-        // 봇 응답 저장
+    }
+
+    @Transactional(readOnly = true, timeout = 5)
+    private List<ChatBotMessage> loadHistory(Long memberId) {
+        return chatBotMessageRepository.findTop20ByMemberIdOrderByCreatedAtDesc(memberId);
+    }
+
+    @Transactional(timeout = 5)
+    private ChatBotResponse saveBotResponse(Long memberId, String content) {
         ChatBotMessage botMessage = ChatBotMessage.builder()
                 .memberId(memberId)
                 .role(MessageRole.BOT)
-                .content(botResponse)
+                .content(content)
                 .build();
         chatBotMessageRepository.save(botMessage);
-        
         return ChatBotResponse.from(botMessage);
     }
     
