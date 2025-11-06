@@ -6,6 +6,7 @@ import kr.co.readingtown.chat.domain.MessageRole;
 import kr.co.readingtown.chat.dto.request.ChatBotRequest;
 import kr.co.readingtown.chat.dto.request.OpenAIRequest;
 import kr.co.readingtown.chat.dto.response.ChatBotResponse;
+import kr.co.readingtown.chat.dto.response.ChatHistoryPageResponse;
 import kr.co.readingtown.chat.dto.response.OpenAIResponse;
 import kr.co.readingtown.chat.exception.ChatException;
 import kr.co.readingtown.chat.repository.ChatBotMessageRepository;
@@ -20,6 +21,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -172,10 +174,118 @@ public class ChatBotService {
         }
     }
     
-    public List<ChatBotResponse> getChatHistory(Long memberId) {
-        List<ChatBotMessage> messages = chatBotMessageRepository.findByMemberIdOrderByCreatedAtDesc(memberId);
-        return messages.stream()
-                .map(ChatBotResponse::from)
-                .toList();
+    public ChatHistoryPageResponse getChatHistory(Long memberId, Long beforeId, int limit) {
+        // 최대 100개 제한
+        limit = Math.min(limit, 100);
+
+        // 메시지 조회
+        List<ChatBotMessage> messages;
+        if (beforeId == null) {
+            messages = chatBotMessageRepository.findByMemberIdOrderByCreatedAtDesc(
+                    memberId,
+                    org.springframework.data.domain.PageRequest.of(0, limit)
+            );
+        } else {
+            messages = chatBotMessageRepository.findByMemberIdAndMessageIdLessThanOrderByCreatedAtDesc(
+                    memberId,
+                    beforeId,
+                    org.springframework.data.domain.PageRequest.of(0, limit)
+            );
+        }
+
+        // UI 필드 계산 (showDate, showTime, labels)
+        List<ChatBotResponse> responses = calculateUIFields(messages);
+
+        // hasMore, nextBeforeId 계산
+        boolean hasMore = messages.size() == limit;
+        Long nextBeforeId = hasMore ? messages.get(messages.size() - 1).getMessageId() : null;
+
+        return new ChatHistoryPageResponse(responses, hasMore, nextBeforeId);
+    }
+
+    private List<ChatBotResponse> calculateUIFields(List<ChatBotMessage> messages) {
+        if (messages.isEmpty()) {
+            return List.of();
+        }
+
+        List<ChatBotResponse> responses = new ArrayList<>();
+        LocalDateTime previousDateTime = null;
+
+        for (ChatBotMessage message : messages) {
+            LocalDateTime currentDateTime = message.getCreatedAt();
+
+            boolean showDate = false;
+            String dateLabel = null;
+            boolean showTime = false;
+            String timeLabel = null;
+
+            if (previousDateTime == null) {
+                // 첫 메시지
+                showDate = true;
+                dateLabel = formatDateLabel(currentDateTime);
+            } else {
+                // 이전 메시지와 날짜 비교
+                if (!isSameDay(previousDateTime, currentDateTime)) {
+                    showDate = true;
+                    dateLabel = formatDateLabel(currentDateTime);
+                } else {
+                    // 같은 날이면 시간 차이 확인 (1분 이상)
+                    if (java.time.Duration.between(currentDateTime, previousDateTime).toMinutes() >= 1) {
+                        showTime = true;
+                        timeLabel = formatTimeLabel(currentDateTime);
+                    }
+                }
+            }
+
+            responses.add(new ChatBotResponse(
+                    message.getMessageId(),
+                    message.getContent(),
+                    message.getRole(),
+                    message.getCreatedAt(),
+                    showDate,
+                    dateLabel,
+                    showTime,
+                    timeLabel
+            ));
+
+            previousDateTime = currentDateTime;
+        }
+
+        return responses;
+    }
+
+    private boolean isSameDay(LocalDateTime dt1, LocalDateTime dt2) {
+        return dt1.toLocalDate().equals(dt2.toLocalDate());
+    }
+
+    private String formatDateLabel(LocalDateTime dateTime) {
+        // "2025년 8월 16일 오후 5:46"
+        int hour = dateTime.getHour();
+        String amPm = hour < 12 ? "오전" : "오후";
+        int displayHour = hour % 12;
+        if (displayHour == 0) displayHour = 12;
+
+        return String.format("%d년 %d월 %d일 %s %d:%02d",
+                dateTime.getYear(),
+                dateTime.getMonthValue(),
+                dateTime.getDayOfMonth(),
+                amPm,
+                displayHour,
+                dateTime.getMinute()
+        );
+    }
+
+    private String formatTimeLabel(LocalDateTime dateTime) {
+        // "오후 5:46"
+        int hour = dateTime.getHour();
+        String amPm = hour < 12 ? "오전" : "오후";
+        int displayHour = hour % 12;
+        if (displayHour == 0) displayHour = 12;
+
+        return String.format("%s %d:%02d",
+                amPm,
+                displayHour,
+                dateTime.getMinute()
+        );
     }
 }

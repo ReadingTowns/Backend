@@ -26,8 +26,7 @@ public class ChatBotMessage extends BaseTimeEntity {
     private MessageRole role;
 
     @Comment("메시지 내용")
-    @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @Builder

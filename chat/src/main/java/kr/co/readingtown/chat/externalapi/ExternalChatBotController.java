@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import kr.co.readingtown.chat.dto.request.ChatBotRequest;
 import kr.co.readingtown.chat.dto.response.ChatBotResponse;
+import kr.co.readingtown.chat.dto.response.ChatHistoryPageResponse;
 import kr.co.readingtown.chat.service.ChatBotService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -30,10 +31,12 @@ public class ExternalChatBotController {
     }
     
     @GetMapping("/history")
-    @Operation(summary = "대화 내역 조회", description = "사용자의 챗봇 대화 내역을 조회합니다.")
-    public List<ChatBotResponse> getChatHistory(
-            @AuthenticationPrincipal Long memberId) {
-        
-        return chatBotService.getChatHistory(memberId);
+    @Operation(summary = "대화 내역 조회", description = "사용자의 챗봇 대화 내역을 페이지네이션으로 조회합니다.")
+    public ChatHistoryPageResponse getChatHistory(
+            @AuthenticationPrincipal Long memberId,
+            @RequestParam(required = false) Long beforeId,
+            @RequestParam(defaultValue = "30") int limit) {
+
+        return chatBotService.getChatHistory(memberId, beforeId, limit);
     }
 }
