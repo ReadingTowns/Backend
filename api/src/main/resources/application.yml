@@ -20,5 +20,11 @@ ai:
 youtube:
   key: ${YOUTUBE_KEY}
 
+openai:
+  api:
+    key: ${OPENAI_API_KEY}
+    url: https://api.openai.com
+  model: gpt-4o-mini
+
 cors:
   allowed-origins: http://localhost:3000, https://readingtown.site, https://dev.readingtown.site
