@@ -259,7 +259,8 @@ public class ChatService {
         if (sessions == null) return;
 
         try {
-            String json = objectMapper.writeValueAsString(message);
+            WebSocketMessageDto dto = WebSocketMessageDto.of(message);
+            String json = objectMapper.writeValueAsString(dto);
             for (WebSocketSession s : sessions) {
                 if (s.isOpen()) s.sendMessage(new TextMessage(json));
             }
