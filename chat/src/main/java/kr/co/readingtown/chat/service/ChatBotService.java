@@ -29,8 +29,9 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ChatBotService {
-    
+
     private final ChatBotMessageRepository chatBotMessageRepository;
+    private final ChatBotMessageService chatBotMessageService;
     private final WebClient.Builder webClientBuilder;
     private final ChatBotPrompt chatBotPrompt;
     
@@ -46,7 +47,7 @@ public class ChatBotService {
     public ChatBotResponse chat(Long memberId, ChatBotRequest request) {
         // Step 1: 사용자 메시지 저장 (독립적인 트랜잭션)
         try {
-            saveUserMessage(memberId, request.message());
+            chatBotMessageService.saveUserMessage(memberId, request.message());
             log.debug("사용자 메시지 저장 완료: memberId={}, message={}", memberId, request.message());
         } catch (Exception e) {
             log.error("사용자 메시지 저장 실패: memberId={}, message={}", memberId, request.message(), e);
@@ -56,7 +57,7 @@ public class ChatBotService {
         // Step 2: 대화 내역 조회 (읽기 전용 트랜잭션)
         List<ChatBotMessage> history;
         try {
-            history = loadHistory(memberId);
+            history = chatBotMessageService.loadHistory(memberId);
             log.debug("대화 내역 조회 완료: memberId={}, historySize={}", memberId, history.size());
         } catch (Exception e) {
             log.error("대화 내역 조회 실패: memberId={}", memberId, e);
@@ -77,7 +78,7 @@ public class ChatBotService {
 
         // Step 4: 봇 응답 저장 (독립적인 트랜잭션)
         try {
-            ChatBotResponse response = saveBotResponse(memberId, botResponse);
+            ChatBotResponse response = chatBotMessageService.saveBotResponse(memberId, botResponse);
             log.debug("봇 응답 저장 완료: memberId={}", memberId);
             return response;
         } catch (Exception e) {
@@ -86,32 +87,6 @@ public class ChatBotService {
         }
     }
 
-    @Transactional(timeout = 5)
-    protected void saveUserMessage(Long memberId, String content) {
-        ChatBotMessage userMessage = ChatBotMessage.builder()
-                .memberId(memberId)
-                .role(MessageRole.USER)
-                .content(content)
-                .build();
-        chatBotMessageRepository.save(userMessage);
-    }
-
-    @Transactional(readOnly = true, timeout = 5)
-    protected List<ChatBotMessage> loadHistory(Long memberId) {
-        return chatBotMessageRepository.findTop20ByMemberIdOrderByCreatedAtDesc(memberId);
-    }
-
-    @Transactional(timeout = 5)
-    protected ChatBotResponse saveBotResponse(Long memberId, String content) {
-        ChatBotMessage botMessage = ChatBotMessage.builder()
-                .memberId(memberId)
-                .role(MessageRole.BOT)
-                .content(content)
-                .build();
-        chatBotMessageRepository.save(botMessage);
-        return ChatBotResponse.from(botMessage);
-    }
-    
     private String callOpenAI(List<ChatBotMessage> history, String currentMessage) {
         WebClient webClient = webClientBuilder
                 .baseUrl(openaiApiUrl)
