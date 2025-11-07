@@ -5,23 +5,24 @@ import kr.co.readingtown.chat.domain.MessageType;
 
 import java.time.LocalDateTime;
 
-public record MessageResponseDto(
+public record WebSocketMessageDto(
         Long messageId,
+        Long chatroomId,
         Long senderId,
-        String messageText,
         MessageType messageType,
+        String content,
         Long relatedBookhouseId,
         Long relatedExchangeStatusId,
         LocalDateTime sentTime
 ) {
 
-    public static MessageResponseDto of(Message message) {
-
-        return new MessageResponseDto(
+    public static WebSocketMessageDto of(Message message) {
+        return new WebSocketMessageDto(
                 message.getMessageId(),
+                message.getChatroomId(),
                 message.getSenderId(),
-                message.getContent(),
                 message.getMessageType(),
+                message.getContent(),
                 message.getRelatedBookhouseId(),
                 message.getRelatedExchangeStatusId(),
                 message.getSentTime()
