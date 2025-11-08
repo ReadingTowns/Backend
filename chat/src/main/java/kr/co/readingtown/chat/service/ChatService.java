@@ -180,7 +180,8 @@ public class ChatService {
             }
         }
 
-        // 한 명이라도 나가면 채팅방 즉시 삭제
+        // 한 명이라도 나가면 메시지 먼저 삭제 후 채팅방 삭제
+        messageRepository.deleteByChatroomId(chatroomId);
         chatroomRepository.delete(chatroom);
     }
 
@@ -265,6 +266,7 @@ public class ChatService {
     }
 
     // ✅ 자동 시스템 메시지 전송 (교환 완료/반납 등)
+    @Transactional
     public void sendSystemMessage(Long chatroomId, Long senderId, String content, MessageType type, Long exchangeStatusId) {
         ChatMessageRequestDto msg = new ChatMessageRequestDto(
                 chatroomId, senderId, content, type, null, exchangeStatusId

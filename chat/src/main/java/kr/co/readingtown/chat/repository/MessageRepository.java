@@ -46,4 +46,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
         WHERE m.created_at = latest.latest_created_at
     """, nativeQuery = true)
     List<Message> findLatestMessagesByChatrooms(@Param("chatroomIds") List<Long> chatroomIds);
+
+    // 채팅방의 모든 메시지 삭제
+    void deleteByChatroomId(Long chatroomId);
 }
