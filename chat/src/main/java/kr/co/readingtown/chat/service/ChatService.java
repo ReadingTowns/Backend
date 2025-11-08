@@ -37,6 +37,8 @@ public class ChatService {
     public final BookhouseClient bookhouseClient;
     public final BookhouseUpdater bookhouseUpdater;
 
+    private final ObjectMapper objectMapper;
+
     public final MessageRepository messageRepository;
     public final ChatroomRepository chatroomRepository;
 
@@ -232,7 +234,6 @@ public class ChatService {
 
     @Setter
     private Map<String, Set<WebSocketSession>> chatRooms; // 주입받을 대상
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Transactional
     public void saveAndBroadcastMessage(ChatMessageRequestDto request) {
