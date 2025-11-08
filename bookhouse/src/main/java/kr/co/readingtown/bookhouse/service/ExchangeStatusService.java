@@ -248,7 +248,7 @@ public class ExchangeStatusService {
                     exchangeStatus.getChatroomId(),
                     memberId,  // 취소한 사람의 ID
                     "교환 신청이 취소되었습니다.",
-                    "SYSTEM",  // 취소는 일반 시스템 메시지로
+                    "EXCHANGE_CANCELED",  // 교환 취소 메시지 타입
                     exchangeStatus.getExchangeStatusId()
             );
             chatClient.sendSystemMessage(messageDto);
