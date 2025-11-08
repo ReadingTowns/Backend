@@ -30,6 +30,7 @@ public class InternalChatController {
         // ChatService의 sendSystemMessage 호출
         chatService.sendSystemMessage(
                 exchangeRequestMessageDto.chatroomId(),
+                exchangeRequestMessageDto.senderId(),
                 exchangeRequestMessageDto.message(),
                 messageType,
                 exchangeRequestMessageDto.exchangeStatusId()

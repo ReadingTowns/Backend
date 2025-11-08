@@ -230,4 +230,8 @@ public class BookhouseService {
     public List<Long> getMembersBookId(Long memberId) {
         return bookhouseRepository.findBookIdByMember(memberId);
     }
+
+    public void getIsExchanged(Long bookhouseId) {
+
+    }
 }
