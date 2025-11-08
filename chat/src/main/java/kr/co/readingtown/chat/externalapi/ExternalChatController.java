@@ -31,9 +31,11 @@ public class ExternalChatController {
 
     @GetMapping("/{chatroomId}/books")
     @Operation(summary = "교환 책 정보 조회", description = "채팅 페이지에서 교환 책 정보를 조회하는 API 입니다.")
-    public ChatExchangedBookInfoResponse getExchangedBookInfo(@PathVariable Long chatroomId) {
+    public ChatExchangedBookInfoResponse getExchangedBookInfo(
+            @PathVariable Long chatroomId,
+            @AuthenticationPrincipal Long myId) {
 
-        return chatService.getExchangedBookInfo(chatroomId);
+        return chatService.getExchangedBookInfo(chatroomId, myId);
     }
 
     @GetMapping("/{chatroomId}/partner/profile")

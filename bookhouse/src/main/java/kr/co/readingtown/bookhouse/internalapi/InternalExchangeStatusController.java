@@ -21,7 +21,7 @@ public class InternalExchangeStatusController {
     @GetMapping("/internal/exchange-status/{chatroomId}/book")
     public ExchangedBookResponse getBookIdByChatroomId(
             @PathVariable Long chatroomId,
-            @AuthenticationPrincipal Long myId) {
+            @RequestParam Long myId) {
 
         return exchangeStatusService.getBookIdByChatroomId(chatroomId, myId);
     }
