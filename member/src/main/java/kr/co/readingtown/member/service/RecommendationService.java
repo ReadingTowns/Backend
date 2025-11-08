@@ -9,8 +9,12 @@ import kr.co.readingtown.member.domain.MemberKeyword;
 import kr.co.readingtown.member.domain.enums.KeywordType;
 import kr.co.readingtown.member.dto.request.KeywordRequest;
 import kr.co.readingtown.member.dto.response.*;
+import kr.co.readingtown.member.dto.request.TextSearchRequest;
+import kr.co.readingtown.member.dto.response.ai.BertSearchResponse;
 import kr.co.readingtown.member.dto.response.ai.BookRecommendation;
 import kr.co.readingtown.member.dto.response.ai.BookRecommendationResponseDto;
+import kr.co.readingtown.member.dto.response.ai.BookSearchResponseDto;
+import kr.co.readingtown.member.dto.response.ai.BertSearchResponseDto;
 import kr.co.readingtown.member.dto.response.ai.UserRecommendation;
 import kr.co.readingtown.member.dto.response.ai.UserRecommendationResponse;
 import kr.co.readingtown.member.exception.KeywordException;
@@ -27,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -56,36 +61,52 @@ public class RecommendationService {
 
         // 유저 서재 책 id 추출
         List<Long> bookIds = bookhouseClient.getMembersBookId(memberId);
-        if (bookIds.isEmpty())
-            return List.of();
-
+        
         // 유저 키워드 추출
         List<String> keywords = keywordRepository.findContentsByMemberId(memberId);
-        if (keywords.isEmpty())
+        
+        // 둘 다 없으면 빈 리스트 반환
+        if (bookIds.isEmpty() && keywords.isEmpty()) {
             return List.of();
+        }
 
-        // 파라미터로 넘길 수 있도록 가공
-        String bookIdsParam = bookIds.stream()
-                .map(String::valueOf)
-                .collect(Collectors.joining(","));
-        String keywordsParam = String.join(",", keywords);
-
-        // AI 서버 호출
-        List<BookRecommendation> recommendations = aiRecommendClient
-                .recommend(bookIdsParam, keywordsParam)
-                .recommendations();
+        // AI 서버 호출을 위한 파라미터 준비
+        List<BookRecommendation> recommendations;
+        
+        if (!bookIds.isEmpty() && !keywords.isEmpty()) {
+            // 책 ID와 키워드 모두 있는 경우
+            String bookIdsParam = bookIds.stream()
+                    .map(String::valueOf)
+                    .collect(Collectors.joining(","));
+            String keywordsParam = String.join(",", keywords);
+            recommendations = aiRecommendClient
+                    .recommend(bookIdsParam, keywordsParam)
+                    .recommendations();
+        } else if (!bookIds.isEmpty()) {
+            // 책 ID만 있는 경우
+            String bookIdsParam = bookIds.stream()
+                    .map(String::valueOf)
+                    .collect(Collectors.joining(","));
+            recommendations = aiRecommendClient
+                    .recommend(bookIdsParam, null)
+                    .recommendations();
+        } else {
+            // 키워드만 있는 경우
+            String keywordsParam = String.join(",", keywords);
+            recommendations = aiRecommendClient
+                    .recommend(null, keywordsParam)
+                    .recommendations();
+        }
 
         // response 가공
         return recommendations.stream()
                 .map(b -> new BookRecommendationResponseDto(
                         b.bookId(),
-                        b.image(),
+                        b.bookImage(),
                         b.bookName(),
                         b.author(),
                         b.publisher(),
-                        BigDecimal.valueOf(b.similarity() * 100)
-                                .setScale(1, RoundingMode.HALF_UP)
-                                .doubleValue(),
+                        b.similarity(),
                         b.relatedUserKeywords()
                 ))
                 .collect(Collectors.toList());
@@ -287,5 +308,40 @@ public class RecommendationService {
                     .toList();
             memberKeywordRepository.saveAll(newKeywords);
         }
+    }
+
+    public BertSearchResponseDto recommendBooksByKeyword(String keyword) {
+        // 요청 객체 생성 (기본값: top_k=10, use_combined=true)
+        TextSearchRequest request = new TextSearchRequest(keyword);
+        
+        // AI 서버 호출
+        BertSearchResponse response = aiRecommendClient.searchByBert(request);
+        
+        // 응답을 DTO로 변환
+        List<BookSearchResponseDto> bookResults = response.results().stream()
+                .map(result -> {
+                    // keywords 문자열을 공백으로 분리하여 List로 변환
+                    List<String> relatedUserKeywords = null;
+                    if (result.keywords() != null && !result.keywords().isEmpty()) {
+                        relatedUserKeywords = Arrays.asList(result.keywords().split(" "));
+                    }
+                    
+                    return new BookSearchResponseDto(
+                            result.bookId(),
+                            result.bookImage(),
+                            result.bookName(),
+                            result.author(),
+                            result.publisher(),
+                            result.similarity(),
+                            relatedUserKeywords,
+                            result.reviewPreview()
+                    );
+                })
+                .collect(Collectors.toList());
+        
+        return new BertSearchResponseDto(
+                response.query(),
+                bookResults
+        );
     }
 }

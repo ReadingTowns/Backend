@@ -1,9 +1,13 @@
 package kr.co.readingtown.member.client;
 
+import kr.co.readingtown.member.dto.request.TextSearchRequest;
+import kr.co.readingtown.member.dto.response.ai.BertSearchResponse;
 import kr.co.readingtown.member.dto.response.ai.RecommendationResponse;
 import kr.co.readingtown.member.dto.response.ai.UserRecommendationResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(
@@ -14,7 +18,7 @@ public interface AiRecommendClient {
 
     @GetMapping("/recommend")
     RecommendationResponse recommend(
-            @RequestParam("book_ids") String bookIds,
+            @RequestParam(value = "book_ids", required = false) String bookIds,
             @RequestParam(value = "user_keywords", required = false) String userKeywords
     );
     
@@ -29,4 +33,7 @@ public interface AiRecommendClient {
             @RequestParam("member_id") Long memberId,
             @RequestParam(value = "top_k", defaultValue = "10") Integer topK
     );
+
+    @PostMapping("/search/bert")
+    BertSearchResponse searchByBert(@RequestBody TextSearchRequest request);
 }
