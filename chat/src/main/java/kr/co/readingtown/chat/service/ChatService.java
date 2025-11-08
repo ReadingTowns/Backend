@@ -160,7 +160,7 @@ public class ChatService {
                 message);
     }
 
-    // 채팅룸 나가기 (만약 모두가 나갔다면, 채팅룸 삭제)
+    // 채팅룸 나가기 (한 명이라도 나가면 채팅룸 즉시 삭제)
     @Transactional
     public void leaveChatroom(Long chatroomId, Long myId) {
 
@@ -180,14 +180,8 @@ public class ChatService {
             }
         }
 
-        if (Objects.equals(chatroom.getOwnerId(), myId)) {
-            chatroom.removeOwnerId();
-        } else if (Objects.equals(chatroom.getRequesterId(), myId)) {
-            chatroom.removeRequesterId();
-        }
-
-        if (chatroom.isEmpty())
-            chatroomRepository.delete(chatroom);
+        // 한 명이라도 나가면 채팅방 즉시 삭제
+        chatroomRepository.delete(chatroom);
     }
 
     // 대면 교환 완료
@@ -271,10 +265,9 @@ public class ChatService {
     }
 
     // ✅ 자동 시스템 메시지 전송 (교환 완료/반납 등)
-    @Transactional
-    public void sendSystemMessage(Long chatroomId, String content, MessageType type, Long exchangeStatusId) {
+    public void sendSystemMessage(Long chatroomId, Long senderId, String content, MessageType type, Long exchangeStatusId) {
         ChatMessageRequestDto msg = new ChatMessageRequestDto(
-                chatroomId, 0L, content, type, null, exchangeStatusId
+                chatroomId, senderId, content, type, null, exchangeStatusId
         );
         saveAndBroadcastMessage(msg);
     }

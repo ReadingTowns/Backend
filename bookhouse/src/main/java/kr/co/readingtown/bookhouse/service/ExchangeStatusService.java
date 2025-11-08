@@ -27,6 +27,7 @@ public class ExchangeStatusService {
     private final BookhouseRepository bookhouseRepository;
     private final ExchangeStatusRepository exchangeStatusRepository;
     private final ChatClient chatClient;
+    private final BookhouseService bookhouseService;
 
     public ExchangedBookResponse getBookIdByChatroomId(Long chatroomId, Long myId) {
 
@@ -85,6 +86,7 @@ public class ExchangeStatusService {
         // ✅ 채팅방 ID 찾아서 자동 메시지 전송
         ExchangeRequestMessageDto messageDto = new ExchangeRequestMessageDto(
                 exchangeStatus.getChatroomId(),
+                memberId,  // 교환 요청자 ID
                 "교환 신청이 도착했습니다.",
                 "EXCHANGE_REQUEST",  // MessageType.EXCHANGE_REQUEST as String
                 exchangeStatus.getExchangeStatusId()
@@ -155,6 +157,7 @@ public class ExchangeStatusService {
             try {
                 ExchangeRequestMessageDto messageDto = new ExchangeRequestMessageDto(
                         exchangeStatus.getChatroomId(),
+                        0L,  // 시스템 메시지 (양측 모두 수락한 경우)
                         "교환이 예약되었습니다. 대면 교환을 진행해주세요.",
                         "EXCHANGE_RESERVED",
                         exchangeStatus.getExchangeStatusId()
@@ -168,6 +171,7 @@ public class ExchangeStatusService {
             try {
                 ExchangeRequestMessageDto messageDto = new ExchangeRequestMessageDto(
                         exchangeStatus.getChatroomId(),
+                        memberId,  // 수락한 사람의 ID
                         "교환 신청이 수락되었습니다.",
                         "EXCHANGE_ACCEPTED",
                         exchangeStatus.getExchangeStatusId()
@@ -201,11 +205,12 @@ public class ExchangeStatusService {
         }
 
         exchangeStatus.updateRequestStatus(RequestStatus.REJECTED);
-        
+
         // ✅ 교환 거절 시스템 메시지 전송
         try {
             ExchangeRequestMessageDto messageDto = new ExchangeRequestMessageDto(
                     exchangeStatus.getChatroomId(),
+                    memberId,  // 거절한 사람의 ID
                     "교환 신청이 거절되었습니다.",
                     "EXCHANGE_REJECTED",
                     exchangeStatus.getExchangeStatusId()
@@ -240,6 +245,7 @@ public class ExchangeStatusService {
         try {
             ExchangeRequestMessageDto messageDto = new ExchangeRequestMessageDto(
                     exchangeStatus.getChatroomId(),
+                    memberId,  // 취소한 사람의 ID
                     "교환 신청이 취소되었습니다.",
                     "SYSTEM",  // 취소는 일반 시스템 메시지로
                     exchangeStatus.getExchangeStatusId()
@@ -272,11 +278,12 @@ public class ExchangeStatusService {
             }
         }
         books.forEach(b -> b.updateIsExchanged(IsExchanged.EXCHANGED));
-        
+
         // ✅ 교환 완료 시스템 메시지 전송
         try {
             ExchangeRequestMessageDto messageDto = new ExchangeRequestMessageDto(
                     chatroomId,
+                    0L,  // 시스템 메시지 (양측 모두 완료)
                     "교환이 완료되었습니다. 즐거운 독서 되세요!",
                     "EXCHANGE_COMPLETED",
                     null  // 특정 교환 상태가 아닌 전체 교환 완료
@@ -309,11 +316,12 @@ public class ExchangeStatusService {
             b.updateIsExchanged(IsExchanged.PENDING);
             b.updateChatroomId(null);
         });
-        
+
         // ✅ 교환 반납 시스템 메시지 전송
         try {
             ExchangeRequestMessageDto messageDto = new ExchangeRequestMessageDto(
                     chatroomId,
+                    0L,  // 시스템 메시지 (양측 모두 반납)
                     "교환이 반납되었습니다. 감사합니다.",
                     "EXCHANGE_RETURNED",
                     null  // 특정 교환 상태가 아닌 전체 반납
@@ -324,5 +332,23 @@ public class ExchangeStatusService {
         }
         
         // TODO ExchangeStatus 레코드 삭제 필요할지
+    }
+
+    public kr.co.readingtown.bookhouse.dto.response.ExchangeStatusResponse getExchangeStatus(Long chatroomId) {
+        List<ExchangeStatus> exchangeStatusList = exchangeStatusRepository.findByChatroomId(chatroomId);
+
+        if (exchangeStatusList.isEmpty()) {
+            return null;
+        }
+
+        // 첫 번째 책의 IsExchanged 상태 확인 (두 책은 항상 동일한 상태여야 함)
+        Long bookhouseId = exchangeStatusList.get(0).getBookhouseId();
+        Bookhouse bookhouse = bookhouseRepository.findById(bookhouseId)
+                .orElseThrow(BookhouseException.BookhouseNotFound::new);
+
+        // IsExchanged enum을 String으로 변환하여 반환
+        return new kr.co.readingtown.bookhouse.dto.response.ExchangeStatusResponse(
+                bookhouse.getIsExchanged().name()
+        );
     }
 }
