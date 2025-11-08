@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 public interface BookhouseClient {
 
     @GetMapping("/internal/exchange-status/{chatroomId}/book")
-    ExchangedBookResponse getBookIdByChatroomId(@PathVariable Long chatroomId);
+    ExchangedBookResponse getBookIdByChatroomId(@PathVariable Long chatroomId, @RequestParam Long myId);
 
     @GetMapping("/internal/chatrooms/{chatroomId}/exchange-status")
     Boolean isExchanging(@PathVariable Long chatroomId);

@@ -64,9 +64,9 @@ public class ChatService {
     }
 
     // 채팅룸 교환 책 정보 조회
-    public ChatExchangedBookInfoResponse getExchangedBookInfo(Long chatroomId) {
+    public ChatExchangedBookInfoResponse getExchangedBookInfo(Long chatroomId, Long myId) {
 
-        ExchangedBookResponse exchangedBooks = bookhouseClient.getBookIdByChatroomId(chatroomId);
+        ExchangedBookResponse exchangedBooks = bookhouseClient.getBookIdByChatroomId(chatroomId, myId);
 
         BookInfoResponse myBookInfo = null;
         BookInfoResponse partnerBookInfo = null;
