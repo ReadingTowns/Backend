@@ -8,5 +8,6 @@ public enum MessageType {
     EXCHANGE_RESERVED,  // 예약 완료
     EXCHANGE_COMPLETED, // 교환 완료
     EXCHANGE_RETURNED,  // 반납 완료
-    SYSTEM              // 시스템 자동 메시지
+    SYSTEM,             // 시스템 자동 메시지
+    PING                // Heartbeat (연결 유지용)
 }
