@@ -180,7 +180,8 @@ public class ChatService {
             }
         }
 
-        // 한 명이라도 나가면 채팅방 즉시 삭제
+        // 한 명이라도 나가면 메시지 먼저 삭제 후 채팅방 삭제
+        messageRepository.deleteByChatroomId(chatroomId);
         chatroomRepository.delete(chatroom);
     }
 
