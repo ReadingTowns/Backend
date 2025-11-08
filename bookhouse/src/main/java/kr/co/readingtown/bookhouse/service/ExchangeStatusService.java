@@ -29,6 +29,7 @@ public class ExchangeStatusService {
     private final ChatClient chatClient;
     private final BookhouseService bookhouseService;
 
+    // 채팅방 내 교환요청한 책 정보 조회
     public ExchangedBookResponse getBookIdByChatroomId(Long chatroomId, Long myId) {
 
         List<ExchangeStatus> exchangeStatusList = exchangeStatusRepository.findByChatroomId(chatroomId);
