@@ -58,13 +58,19 @@ public class WebsocketHandler extends TextWebSocketHandler {
         // ✅ 1. JSON → ChatMessageRequestDto로 파싱
         ChatMessageRequestDto request = objectMapper.readValue(payload, ChatMessageRequestDto.class);
 
+        // ✅ 2. Heartbeat PING 메시지 처리 (연결 유지용, 저장하지 않음)
+        if (request.messageType() == MessageType.PING) {
+            log.debug("Heartbeat PING received from session: {}", session.getId());
+            return; // PING 메시지는 무시하고 연결만 유지
+        }
+
         String roomId = String.valueOf(request.chatroomId());
 
-        // ✅ 2. 방 등록 및 세션 추가
+        // ✅ 3. 방 등록 및 세션 추가
         chatRooms.computeIfAbsent(roomId, k -> ConcurrentHashMap.newKeySet()).add(session);
         sessionRoomMap.put(session, roomId);
 
-        // ✅ 3. 인증된 사용자 확인
+        // ✅ 4. 인증된 사용자 확인
         Long senderId = (Long) session.getAttributes().get("memberId");
         if (senderId == null) {
             log.warn("인증되지 않은 사용자");

@@ -1,6 +1,7 @@
 package kr.co.readingtown.bookhouse.internalapi;
 
 import kr.co.readingtown.bookhouse.dto.response.ExchangedBookResponse;
+import kr.co.readingtown.bookhouse.dto.response.ExchangeStatusResponse;
 import kr.co.readingtown.bookhouse.dto.response.ExchangingBookResponse;
 import kr.co.readingtown.bookhouse.service.BookhouseService;
 import kr.co.readingtown.bookhouse.service.ExchangeStatusService;
@@ -23,6 +24,13 @@ public class InternalExchangeStatusController {
             @AuthenticationPrincipal Long myId) {
 
         return exchangeStatusService.getBookIdByChatroomId(chatroomId, myId);
+    }
+
+    @GetMapping("/internal/chatrooms/{chatroomId}/status")
+    public ExchangeStatusResponse getExchangeStatus(
+            @PathVariable Long chatroomId) {
+
+        return exchangeStatusService.getExchangeStatus(chatroomId);
     }
 
     @PatchMapping("/internal/chatrooms/{chatroomId}/books/complete-exchange")
