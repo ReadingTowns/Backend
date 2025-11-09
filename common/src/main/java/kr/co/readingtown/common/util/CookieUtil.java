@@ -38,7 +38,7 @@ public class CookieUtil {
                 .secure(true)
                 .path("/")
                 .sameSite("None")
-                .maxAge(Duration.ofSeconds(30))
+                .maxAge(Duration.ofMinutes(15))
                 .build();
 
         // refreshToken 쿠키 설정
