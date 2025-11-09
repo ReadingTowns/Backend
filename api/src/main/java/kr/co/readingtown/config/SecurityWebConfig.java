@@ -49,7 +49,8 @@ public class SecurityWebConfig {
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/internal/**",
-            "/auth/callback/**"
+            "/auth/callback/**",
+            "/api/v1/auth/reissue"
     };
 
     @Bean
