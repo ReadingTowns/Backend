@@ -25,7 +25,7 @@ public class TokenProvider {
     public static final String ACCESS_TOKEN_TYPE = "access";
 
     public static final String REFRESH_TOKEN_TYPE = "refresh";
-    private final long accessTokenValidityInMillis = 1000 * 60 * 15; // 15분
+    private final long accessTokenValidityInMillis = 1000 * 30; // 30초
     private final long refreshTokenValidityInMillis = 1000L * 60 * 60 * 24 * 7; // 일주일
 
     @PostConstruct
