@@ -48,7 +48,7 @@ public class SecurityWebConfig {
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/swagger-ui.html",
-            "/internal",
+            "/internal/**",
             "/auth/callback/**"
     };
 
