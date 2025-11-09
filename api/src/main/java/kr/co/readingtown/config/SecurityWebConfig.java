@@ -43,6 +43,7 @@ public class SecurityWebConfig {
     private final String[] PermitAllPatterns = {
             "/",
             "/login**",
+            "/login/oauth2/**",
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/swagger-ui.html"
