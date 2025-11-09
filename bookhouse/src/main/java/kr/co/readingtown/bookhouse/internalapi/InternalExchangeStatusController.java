@@ -6,7 +6,6 @@ import kr.co.readingtown.bookhouse.dto.response.ExchangingBookResponse;
 import kr.co.readingtown.bookhouse.service.BookhouseService;
 import kr.co.readingtown.bookhouse.service.ExchangeStatusService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,16 +18,13 @@ public class InternalExchangeStatusController {
     private final BookhouseService bookhouseService;
 
     @GetMapping("/internal/exchange-status/{chatroomId}/book")
-    public ExchangedBookResponse getBookIdByChatroomId(
-            @PathVariable Long chatroomId,
-            @RequestParam Long myId) {
+    public ExchangedBookResponse getBookIdByChatroomId(@PathVariable Long chatroomId, @RequestParam Long myId) {
 
         return exchangeStatusService.getBookIdByChatroomId(chatroomId, myId);
     }
 
     @GetMapping("/internal/chatrooms/{chatroomId}/status")
-    public ExchangeStatusResponse getExchangeStatus(
-            @PathVariable Long chatroomId) {
+    public ExchangeStatusResponse getExchangeStatus(@PathVariable Long chatroomId) {
 
         return exchangeStatusService.getExchangeStatus(chatroomId);
     }
