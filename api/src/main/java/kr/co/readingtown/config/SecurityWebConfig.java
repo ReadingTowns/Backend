@@ -46,7 +46,8 @@ public class SecurityWebConfig {
             "/login/oauth2/**",
             "/v3/api-docs/**",
             "/swagger-ui/**",
-            "/swagger-ui.html"
+            "/swagger-ui.html",
+            "/internal"
     };
 
     @Bean
@@ -70,7 +71,7 @@ public class SecurityWebConfig {
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/hc").permitAll()
                         .requestMatchers(PermitAllPatterns).permitAll()
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
