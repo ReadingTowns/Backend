@@ -44,6 +44,7 @@ public class SecurityWebConfig {
             "/",
             "/login**",
             "/login/oauth2/**",
+            "/login/oauth2/code/**",
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/swagger-ui.html",
