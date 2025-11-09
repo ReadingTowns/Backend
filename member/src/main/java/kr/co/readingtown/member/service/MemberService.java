@@ -1,6 +1,7 @@
 package kr.co.readingtown.member.service;
 
 import kr.co.readingtown.common.config.AppProperties;
+import kr.co.readingtown.common.s3.ImageService;
 import kr.co.readingtown.member.dto.request.internal.FollowBulkCheckRequestDto;
 import kr.co.readingtown.member.integration.bookhouse.FollowClient;
 import kr.co.readingtown.member.domain.Member;
@@ -33,6 +34,7 @@ public class MemberService {
     private final AppProperties appProperties;
     private final LocationService locationService;
     private final FollowClient followClient;
+    private final ImageService imageService;
 
     @Transactional
     public void registerMember(LoginType loginType, String loginId, String username) {
@@ -440,5 +442,28 @@ public class MemberService {
                     .build());
         }
         return result;
+    }
+
+    @Transactional
+    public ProfileImageResponseDto updateImage(Long memberId) {
+
+        // 멤버 조회
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberException.NoAuthMember::new);
+
+        // key 조회
+        String oldKey = imageService.urlToKey(member.getProfileImage());
+        String newKey = "profile/" + memberId + "_" + UUID.randomUUID() + ".png";
+
+        // oldKey가 default가 아니라면 삭제
+        if (oldKey.equals("readingtown_profile_gray.png")) {
+            imageService.deleteImage(oldKey);
+        }
+
+        // 업로드 presigned url 발급
+        String presignedUrl = imageService.generateUploadPresignedUrl(newKey);
+        member.updateImage(imageService.keyToUrl(newKey));
+
+        return ProfileImageResponseDto.of(presignedUrl);
     }
 }
