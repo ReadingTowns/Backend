@@ -29,13 +29,13 @@ public class InternalExchangeStatusController {
         return exchangeStatusService.getExchangeStatus(chatroomId);
     }
 
-    @PatchMapping("/internal/chatrooms/{chatroomId}/books/complete-exchange")
+    @PostMapping("/internal/chatrooms/{chatroomId}/books/complete-exchange")
     public void completeExchange(@PathVariable Long chatroomId) {
 
         exchangeStatusService.completeExchange(chatroomId);
     }
 
-    @PatchMapping("/internal/chatrooms/{chatroomId}/books/return-exchange")
+    @PostMapping("/internal/chatrooms/{chatroomId}/books/return-exchange")
     public void returnExchange(@PathVariable Long chatroomId) {
 
         exchangeStatusService.returnExchange(chatroomId);

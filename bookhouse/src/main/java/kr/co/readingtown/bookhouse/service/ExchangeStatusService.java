@@ -338,8 +338,7 @@ public class ExchangeStatusService {
         } catch (Exception e) {
             // 채팅 서비스 장애 시에도 교환 반납은 정상 처리
         }
-        
-        // TODO ExchangeStatus 레코드 삭제 필요할지
+        // ExchangeStatus 레코드는 우선 교환 이력 추적을 위해 삭제하지 않고 보존
     }
 
     public kr.co.readingtown.bookhouse.dto.response.ExchangeStatusResponse getExchangeStatus(Long chatroomId) {

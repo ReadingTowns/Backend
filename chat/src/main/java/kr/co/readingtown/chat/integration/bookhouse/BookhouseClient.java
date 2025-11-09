@@ -21,9 +21,9 @@ public interface BookhouseClient {
     @GetMapping("/internal/chatrooms/{chatroomId}/status")
     ExchangeStatusResponse getExchangeStatus(@PathVariable Long chatroomId);
 
-    @PatchMapping("/internal/chatrooms/{chatroomId}/books/complete-exchange")
+    @PostMapping("/internal/chatrooms/{chatroomId}/books/complete-exchange")
     void completeExchange(@PathVariable("chatroomId") Long chatroomId);
 
-    @PatchMapping("/internal/chatrooms/{chatroomId}/books/return-exchange")
+    @PostMapping("/internal/chatrooms/{chatroomId}/books/return-exchange")
     void returnExchange(@PathVariable("chatroomId") Long chatroomId);
 }
