@@ -238,7 +238,6 @@ public class MemberService {
 
         member.updateProfile(
                 updateProfileRequestDto.nickname(),
-                updateProfileRequestDto.profileImage(),
                 updateProfileRequestDto.availableTime()
         );
     }
