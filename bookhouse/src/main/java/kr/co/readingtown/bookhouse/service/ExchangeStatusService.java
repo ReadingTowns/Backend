@@ -269,22 +269,22 @@ public class ExchangeStatusService {
     // 교환 시작 - RESERVED -> EXCHANGED
     @Transactional
     public void completeExchange(Long chatroomId) {
-        List<ExchangeStatus> exchangeStatusList = exchangeStatusRepository.findAllByChatroomIdForUpdate(chatroomId);
+        // chatroomId로 Bookhouse 조회 (동시성 제어를 위한 행 잠금)
+        List<Bookhouse> books = bookhouseRepository.findAllByChatroomIdForUpdate(chatroomId);
 
-
-        if (exchangeStatusList.size() != 2) {
+        // Bookhouse가 정확히 2개인지 확인
+        if (books.size() != 2) {
             throw new BookhouseException.InvalidExchangeStatusCount();
         }
 
-        // 두 개의 Bookhouse를 모두 RESERVED -> EXCHANGED로 변경
-        List<Long> bookhouseIds = exchangeStatusList.stream().map(ExchangeStatus::getBookhouseId).toList();
-        List<Bookhouse> books = bookhouseRepository.findAllByIdForUpdate(bookhouseIds);
-
+        // 두 Bookhouse 모두 RESERVED 상태인지 확인
         for (Bookhouse b : books) {
             if (b.getIsExchanged() != IsExchanged.RESERVED) {
                 throw new BookhouseException.InvalidExchangeStatusForComplete();
             }
         }
+
+        // RESERVED -> EXCHANGED로 변경
         books.forEach(b -> b.updateIsExchanged(IsExchanged.EXCHANGED));
 
         // ✅ 교환 완료 시스템 메시지 전송
@@ -305,21 +305,22 @@ public class ExchangeStatusService {
     // 교환 반납 - EXCHANGED -> PENDING
     @Transactional
     public void returnExchange(Long chatroomId) {
-        List<ExchangeStatus> exchangeStatusList =
-                exchangeStatusRepository.findAllByChatroomIdForUpdate(chatroomId);
+        // chatroomId로 Bookhouse 조회 (동시성 제어를 위한 행 잠금)
+        List<Bookhouse> books = bookhouseRepository.findAllByChatroomIdForUpdate(chatroomId);
 
-        if (exchangeStatusList.size() != 2) {
+        // Bookhouse가 정확히 2개인지 확인
+        if (books.size() != 2) {
             throw new BookhouseException.InvalidExchangeStatusCount();
         }
 
-        List<Long> ids = exchangeStatusList.stream().map(ExchangeStatus::getBookhouseId).toList();
-        List<Bookhouse> books = bookhouseRepository.findAllByIdForUpdate(ids);
-
+        // 두 Bookhouse 모두 EXCHANGED 상태인지 확인
         for (Bookhouse b : books) {
             if (b.getIsExchanged() != IsExchanged.EXCHANGED) {
                 throw new BookhouseException.InvalidExchangeStatusForReturn();
             }
         }
+
+        // EXCHANGED -> PENDING으로 변경 및 chatroomId 초기화
         books.forEach(b -> {
             b.updateIsExchanged(IsExchanged.PENDING);
             b.updateChatroomId(null);

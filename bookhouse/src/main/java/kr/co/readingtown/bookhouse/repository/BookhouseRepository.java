@@ -27,6 +27,10 @@ public interface BookhouseRepository extends JpaRepository<Bookhouse, Long> {
     List<Bookhouse> findAllByChatroomId(Long chatroomId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT b FROM Bookhouse b WHERE b.chatroomId = :chatroomId")
+    List<Bookhouse> findAllByChatroomIdForUpdate(@Param("chatroomId") Long chatroomId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select b from Bookhouse b where b.bookhouseId in :bookhouseIds")
     List<Bookhouse> findAllByIdForUpdate(@Param("bookhouseIds")List<Long> bookhouseIds);
 
