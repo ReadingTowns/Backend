@@ -5,7 +5,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import kr.co.readingtown.authentication.client.MemberClient;
-import kr.co.readingtown.authentication.exception.AuthenticationException;
 import kr.co.readingtown.common.util.CookieUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -33,7 +32,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 1. 쿠키에서 access token 추출
         String token = cookieUtil.extractTokenFromCookie(request, ACCESS_TOKEN_COOKIE_NAME);
         if (token == null) {
-            throw new AuthenticationException.NoTokenException();
+            filterChain.doFilter(request, response);
+            return;
         }
 
         // 2. access token 유효성 검사
