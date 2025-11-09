@@ -29,7 +29,7 @@ public class ExchangeStatusService {
     private final ChatClient chatClient;
     private final BookhouseService bookhouseService;
 
-    // 채팅방 내 교환요청한 책 정보 조회
+    // 채팅방 내 교환 요청한 책 정보 조회
     public ExchangedBookResponse getBookIdByChatroomId(Long chatroomId, Long myId) {
 
         List<ExchangeStatus> exchangeStatusList = exchangeStatusRepository.findByChatroomId(chatroomId);
@@ -41,19 +41,26 @@ public class ExchangeStatusService {
             Bookhouse bookhouse = bookhouseRepository.findById(status.getBookhouseId())
                     .orElseThrow(BookhouseException.BookhouseNotFound::new);
 
+            // 교환 확정 이후 (RESERVED, EXCHANGED) → isExchanged 상태 반환
+            // 교환 요청 단계 (PENDING) → requestStatus 상태 반환
+            String statusValue = (bookhouse.getIsExchanged() == IsExchanged.RESERVED ||
+                                  bookhouse.getIsExchanged() == IsExchanged.EXCHANGED)
+                    ? bookhouse.getIsExchanged().toString()
+                    : status.getRequestStatus().toString();
+
             if (bookhouse.getMemberId().equals(myId)) {
                 myBook = new ExchangedDetail(
                         status.getExchangeStatusId(),
                         bookhouse.getBookhouseId(),
                         bookhouse.getBookId(),
-                        bookhouse.getIsExchanged().toString()
+                        statusValue
                 );
             } else {
                 partnerBook = new ExchangedDetail(
                         status.getExchangeStatusId(),
                         bookhouse.getBookhouseId(),
                         bookhouse.getBookId(),
-                        bookhouse.getIsExchanged().toString()
+                        statusValue
                 );
             }
         }
@@ -248,7 +255,7 @@ public class ExchangeStatusService {
                     exchangeStatus.getChatroomId(),
                     memberId,  // 취소한 사람의 ID
                     "교환 신청이 취소되었습니다.",
-                    "SYSTEM",  // 취소는 일반 시스템 메시지로
+                    "EXCHANGE_CANCELED",  // 교환 취소 메시지 타입
                     exchangeStatus.getExchangeStatusId()
             );
             chatClient.sendSystemMessage(messageDto);

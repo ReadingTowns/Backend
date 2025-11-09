@@ -5,6 +5,7 @@ public enum MessageType {
     EXCHANGE_REQUEST,   // 교환 신청
     EXCHANGE_ACCEPTED,  // 교환 수락
     EXCHANGE_REJECTED,  // 교환 거절
+    EXCHANGE_CANCELED,  // 교환 취소
     EXCHANGE_RESERVED,  // 예약 완료
     EXCHANGE_COMPLETED, // 교환 완료
     EXCHANGE_RETURNED,  // 반납 완료
