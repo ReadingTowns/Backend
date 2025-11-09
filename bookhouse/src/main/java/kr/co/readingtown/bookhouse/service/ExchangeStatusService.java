@@ -269,8 +269,8 @@ public class ExchangeStatusService {
     // 교환 시작 - RESERVED -> EXCHANGED
     @Transactional
     public void completeExchange(Long chatroomId) {
-        // chatroomId로 Bookhouse 조회
-        List<Bookhouse> books = bookhouseRepository.findAllByChatroomId(chatroomId);
+        // chatroomId로 Bookhouse 조회 (동시성 제어를 위한 행 잠금)
+        List<Bookhouse> books = bookhouseRepository.findAllByChatroomIdForUpdate(chatroomId);
 
         // Bookhouse가 정확히 2개인지 확인
         if (books.size() != 2) {
@@ -305,8 +305,8 @@ public class ExchangeStatusService {
     // 교환 반납 - EXCHANGED -> PENDING
     @Transactional
     public void returnExchange(Long chatroomId) {
-        // chatroomId로 Bookhouse 조회
-        List<Bookhouse> books = bookhouseRepository.findAllByChatroomId(chatroomId);
+        // chatroomId로 Bookhouse 조회 (동시성 제어를 위한 행 잠금)
+        List<Bookhouse> books = bookhouseRepository.findAllByChatroomIdForUpdate(chatroomId);
 
         // Bookhouse가 정확히 2개인지 확인
         if (books.size() != 2) {
