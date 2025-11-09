@@ -161,4 +161,12 @@ public class ExternalMemberController {
     public List<ExchangingBookResponseDto> getMyExchangingBooks(@AuthenticationPrincipal Long memberId) {
         return bookhouseReader.getExchangingBooks(memberId);
     }
+
+    @PatchMapping("/me/profile-image")
+    @Operation(summary = "유저 프로필 이미지 수정", description = "새로 업데이트할 url을 반환합니다.")
+    public ProfileImageResponseDto updateProfileImage(@AuthenticationPrincipal Long memberId) {
+
+        return memberService.updateImage(memberId);
+    }
+
 }
