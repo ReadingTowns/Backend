@@ -68,6 +68,10 @@ public class Member extends BaseEntity {
     @Column(name = "is_onboarded")
     private boolean isOnboarded = false;
 
+    public void updateImage(String image) {
+        this.profileImage = image;
+    }
+
     public void updateProfile(String nickname, String profileImage, String availableTime) {
         this.nickname = nickname;
         this.profileImage = profileImage;
