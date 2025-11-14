@@ -142,21 +142,13 @@ public class ChatService {
                 ? chatroom.getOwnerId()
                 : chatroom.getRequesterId();
 
-        // 상대방이 채팅방을 나간 경우 처리
-        if (partnerId == null) {
-            Message message = latestMessageMap.get(chatroom.getChatroomId());
-            return ChatroomPreviewResponseDto.of(
-                    chatroom.getChatroomId(),
-                    "(알 수 없음)",
-                    message);
-        }
-
         ChatMemberInfoResponse partnerInfo = memberClient.getMemberInfo(partnerId);
         Message message = latestMessageMap.get(chatroom.getChatroomId());
 
         return ChatroomPreviewResponseDto.of(
                 chatroom.getChatroomId(),
                 partnerInfo.nickname(),
+                partnerInfo.profileImage(),
                 message);
     }
 
