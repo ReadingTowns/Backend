@@ -7,15 +7,17 @@ import java.time.LocalDateTime;
 public record ChatroomPreviewResponseDto(
         Long chatroomId,
         String partnerName,
+        String profileImage,
         String lastMessage,
         LocalDateTime lastMessageTime
 ) {
 
-    public static ChatroomPreviewResponseDto of(Long chatroomId, String partnerName, Message message) {
+    public static ChatroomPreviewResponseDto of(Long chatroomId, String partnerName, String profileImage, Message message) {
 
         return new ChatroomPreviewResponseDto(
                 chatroomId,
                 partnerName,
+                profileImage,
                 message != null ? message.getContent() : null,
                 message != null ? message.getSentTime() : null
         );
