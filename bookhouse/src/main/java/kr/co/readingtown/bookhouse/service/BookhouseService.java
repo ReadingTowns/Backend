@@ -125,16 +125,20 @@ public class BookhouseService {
             return new ArrayList<>();
         }
         
-        // 채팅방별로 그룹화
-        Map<Long, List<Bookhouse>> booksByChatroom = myExchangedBooks.stream()
+        // 채팅방별로 그룹화 (채팅방당 내 책은 1개)
+        Map<Long, Bookhouse> booksByChatroom = myExchangedBooks.stream()
                 .filter(b -> b.getChatroomId() != null)
-                .collect(Collectors.groupingBy(Bookhouse::getChatroomId));
-        
+                .collect(Collectors.toMap(
+                        Bookhouse::getChatroomId,
+                        book -> book,
+                        (existing, replacement) -> existing // 중복 시 기존 것 유지
+                ));
+
         List<ExchangingBookResponse> responses = new ArrayList<>();
-        
-        for (Map.Entry<Long, List<Bookhouse>> entry : booksByChatroom.entrySet()) {
+
+        for (Map.Entry<Long, Bookhouse> entry : booksByChatroom.entrySet()) {
             Long chatroomId = entry.getKey();
-            Bookhouse myBook = entry.getValue().get(0); // 채팅방당 내 책은 1개
+            Bookhouse myBook = entry.getValue();
             
             // 같은 채팅방의 상대방 책 찾기 (채팅방에는 2개의 책만 존재)
             List<Bookhouse> ChatroomBooks = bookhouseRepository.findAllByChatroomId(chatroomId);
