@@ -55,8 +55,14 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
         if (request instanceof ServletServerHttpRequest servletRequest) {
             HttpServletRequest httpRequest = servletRequest.getServletRequest();
 
-            String roomId = httpRequest.getParameter("roomId");
-            attributes.put("roomId", roomId);
+            // WebSocket 쿼리 파라미터에서 roomId 추출
+            String query = request.getURI().getQuery();
+            if (query != null) {
+                String roomId = extractQueryParam(query, "roomId");
+                if (roomId != null && !roomId.isEmpty()) {
+                    attributes.put("roomId", roomId);
+                }
+            }
 
             String token = cookieUtil.extractTokenFromCookie(httpRequest, ACCESS_TOKEN_COOKIE_NAME);
 
@@ -84,5 +90,24 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
                                ServerHttpResponse response,
                                WebSocketHandler wsHandler,
                                Exception exception) {
+    }
+
+    /**
+     * 쿼리 스트링에서 특정 파라미터 값 추출
+     * 예: "roomId=123&other=value" -> "123"
+     */
+    private String extractQueryParam(String query, String paramName) {
+        if (query == null || query.isEmpty()) {
+            return null;
+        }
+
+        String[] params = query.split("&");
+        for (String param : params) {
+            String[] keyValue = param.split("=");
+            if (keyValue.length == 2 && keyValue[0].equals(paramName)) {
+                return keyValue[1];
+            }
+        }
+        return null;
     }
 }
