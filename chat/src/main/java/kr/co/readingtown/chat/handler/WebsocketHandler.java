@@ -42,10 +42,15 @@ public class WebsocketHandler extends TextWebSocketHandler {
     // 프론트에서 /ws/conn으로 연결 요청하면
     // 1. HTTP -> WebSocket 핸드쉐이크 요청
     // 2. 연결 성공시 afterConnectionEstablished(WebSocketSession session) 호출
+    // 3. afterConnectionEstablished에서 채팅방에 세션 연결하도록
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 
         log.info("{} 연결됨", session.getId());
+
+        String roomId = (String) session.getAttributes().get("roomId");
+        chatRooms.computeIfAbsent(roomId, k -> ConcurrentHashMap.newKeySet()).add(session);
+        sessionRoomMap.put(session, roomId);
     }
 
     // 소켓 메시지 처리
@@ -55,22 +60,16 @@ public class WebsocketHandler extends TextWebSocketHandler {
         String payload = message.getPayload();
         log.info("payload {}", payload);
 
-        // ✅ 1. JSON → ChatMessageRequestDto로 파싱
+        // 1. JSON → ChatMessageRequestDto로 파싱
         ChatMessageRequestDto request = objectMapper.readValue(payload, ChatMessageRequestDto.class);
 
-        // ✅ 2. Heartbeat PING 메시지 처리 (연결 유지용, 저장하지 않음)
+        // 2. Heartbeat PING 메시지 처리 (연결 유지용, 저장하지 않음)
         if (request.messageType() == MessageType.PING) {
             log.debug("Heartbeat PING received from session: {}", session.getId());
             return; // PING 메시지는 무시하고 연결만 유지
         }
 
-        String roomId = String.valueOf(request.chatroomId());
-
-        // ✅ 3. 방 등록 및 세션 추가
-        chatRooms.computeIfAbsent(roomId, k -> ConcurrentHashMap.newKeySet()).add(session);
-        sessionRoomMap.put(session, roomId);
-
-        // ✅ 4. 인증된 사용자 확인
+        // 3. 인증된 사용자 확인
         Long senderId = (Long) session.getAttributes().get("memberId");
         if (senderId == null) {
             log.warn("인증되지 않은 사용자");
@@ -78,7 +77,7 @@ public class WebsocketHandler extends TextWebSocketHandler {
             return;
         }
 
-        // ✅ 4. senderId를 세션에서 가져온 값으로 대체하여 메시지 저장 및 브로드캐스트
+        // 4. senderId를 세션에서 가져온 값으로 대체하여 메시지 저장 및 브로드캐스트
         // 보안: 클라이언트가 보낸 senderId는 무시하고 인증된 사용자 ID 사용
         ChatMessageRequestDto authenticatedRequest = new ChatMessageRequestDto(
                 request.chatroomId(),
