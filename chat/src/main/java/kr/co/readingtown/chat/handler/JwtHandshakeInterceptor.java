@@ -54,6 +54,10 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
 
         if (request instanceof ServletServerHttpRequest servletRequest) {
             HttpServletRequest httpRequest = servletRequest.getServletRequest();
+
+            String roomId = httpRequest.getParameter("roomId");
+            attributes.put("roomId", roomId);
+
             String token = cookieUtil.extractTokenFromCookie(httpRequest, ACCESS_TOKEN_COOKIE_NAME);
 
             if (token == null) {
