@@ -70,10 +70,9 @@ public class ReviewService {
         bookValidator.validateBookExists(bookId);
         memberValidator.validateMemberExists(memberId);
 
-        ReviewIdAndContentDto myReview = reviewRepository.findReviewByBookIdAndMemberId(bookId, memberId)
-                .orElseThrow(ReviewException.ReviewNotFound::new);
-
-        return ReviewResponseDto.toReviewResponseDto(myReview);
+        return reviewRepository.findReviewByBookIdAndMemberId(bookId, memberId)
+                .map(ReviewResponseDto::toReviewResponseDto)
+                .orElse(null);
     }
 
     // 특정 책의 모든 감상평 조회 (자기 자신 제외)
