@@ -3,7 +3,7 @@ package kr.co.readingtown.bookhouse.service;
 import kr.co.readingtown.bookhouse.domain.Bookhouse;
 import kr.co.readingtown.bookhouse.domain.enums.IsExchanged;
 import kr.co.readingtown.bookhouse.dto.response.ExchangingBookResponse;
-import kr.co.readingtown.bookhouse.dto.response.BookPreviewResponseDto;
+import kr.co.readingtown.bookhouse.dto.response.BookhouseBookResponseDto;
 import kr.co.readingtown.bookhouse.integration.book.BookReader;
 import kr.co.readingtown.bookhouse.repository.BookhouseRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -69,11 +69,11 @@ class BookhouseServiceTest {
         Bookhouse partnerBook = createBookhouse(2L, 2L, 20L, IsExchanged.EXCHANGED, chatroomId);
         
         // 책 정보 DTO (실제 생성자 순서: bookId, bookImage, bookName, author)
-        BookPreviewResponseDto myBookInfo = new BookPreviewResponseDto(
+        BookhouseBookResponseDto myBookInfo = new BookhouseBookResponseDto(
                 10L, "http://image1.jpg", "내 책 제목", "작가1"
         );
         
-        BookPreviewResponseDto partnerBookInfo = new BookPreviewResponseDto(
+        BookhouseBookResponseDto partnerBookInfo = new BookhouseBookResponseDto(
                 20L, "http://image2.jpg", "상대방 책 제목", "작가2"  
         );
         
@@ -121,16 +121,16 @@ class BookhouseServiceTest {
         Bookhouse partnerBook2 = createBookhouse(4L, 3L, 40L, IsExchanged.EXCHANGED, chatroomId2);
         
         // 책 정보 Mock
-        BookPreviewResponseDto bookInfo1 = new BookPreviewResponseDto(
+        BookhouseBookResponseDto bookInfo1 = new BookhouseBookResponseDto(
                 10L, "http://image1.jpg", "책1", "작가1"
         );
-        BookPreviewResponseDto bookInfo2 = new BookPreviewResponseDto(
+        BookhouseBookResponseDto bookInfo2 = new BookhouseBookResponseDto(
                 20L, "http://image2.jpg", "책2", "작가2"
         );
-        BookPreviewResponseDto bookInfo3 = new BookPreviewResponseDto(
+        BookhouseBookResponseDto bookInfo3 = new BookhouseBookResponseDto(
                 30L, "http://image3.jpg", "책3", "작가3"
         );
-        BookPreviewResponseDto bookInfo4 = new BookPreviewResponseDto(
+        BookhouseBookResponseDto bookInfo4 = new BookhouseBookResponseDto(
                 40L, "http://image4.jpg", "책4", "작가4"
         );
         
@@ -163,7 +163,7 @@ class BookhouseServiceTest {
         // Given
         Bookhouse myBook = createBookhouse(1L, memberId, 10L, IsExchanged.EXCHANGED, chatroomId);
         
-        BookPreviewResponseDto myBookInfo = new BookPreviewResponseDto(
+        BookhouseBookResponseDto myBookInfo = new BookhouseBookResponseDto(
                 10L, "http://image.jpg", "내 책", "작가"
         );
         

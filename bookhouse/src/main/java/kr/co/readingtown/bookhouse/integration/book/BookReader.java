@@ -1,7 +1,7 @@
 package kr.co.readingtown.bookhouse.integration.book;
 
 import kr.co.readingtown.bookhouse.dto.request.BookInfoRequestDto;
-import kr.co.readingtown.bookhouse.dto.response.BookPreviewResponseDto;
+import kr.co.readingtown.bookhouse.dto.response.BookhouseBookResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +14,7 @@ public class BookReader {
 
     private final BookClient bookClient;
 
-    public List<BookPreviewResponseDto> getBookInfo(List<Long> bookIds) {
+    public List<BookhouseBookResponseDto> getBookInfo(List<Long> bookIds) {
 
         if (bookIds == null || bookIds.isEmpty()) {
             return Collections.emptyList();

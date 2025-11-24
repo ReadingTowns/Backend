@@ -3,7 +3,7 @@ package kr.co.readingtown.bookhouse.service;
 import kr.co.readingtown.bookhouse.domain.Bookhouse;
 import kr.co.readingtown.bookhouse.domain.enums.IsExchanged;
 import kr.co.readingtown.bookhouse.dto.request.BookInfoRequestDto;
-import kr.co.readingtown.bookhouse.dto.response.BookPreviewResponseDto;
+import kr.co.readingtown.bookhouse.dto.response.BookhouseBookResponseDto;
 import kr.co.readingtown.bookhouse.dto.response.BookhouseOwnerResponseDto;
 import kr.co.readingtown.bookhouse.dto.response.BookhouseSearchResponseDto;
 import kr.co.readingtown.bookhouse.dto.response.ExchangingBookDetail;
@@ -82,7 +82,7 @@ public class BookhouseService {
     }
 
     // 특정 회원의 서재 책 리스트 조회
-    public PageResponse<BookPreviewResponseDto> getBookhouseBooks(Long memberId, int page, int size) {
+    public PageResponse<BookhouseBookResponseDto> getBookhouseBooks(Long memberId, int page, int size) {
 
         Page<Bookhouse> bookhousePage = bookhouseRepository.findAllByMemberIdOrderByCreatedAtDesc(memberId, PageRequest.of(page, size));
 
@@ -90,20 +90,20 @@ public class BookhouseService {
                 .map(Bookhouse::getBookId)
                 .toList();
 
-        List<BookPreviewResponseDto> bookInfoList = bookReader.getBookInfo(bookIds);
+        List<BookhouseBookResponseDto> bookInfoList = bookReader.getBookInfo(bookIds);
         
         // bookId를 키로 하는 Map 생성
-        Map<Long, BookPreviewResponseDto> bookInfoMap = bookInfoList.stream()
-                .collect(Collectors.toMap(BookPreviewResponseDto::bookId, Function.identity()));
+        Map<Long, BookhouseBookResponseDto> bookInfoMap = bookInfoList.stream()
+                .collect(Collectors.toMap(BookhouseBookResponseDto::bookId, Function.identity()));
         
         // bookhouseId를 포함한 새로운 리스트 생성
-        List<BookPreviewResponseDto> content = new ArrayList<>();
+        List<BookhouseBookResponseDto> content = new ArrayList<>();
         List<Bookhouse> bookhouseList = bookhousePage.getContent();
         
         for (Bookhouse bookhouse : bookhouseList) {
-            BookPreviewResponseDto bookInfo = bookInfoMap.get(bookhouse.getBookId());
+            BookhouseBookResponseDto bookInfo = bookInfoMap.get(bookhouse.getBookId());
             
-            content.add(new BookPreviewResponseDto(
+            content.add(new BookhouseBookResponseDto(
                     bookhouse.getBookhouseId(),
                     bookInfo.bookId(),
                     bookInfo.bookImage(),
@@ -148,8 +148,8 @@ public class BookhouseService {
                     .orElse(null);
             
             // 책 정보 조회
-            BookPreviewResponseDto myBookInfo = bookReader.getBookInfo(List.of(myBook.getBookId())).get(0);
-            BookPreviewResponseDto partnerBookInfo = null;
+            BookhouseBookResponseDto myBookInfo = bookReader.getBookInfo(List.of(myBook.getBookId())).get(0);
+            BookhouseBookResponseDto partnerBookInfo = null;
             
             if (partnerBook != null) {
                 partnerBookInfo = bookReader.getBookInfo(List.of(partnerBook.getBookId())).get(0);

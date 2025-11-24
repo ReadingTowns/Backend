@@ -3,7 +3,7 @@ package kr.co.readingtown.bookhouse.externalapi;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.co.readingtown.bookhouse.dto.request.BookInfoRequestDto;
-import kr.co.readingtown.bookhouse.dto.response.BookPreviewResponseDto;
+import kr.co.readingtown.bookhouse.dto.response.BookhouseBookResponseDto;
 import kr.co.readingtown.bookhouse.dto.response.BookhouseOwnerResponseDto;
 import kr.co.readingtown.bookhouse.dto.response.BookhouseSearchResponseDto;
 import kr.co.readingtown.bookhouse.service.BookhouseService;
@@ -51,7 +51,7 @@ public class ExternalBookhouseController {
 
     @GetMapping("/members/me")
     @Operation(summary = "내 서재 조회(믿지마셈)", description = "현재 로그인한 회원의 서재를 조회합니다.")
-    public PageResponse<BookPreviewResponseDto> getMyBookhouse(
+    public PageResponse<BookhouseBookResponseDto> getMyBookhouse(
             @AuthenticationPrincipal Long memberId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -61,7 +61,7 @@ public class ExternalBookhouseController {
 
     @GetMapping("/members/{memberId}")
     @Operation(summary = "회원의 서재 조회(믿지마셈)", description = "특정 회원의 서재를 조회합니다.")
-    public PageResponse<BookPreviewResponseDto> getBookhouseByMemberId(
+    public PageResponse<BookhouseBookResponseDto> getBookhouseByMemberId(
             @PathVariable Long memberId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {

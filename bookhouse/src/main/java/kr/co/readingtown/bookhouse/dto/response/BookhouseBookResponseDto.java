@@ -1,6 +1,6 @@
 package kr.co.readingtown.bookhouse.dto.response;
 
-public record BookPreviewResponseDto(
+public record BookhouseBookResponseDto(
         Long bookhouseId,
         Long bookId,
         String bookImage,
