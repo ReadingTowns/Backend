@@ -191,6 +191,13 @@ public class BookhouseService {
     public List<BookhouseOwnerResponseDto> getBookhousesByBookId(Long bookId, Long currentMemberId) {
         List<Bookhouse> bookhouses = bookhouseRepository.findAllByBookIdOrderByCreatedAtDesc(bookId);
 
+        // 로그인한 사용자 본인은 제외
+        if (currentMemberId != null) {
+            bookhouses = bookhouses.stream()
+                    .filter(bh -> !bh.getMemberId().equals(currentMemberId))
+                    .toList();
+        }
+
         if (bookhouses.isEmpty()) {
             return List.of();
         }
@@ -230,6 +237,7 @@ public class BookhouseService {
 
         return responses;
     }
+
     // 유저가 서재에 가지고있는 책의 id 조회
     public List<Long> getMembersBookId(Long memberId) {
         return bookhouseRepository.findBookIdByMember(memberId);
