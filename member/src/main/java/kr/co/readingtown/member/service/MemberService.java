@@ -46,6 +46,7 @@ public class MemberService {
                     .loginId(loginId)
                     .username(username)
                     .nickname(null) //기본 닉네임 Null로 설정 후 온보딩에서 설정
+                    .profileImage(appProperties.getDefaultProfileImageUrl())
                     .userRatingSum(0)
                     .userRatingCount(0)
                     .build();
@@ -450,12 +451,12 @@ public class MemberService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(MemberException.NoAuthMember::new);
 
-        // key 조회
-        String oldKey = imageService.urlToKey(member.getProfileImage());
+        // 새 key 생성
         String newKey = "profile/" + memberId + "_" + UUID.randomUUID() + ".png";
 
-        // oldKey가 default가 아니라면 삭제
-        if (oldKey.equals("readingtown_profile_gray.png")) {
+        // 기존 이미지가 사용자가 업로드한 이미지라면 삭제 (profile/로 시작하는 경우만)
+        String oldKey = imageService.urlToKey(member.getProfileImage());
+        if (oldKey != null && oldKey.startsWith("profile/")) {
             imageService.deleteImage(oldKey);
         }
 
