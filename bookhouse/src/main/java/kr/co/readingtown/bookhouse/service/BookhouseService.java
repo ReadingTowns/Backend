@@ -245,7 +245,7 @@ public class BookhouseService {
     }
 
     // 채팅방의 현재 교환 상태 조회
-    public ExchangeStatusResponse getExchangeStatusForChatroom(Long chatroomId) {
+    public ExchangeStatusResponse getIsExchangedForChatroom(Long chatroomId) {
         // 이 채팅방에서 현재 교환 중인 Bookhouse 조회 (chatroomId가 일치하는 것만)
         List<Bookhouse> books = bookhouseRepository.findAllByChatroomId(chatroomId);
 

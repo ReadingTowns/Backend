@@ -23,8 +23,8 @@ public class InternalBookhouseController {
     }
 
     @GetMapping("/internal/bookhouse/{chatroomId}/status")
-    public ExchangeStatusResponse getExchangeStatus(@PathVariable Long chatroomId) {
+    public ExchangeStatusResponse getIsExchanged(@PathVariable Long chatroomId) {
 
-        return bookhouseService.getExchangeStatusForChatroom(chatroomId);
+        return bookhouseService.getIsExchangedForChatroom(chatroomId);
     }
 }
