@@ -2,6 +2,9 @@ package kr.co.readingtown.member.service;
 
 import kr.co.readingtown.common.config.AppProperties;
 import kr.co.readingtown.common.s3.ImageService;
+import kr.co.readingtown.member.client.BookhouseClient;
+import kr.co.readingtown.member.client.ChatClient;
+import kr.co.readingtown.member.client.ReviewClient;
 import kr.co.readingtown.member.dto.request.internal.FollowBulkCheckRequestDto;
 import kr.co.readingtown.member.integration.bookhouse.FollowClient;
 import kr.co.readingtown.member.domain.Member;
@@ -28,13 +31,21 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class MemberService {
 
-    private final MemberRepository memberRepository;
-    private final MemberKeywordRepository memberKeywordRepository;
-    private final KeywordRepository keywordRepository;
     private final AppProperties appProperties;
-    private final LocationService locationService;
+
+    private final ChatClient chatClient;
+    private final ReviewClient reviewClient;
     private final FollowClient followClient;
+    private final BookhouseClient bookhouseClient;
+    private final kr.co.readingtown.member.client.FollowClient memberFollowClient;
+
     private final ImageService imageService;
+    private final LocationService locationService;
+    private final RecommendationService recommendationService;
+
+    private final MemberRepository memberRepository;
+    private final KeywordRepository keywordRepository;
+    private final MemberKeywordRepository memberKeywordRepository;
 
     @Transactional
     public void registerMember(LoginType loginType, String loginId, String username) {
@@ -465,5 +476,21 @@ public class MemberService {
         member.updateImage(imageService.keyToUrl(newKey));
 
         return ProfileImageResponseDto.of(presignedUrl);
+    }
+
+    @Transactional
+    public void deleteMemberAccount(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberException.NoAuthMember::new);
+
+        // 멤버와 관련된 키워드, 팔로우, 감상평, 서재, 채팅룸, 채팅룸에 속한 메시지, 교환 상태
+        recommendationService.deleteMembersKeywords(memberId);
+        memberFollowClient.deleteFollowRelation(memberId);
+        reviewClient.deleteMembersReviews(memberId);
+        bookhouseClient.deleteMembersBookhouse(memberId);
+        chatClient.deleteChatroom(memberId);
+
+        // 멤버 삭제
+        memberRepository.delete(member);
     }
 }

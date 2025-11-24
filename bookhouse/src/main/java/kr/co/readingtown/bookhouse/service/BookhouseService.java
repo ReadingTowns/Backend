@@ -242,4 +242,11 @@ public class BookhouseService {
     public List<Long> getMembersBookId(Long memberId) {
         return bookhouseRepository.findBookIdByMember(memberId);
     }
+
+    // 유저의 서재 전부 삭제
+    @Transactional
+    public void deleteMembersBookhouse(Long memberId) {
+
+        bookhouseRepository.deleteBookhouseByMemberId(memberId);
+    }
 }

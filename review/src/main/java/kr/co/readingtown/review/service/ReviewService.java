@@ -104,4 +104,10 @@ public class ReviewService {
                 .map(review -> new ReviewWithAuthorResponseDto(memberNames.get(review.memberId()), review.content()))
                 .toList();
     }
+
+    @Transactional
+    public void deleteReview(Long memberId) {
+
+        reviewRepository.deleteReviewByMemberId(memberId);
+    }
 }

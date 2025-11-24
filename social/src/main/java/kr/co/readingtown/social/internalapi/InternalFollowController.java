@@ -53,4 +53,11 @@ public class InternalFollowController {
     public List<Long> getFollowerIds(@RequestParam("memberId") Long memberId){
         return followService.getFollowerIds(memberId);
     }
+
+    // 회원 탈퇴 : 연관된 팔로잉 삭제
+    @DeleteMapping("/revoke")
+    public void deleteFollowRelation(@RequestParam("memberId") Long memberId) {
+
+        followService.deleteFollowRelation(memberId);
+    }
 }

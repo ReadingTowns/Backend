@@ -34,4 +34,8 @@ public interface FollowClient {
     // 나를 팔로우하는 대상들의 ID 목록
     @GetMapping("/internal/follows/follower-ids")
     List<Long> getFollowerIds(@RequestParam("memberId") Long memberId);
+
+    // 회원 탈퇴 : 연관된 팔로잉 삭제
+    @DeleteMapping("/internal/follows/revoke")
+    void deleteFollowRelation(@RequestParam("memberId") Long memberId);
 }

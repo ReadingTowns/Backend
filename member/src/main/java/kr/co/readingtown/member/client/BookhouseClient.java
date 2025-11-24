@@ -1,6 +1,7 @@
 package kr.co.readingtown.member.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -15,4 +16,6 @@ public interface BookhouseClient {
     @GetMapping("/internal/bookhouse/books")
     List<Long> getMembersBookId(@RequestParam("memberId") Long memberId);
 
+    @DeleteMapping("/internal/bookhouse/revoke")
+    void deleteMembersBookhouse(@RequestParam("memberId") Long memberId);
 }

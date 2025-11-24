@@ -169,4 +169,10 @@ public class ExternalMemberController {
         return memberService.updateImage(memberId);
     }
 
+    @PostMapping("/revoke")
+    @Operation(summary = "회원 탈퇴", description = "회원 계정 및 회원과 관련된 모든 데이터를 삭제합니다.")
+    public void revokeMember(@AuthenticationPrincipal Long memberId) {
+
+        memberService.deleteMemberAccount(memberId);
+    }
 }

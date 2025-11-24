@@ -45,4 +45,10 @@ public class InternalExchangeStatusController {
     public List<ExchangingBookResponse> getExchangingBooks(@PathVariable Long memberId) {
         return bookhouseService.getMyExchangingBooks(memberId);
     }
+
+    @DeleteMapping("/internal/exchange-status/revoke")
+    public void deleteExchangeStatusByChatroom(@RequestParam(name = "chatroomIds") List<Long> chatroomIds) {
+
+        exchangeStatusService.deleteExchangeStatusRelation(chatroomIds);
+    }
 }
