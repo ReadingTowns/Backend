@@ -6,6 +6,7 @@ import kr.co.readingtown.bookhouse.dto.request.BookInfoRequestDto;
 import kr.co.readingtown.bookhouse.dto.response.BookPreviewResponseDto;
 import kr.co.readingtown.bookhouse.dto.response.BookhouseOwnerResponseDto;
 import kr.co.readingtown.bookhouse.dto.response.BookhouseSearchResponseDto;
+import kr.co.readingtown.bookhouse.dto.response.ExchangeStatusResponse;
 import kr.co.readingtown.bookhouse.dto.response.ExchangingBookDetail;
 import kr.co.readingtown.bookhouse.dto.response.ExchangingBookResponse;
 import kr.co.readingtown.bookhouse.exception.BookhouseException;
@@ -241,5 +242,18 @@ public class BookhouseService {
     // 유저가 서재에 가지고있는 책의 id 조회
     public List<Long> getMembersBookId(Long memberId) {
         return bookhouseRepository.findBookIdByMember(memberId);
+    }
+
+    // 채팅방의 현재 교환 상태 조회
+    public ExchangeStatusResponse getExchangeStatusForChatroom(Long chatroomId) {
+        // 이 채팅방에서 현재 교환 중인 Bookhouse 조회 (chatroomId가 일치하는 것만)
+        List<Bookhouse> books = bookhouseRepository.findAllByChatroomId(chatroomId);
+
+        if (books.isEmpty()) {
+            return null;  // 이 채팅방에서 현재 교환 중인 책이 없음
+        }
+
+        // 첫 번째 책의 IsExchanged 상태 반환 (두 책은 항상 동일한 상태여야 함)
+        return new ExchangeStatusResponse(books.get(0).getIsExchanged().name());
     }
 }
