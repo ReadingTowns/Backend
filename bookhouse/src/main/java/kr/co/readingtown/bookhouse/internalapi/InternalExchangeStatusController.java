@@ -23,12 +23,6 @@ public class InternalExchangeStatusController {
         return exchangeStatusService.getBookIdByChatroomId(chatroomId, myId);
     }
 
-    @GetMapping("/internal/chatrooms/{chatroomId}/status")
-    public ExchangeStatusResponse getExchangeStatus(@PathVariable Long chatroomId) {
-
-        return exchangeStatusService.getExchangeStatus(chatroomId);
-    }
-
     @PostMapping("/internal/chatrooms/{chatroomId}/books/complete-exchange")
     public void completeExchange(@PathVariable Long chatroomId) {
 

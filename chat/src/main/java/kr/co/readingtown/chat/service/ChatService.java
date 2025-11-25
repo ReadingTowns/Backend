@@ -163,7 +163,7 @@ public class ChatService {
         if (!chatroom.hasMember(myId))
             throw new ChatException.MemberNotInChatroom();
 
-        // 예약/교환 상태 확인
+        // Bookhouse의 isExchanged로 예약/교환 상태 확인
         ExchangeStatusResponse exchangeStatus = bookhouseClient.getExchangeStatus(chatroomId);
         if (exchangeStatus != null && exchangeStatus.status() != null) {
             String status = exchangeStatus.status();
