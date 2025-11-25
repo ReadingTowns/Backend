@@ -3,6 +3,7 @@ package kr.co.readingtown.chat.repository;
 import kr.co.readingtown.chat.domain.Message;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -49,4 +50,12 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 
     // 채팅방의 모든 메시지 삭제
     void deleteByChatroomId(Long chatroomId);
+
+    @Modifying
+    @Query("""
+    DELETE
+    FROM Message m
+    WHERE m.chatroomId IN (:chatroomIds)
+    """)
+    void deleteMessageByChatroomId(@Param("chatroomIds") List<Long> chatroomIds);
 }

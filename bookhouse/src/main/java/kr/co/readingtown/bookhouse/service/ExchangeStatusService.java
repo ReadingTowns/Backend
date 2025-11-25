@@ -359,4 +359,10 @@ public class ExchangeStatusService {
                 bookhouse.getIsExchanged().name()
         );
     }
+
+    @Transactional
+    public void deleteExchangeStatusRelation(List<Long> chatroomIds) {
+
+        exchangeStatusRepository.deleteExchangeStatusByChatroomId(chatroomIds);
+    }
 }

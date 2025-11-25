@@ -23,12 +23,6 @@ public class InternalExchangeStatusController {
         return exchangeStatusService.getBookIdByChatroomId(chatroomId, myId);
     }
 
-    @GetMapping("/internal/chatrooms/{chatroomId}/status")
-    public ExchangeStatusResponse getExchangeStatus(@PathVariable Long chatroomId) {
-
-        return exchangeStatusService.getExchangeStatus(chatroomId);
-    }
-
     @PostMapping("/internal/chatrooms/{chatroomId}/books/complete-exchange")
     public void completeExchange(@PathVariable Long chatroomId) {
 
@@ -44,5 +38,11 @@ public class InternalExchangeStatusController {
     @GetMapping("/internal/members/{memberId}/exchanges")
     public List<ExchangingBookResponse> getExchangingBooks(@PathVariable Long memberId) {
         return bookhouseService.getMyExchangingBooks(memberId);
+    }
+
+    @DeleteMapping("/internal/exchange-status/revoke")
+    public void deleteExchangeStatusByChatroom(@RequestParam(name = "chatroomIds") List<Long> chatroomIds) {
+
+        exchangeStatusService.deleteExchangeStatusRelation(chatroomIds);
     }
 }

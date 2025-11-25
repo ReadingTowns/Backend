@@ -4,6 +4,7 @@ import jakarta.persistence.LockModeType;
 import kr.co.readingtown.bookhouse.domain.ExchangeStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -28,4 +29,11 @@ public interface ExchangeStatusRepository extends JpaRepository<ExchangeStatus, 
     @Query("select e from ExchangeStatus e where e.exchangeStatusId = :exchangeStatusId")
     Optional<ExchangeStatus> findByIdForUpdate(@Param("exchangeStatusId") Long id);
 
+    @Modifying
+    @Query("""
+    DELETE
+    FROM ExchangeStatus es
+    WHERE es.chatroomId IN (:chatroomIds)
+    """)
+    void deleteExchangeStatusByChatroomId(@Param("chatroomIds") List<Long> chatroomIds);
 }

@@ -2,6 +2,9 @@ package kr.co.readingtown.member.service;
 
 import kr.co.readingtown.common.config.AppProperties;
 import kr.co.readingtown.common.s3.ImageService;
+import kr.co.readingtown.member.client.BookhouseClient;
+import kr.co.readingtown.member.client.ChatClient;
+import kr.co.readingtown.member.client.ReviewClient;
 import kr.co.readingtown.member.dto.request.internal.FollowBulkCheckRequestDto;
 import kr.co.readingtown.member.integration.bookhouse.FollowClient;
 import kr.co.readingtown.member.domain.Member;
@@ -28,13 +31,21 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class MemberService {
 
-    private final MemberRepository memberRepository;
-    private final MemberKeywordRepository memberKeywordRepository;
-    private final KeywordRepository keywordRepository;
     private final AppProperties appProperties;
-    private final LocationService locationService;
+
+    private final ChatClient chatClient;
+    private final ReviewClient reviewClient;
     private final FollowClient followClient;
+    private final BookhouseClient bookhouseClient;
+    private final kr.co.readingtown.member.client.FollowClient memberFollowClient;
+
     private final ImageService imageService;
+    private final LocationService locationService;
+    private final RecommendationService recommendationService;
+
+    private final MemberRepository memberRepository;
+    private final KeywordRepository keywordRepository;
+    private final MemberKeywordRepository memberKeywordRepository;
 
     @Transactional
     public void registerMember(LoginType loginType, String loginId, String username) {
@@ -46,6 +57,7 @@ public class MemberService {
                     .loginId(loginId)
                     .username(username)
                     .nickname(null) //기본 닉네임 Null로 설정 후 온보딩에서 설정
+                    .profileImage(appProperties.getDefaultProfileImageUrl())
                     .userRatingSum(0)
                     .userRatingCount(0)
                     .build();
@@ -450,12 +462,12 @@ public class MemberService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(MemberException.NoAuthMember::new);
 
-        // key 조회
-        String oldKey = imageService.urlToKey(member.getProfileImage());
+        // 새 key 생성
         String newKey = "profile/" + memberId + "_" + UUID.randomUUID() + ".png";
 
-        // oldKey가 default가 아니라면 삭제
-        if (oldKey.equals("readingtown_profile_gray.png")) {
+        // 기존 이미지가 사용자가 업로드한 이미지라면 삭제 (profile/로 시작하는 경우만)
+        String oldKey = imageService.urlToKey(member.getProfileImage());
+        if (oldKey != null && oldKey.startsWith("profile/")) {
             imageService.deleteImage(oldKey);
         }
 
@@ -464,5 +476,21 @@ public class MemberService {
         member.updateImage(imageService.keyToUrl(newKey));
 
         return ProfileImageResponseDto.of(presignedUrl);
+    }
+
+    @Transactional
+    public void deleteMemberAccount(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberException.NoAuthMember::new);
+
+        // 멤버와 관련된 키워드, 팔로우, 감상평, 서재, 채팅룸, 채팅룸에 속한 메시지, 교환 상태
+        recommendationService.deleteMembersKeywords(memberId);
+        memberFollowClient.deleteFollowRelation(memberId);
+        reviewClient.deleteMembersReviews(memberId);
+        bookhouseClient.deleteMembersBookhouse(memberId);
+        chatClient.deleteChatroom(memberId);
+
+        // 멤버 삭제
+        memberRepository.delete(member);
     }
 }

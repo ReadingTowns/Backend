@@ -65,4 +65,10 @@ public class FollowService {
     public List<Long> getFollowerIds(Long memberId) {
         return followRepository.findFollowerIds(memberId);
     }
+
+    @Transactional
+    public void deleteFollowRelation(Long memberId) {
+
+        followRepository.deleteAllByMemberIdInFollowRelation(memberId);
+    }
 }

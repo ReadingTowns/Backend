@@ -20,4 +20,12 @@ public interface MemberKeywordRepository extends JpaRepository<MemberKeyword, Lo
     @Modifying
     @Query("DELETE FROM MemberKeyword mk WHERE mk.memberId = :memberId AND mk.keywordId IN :keywordIds")
     void deleteAllByMemberIdAndKeywordIds(@Param("memberId") Long memberId, @Param("keywordIds") List<Long> keywordIds);
+
+    @Modifying
+    @Query("""
+    DELETE
+    FROM MemberKeyword mk
+    WHERE mk.memberId = :memberId
+    """)
+    void deleteAllByMemberId(@Param("memberId") Long memberId);
 }

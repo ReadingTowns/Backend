@@ -4,6 +4,7 @@ import kr.co.readingtown.review.domain.Review;
 import kr.co.readingtown.review.dto.query.ReviewContentAndAuthorNameDto;
 import kr.co.readingtown.review.dto.query.ReviewIdAndContentDto;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -45,4 +46,12 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
         AND rv.memberId <> :memberId
     """)
     List<ReviewContentAndAuthorNameDto> findReviewByBookIdExcludingMe(@Param("bookId") Long bookId, @Param("memberId") Long memberId);
+
+    @Modifying
+    @Query("""
+    DELETE
+    FROM Review rv
+    WHERE rv.memberId = :memberId
+    """)
+    void deleteReviewByMemberId(@Param("memberId") Long memberId);
 }
