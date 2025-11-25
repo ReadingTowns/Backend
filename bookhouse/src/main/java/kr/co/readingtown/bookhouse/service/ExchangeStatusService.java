@@ -341,4 +341,28 @@ public class ExchangeStatusService {
         }
         // ExchangeStatus 레코드는 우선 교환 이력 추적을 위해 삭제하지 않고 보존
     }
+
+    public kr.co.readingtown.bookhouse.dto.response.ExchangeStatusResponse getExchangeStatus(Long chatroomId) {
+        List<ExchangeStatus> exchangeStatusList = exchangeStatusRepository.findByChatroomId(chatroomId);
+
+        if (exchangeStatusList.isEmpty()) {
+            return null;
+        }
+
+        // 첫 번째 책의 IsExchanged 상태 확인 (두 책은 항상 동일한 상태여야 함)
+        Long bookhouseId = exchangeStatusList.get(0).getBookhouseId();
+        Bookhouse bookhouse = bookhouseRepository.findById(bookhouseId)
+                .orElseThrow(BookhouseException.BookhouseNotFound::new);
+
+        // IsExchanged enum을 String으로 변환하여 반환
+        return new kr.co.readingtown.bookhouse.dto.response.ExchangeStatusResponse(
+                bookhouse.getIsExchanged().name()
+        );
+    }
+
+    @Transactional
+    public void deleteExchangeStatusRelation(List<Long> chatroomIds) {
+
+        exchangeStatusRepository.deleteExchangeStatusByChatroomId(chatroomIds);
+    }
 }

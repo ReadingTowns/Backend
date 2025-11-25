@@ -244,6 +244,13 @@ public class BookhouseService {
         return bookhouseRepository.findBookIdByMember(memberId);
     }
 
+    // 유저의 서재 전부 삭제
+    @Transactional
+    public void deleteMembersBookhouse(Long memberId) {
+
+        bookhouseRepository.deleteBookhouseByMemberId(memberId);
+    }
+
     // 채팅방의 현재 교환 상태 조회
     public ExchangeStatusResponse getIsExchangedForChatroom(Long chatroomId) {
         // 이 채팅방에서 현재 교환 중인 Bookhouse 조회 (chatroomId가 일치하는 것만)

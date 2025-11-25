@@ -2,6 +2,7 @@ package kr.co.readingtown.social.repository;
 
 import kr.co.readingtown.social.domain.Follow;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -34,4 +35,13 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
        where f.toFollowingId = :memberId
        """)
     List<Long> findFollowerIds(@Param("memberId") Long memberId);
+
+    @Modifying
+    @Query("""
+    DELETE
+    FROM Follow f
+    WHERE f.toFollowingId = :memberId
+        OR f.fromFollowerId = :memberId
+    """)
+    void deleteAllByMemberIdInFollowRelation(@Param("memberId") Long memberId);
 }

@@ -344,4 +344,10 @@ public class RecommendationService {
                 bookResults
         );
     }
+
+    @Transactional
+    public void deleteMembersKeywords(Long memberId) {
+
+        memberKeywordRepository.deleteAllByMemberId(memberId);
+    }
 }

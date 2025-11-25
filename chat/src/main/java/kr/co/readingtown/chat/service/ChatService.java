@@ -11,6 +11,7 @@ import kr.co.readingtown.chat.exception.ChatException;
 import kr.co.readingtown.chat.integration.book.BookClient;
 import kr.co.readingtown.chat.integration.bookhouse.BookhouseClient;
 import kr.co.readingtown.chat.integration.bookhouse.BookhouseUpdater;
+import kr.co.readingtown.chat.integration.bookhouse.ExchangeStatusClient;
 import kr.co.readingtown.chat.integration.member.MemberClient;
 import kr.co.readingtown.chat.repository.ChatroomRepository;
 import kr.co.readingtown.chat.repository.MessageRepository;
@@ -36,6 +37,7 @@ public class ChatService {
     public final MemberClient memberClient;
     public final BookhouseClient bookhouseClient;
     public final BookhouseUpdater bookhouseUpdater;
+    public final ExchangeStatusClient exchangeStatusClient;
 
     private final ObjectMapper objectMapper;
 
@@ -264,5 +266,24 @@ public class ChatService {
                 chatroomId, senderId, content, type, null, exchangeStatusId
         );
         saveAndBroadcastMessage(msg);
+    }
+
+    @Transactional
+    public void deleteChatRelation(Long memberId) {
+
+        // 멤버가 속한 채팅룸 조회
+        List<Chatroom> chatRooms = chatroomRepository.findMyChatrooms(memberId);
+
+        // 해당 채팅룸 id를 가지는 메시지, 교환 상태 삭제
+        List<Long> chatroomIds = chatRooms.stream()
+                .map(Chatroom::getChatroomId)
+                .toList();
+        if (!chatroomIds.isEmpty()) {
+            messageRepository.deleteMessageByChatroomId(chatroomIds);
+            exchangeStatusClient.deleteExchangeStatusByChatroom(chatroomIds);
+        }
+
+        // 채팅룸 삭제
+        chatroomRepository.deleteAll(chatRooms);
     }
 }
