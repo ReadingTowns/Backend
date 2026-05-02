@@ -107,90 +107,88 @@ public class ExchangeStatusService {
     // 교환 요청 수락
     @Transactional
     public AcceptExchangeResponseDto acceptExchangeStatus(Long memberId, Long exchangeStatusId) {
+        List<ExchangeStatus> allInRoom = lockChatroomAndGetAll(exchangeStatusId);
+        ExchangeStatus exchangeStatus = findFromLocked(allInRoom, exchangeStatusId);
 
-        ExchangeStatus exchangeStatus = exchangeStatusRepository.findByIdForUpdate(exchangeStatusId)
+        validateAcceptPermission(exchangeStatus, memberId);
+        exchangeStatus.updateRequestStatus(RequestStatus.ACCEPTED);
+
+        boolean reserved = tryReserve(allInRoom, exchangeStatus);
+        sendAcceptMessage(exchangeStatus, memberId, reserved);
+
+        return new AcceptExchangeResponseDto(exchangeStatus.getRequestStatus(), reserved);
+    }
+
+    // 채팅방 전체 행 락 획득
+    private List<ExchangeStatus> lockChatroomAndGetAll(Long exchangeStatusId) {
+        Long chatroomId = exchangeStatusRepository.findChatroomIdById(exchangeStatusId);
+        if (chatroomId == null) throw new BookhouseException.ExchangeStatusNotFound();
+        return exchangeStatusRepository.findAllByChatroomIdForUpdate(chatroomId);
+    }
+
+    // 락 걸린 리스트에서 대상 ExchangeStatus 추출
+    private ExchangeStatus findFromLocked(List<ExchangeStatus> allInRoom, Long exchangeStatusId) {
+        return allInRoom.stream()
+                .filter(e -> e.getExchangeStatusId().equals(exchangeStatusId))
+                .findFirst()
                 .orElseThrow(BookhouseException.ExchangeStatusNotFound::new);
+    }
 
+    // 소유자 및 상태 검증
+    private void validateAcceptPermission(ExchangeStatus exchangeStatus, Long memberId) {
         Bookhouse bookhouse = bookhouseRepository.findById(exchangeStatus.getBookhouseId())
                 .orElseThrow(BookhouseException.BookhouseNotFound::new);
 
-        // memberId 가 해당 bookhouse의 소유자인지 검증
         if (!bookhouse.getMemberId().equals(memberId)) {
             throw new BookhouseException.ForbiddenAcceptRequest();
         }
-
-        // 1) 채팅방의 모든 교환행을 잠금
-        List<ExchangeStatus> allInRoom = exchangeStatusRepository.findAllByChatroomIdForUpdate(exchangeStatus.getChatroomId());
-
-
-        // 2) Request 상태에서만 교환 요청 수락 가능
         if (exchangeStatus.getRequestStatus() != RequestStatus.REQUEST) {
             throw new BookhouseException.InvalidExchangeStatusForTransition();
         }
+    }
 
-        // 3) 수락으로 전환
-        exchangeStatus.updateRequestStatus(RequestStatus.ACCEPTED);
-
-        // 4) 같은 트랜잭션/잠금 하에서 메모리 상으로 ACCEPTED 개수 계산
+    // 두 명 모두 수락 시 RESERVED 전환 시도
+    private boolean tryReserve(List<ExchangeStatus> allInRoom, ExchangeStatus exchangeStatus) {
         long acceptedCount = allInRoom.stream()
-                .map(ExchangeStatus::getRequestStatus)
-                .filter(RequestStatus.ACCEPTED::equals)
+                .filter(e -> e.getRequestStatus() == RequestStatus.ACCEPTED)
                 .count();
 
-        boolean reserved = false;
+        if (acceptedCount > 2) throw new BookhouseException.DomainInvariantBroken();
+        if (acceptedCount < 2) return false;
 
-        if (acceptedCount >= 2) {
-            if (acceptedCount != 2) {
-                throw new BookhouseException.DomainInvariantBroken();
-            }
-            // 5) 두 책 예약(RESERVED) 전환 (Bookhouse도 잠금)
-            List<Long> bookhouseIds = allInRoom.stream()
-                    .filter(es -> es.getRequestStatus() == RequestStatus.ACCEPTED)
-                    .map(ExchangeStatus::getBookhouseId)
-                    .toList();
+        List<Long> bookhouseIds = allInRoom.stream()
+                .filter(es -> es.getRequestStatus() == RequestStatus.ACCEPTED)
+                .map(ExchangeStatus::getBookhouseId)
+                .toList();
 
-            List<Bookhouse> books = bookhouseRepository.findAllByIdForUpdate(bookhouseIds);
-            for (Bookhouse b : books) {
-                //이미 예약된 책에 대해 교환 수락을 시도하는 경우, 다시 REQUEST 상태로 되돌려놓음
-                if (b.getIsExchanged() == IsExchanged.RESERVED){
-                    exchangeStatus.updateRequestStatus(RequestStatus.REQUEST);
-                    throw new BookhouseException.BookAlreadyReserved();
-                }
-                b.updateIsExchanged(IsExchanged.RESERVED);
-                b.updateChatroomId(exchangeStatus.getChatroomId());
+        List<Bookhouse> books = bookhouseRepository.findAllByIdForUpdate(bookhouseIds);
+        for (Bookhouse b : books) {
+            if (b.getIsExchanged() == IsExchanged.RESERVED) {
+                exchangeStatus.updateRequestStatus(RequestStatus.REQUEST);
+                throw new BookhouseException.BookAlreadyReserved();
             }
-            reserved = true;
-            
-            // ✅ 예약 완료 시스템 메시지 전송
-            try {
-                ExchangeRequestMessageDto messageDto = new ExchangeRequestMessageDto(
-                        exchangeStatus.getChatroomId(),
-                        0L,  // 시스템 메시지 (양측 모두 수락한 경우)
-                        "교환이 예약되었습니다. 대면 교환을 진행해주세요.",
-                        "EXCHANGE_RESERVED",
-                        exchangeStatus.getExchangeStatusId()
-                );
-                chatClient.sendSystemMessage(messageDto);
-            } catch (Exception e) {
-                // 채팅 서비스 장애 시에도 교환 수락은 정상 처리
-            }
-        } else {
-            // ✅ 교환 수락 시스템 메시지 전송 (아직 한 명만 수락한 경우)
-            try {
-                ExchangeRequestMessageDto messageDto = new ExchangeRequestMessageDto(
-                        exchangeStatus.getChatroomId(),
-                        memberId,  // 수락한 사람의 ID
-                        "교환 신청이 수락되었습니다.",
-                        "EXCHANGE_ACCEPTED",
-                        exchangeStatus.getExchangeStatusId()
-                );
-                chatClient.sendSystemMessage(messageDto);
-            } catch (Exception e) {
-                // 채팅 서비스 장애 시에도 교환 수락은 정상 처리
-            }
+            b.updateIsExchanged(IsExchanged.RESERVED);
+            b.updateChatroomId(exchangeStatus.getChatroomId());
         }
+        return true;
+    }
 
-        return new AcceptExchangeResponseDto(exchangeStatus.getRequestStatus(), reserved);
+    // 수락 결과에 따른 시스템 메시지 발행
+    private void sendAcceptMessage(ExchangeStatus exchangeStatus, Long memberId, boolean reserved) {
+        try {
+            ExchangeRequestMessageDto messageDto = reserved
+                    ? new ExchangeRequestMessageDto(
+                            exchangeStatus.getChatroomId(), 0L,
+                            "교환이 예약되었습니다. 대면 교환을 진행해주세요.",
+                            "EXCHANGE_RESERVED", exchangeStatus.getExchangeStatusId())
+                    : new ExchangeRequestMessageDto(
+                            exchangeStatus.getChatroomId(), memberId,
+                            "교환 신청이 수락되었습니다.",
+                            "EXCHANGE_ACCEPTED", exchangeStatus.getExchangeStatusId());
+            chatClient.sendSystemMessage(messageDto);
+        } catch (Exception e) {
+            // 채팅 서비스 장애 시에도 교환 수락은 정상 처리
+        }
     }
 
     // 교환 요청 거절
