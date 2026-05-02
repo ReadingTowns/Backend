@@ -25,6 +25,9 @@ public interface ExchangeStatusRepository extends JpaRepository<ExchangeStatus, 
     """)
     List<ExchangeStatus> findAllByChatroomIdForUpdate(@Param("chatroomId") Long chatroomId);
 
+    @Query("select e.chatroomId from ExchangeStatus e where e.exchangeStatusId = :exchangeStatusId")
+    Long findChatroomIdById(@Param("exchangeStatusId") Long exchangeStatusId);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select e from ExchangeStatus e where e.exchangeStatusId = :exchangeStatusId")
     Optional<ExchangeStatus> findByIdForUpdate(@Param("exchangeStatusId") Long id);
