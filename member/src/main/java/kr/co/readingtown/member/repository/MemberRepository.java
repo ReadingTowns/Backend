@@ -7,8 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
-
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
@@ -37,9 +36,22 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Query("""
     SELECT m
     FROM Member m
-    WHERE m.latitude IS NOT NULL 
+    WHERE m.latitude IS NOT NULL
     AND m.longitude IS NOT NULL
     AND m.isOnboarded = true
     """)
     List<Member> findAllWithLocation();
+
+    @Query("""
+    SELECT m
+    FROM Member m
+    WHERE m.latitude BETWEEN :minLat AND :maxLat
+    AND m.longitude BETWEEN :minLon AND :maxLon
+    """)
+    List<Member> findMembersInBoundingBox(
+            @Param("minLat") BigDecimal minLat,
+            @Param("maxLat") BigDecimal maxLat,
+            @Param("minLon") BigDecimal minLon,
+            @Param("maxLon") BigDecimal maxLon
+    );
 }

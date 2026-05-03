@@ -119,20 +119,32 @@ public class RecommendationService {
     public List<LocalMemberRecommendationDto> recommendLocalMembers(Long memberId) {
         Member currentMember = memberRepository.findById(memberId)
                 .orElseThrow(MemberException.NotFoundMember::new);
-        
+
         if (currentMember.getLatitude() == null || currentMember.getLongitude() == null) {
             return List.of();
         }
-        
-        List<Member> allMembers = memberRepository.findAllWithLocation();
-        
-        return allMembers.stream()
+
+        // 바운딩 박스 계산 (반경 1km)
+        final double RADIUS_KM = 1.0;
+        final double LAT_DEGREE_PER_KM = 1.0 / 110.574;
+        double currentLat = currentMember.getLatitude().doubleValue();
+        double currentLon = currentMember.getLongitude().doubleValue();
+        double latDelta = RADIUS_KM * LAT_DEGREE_PER_KM;
+        double lonDelta = RADIUS_KM / (111.320 * Math.cos(Math.toRadians(currentLat)));
+
+        BigDecimal minLat = BigDecimal.valueOf(currentLat - latDelta);
+        BigDecimal maxLat = BigDecimal.valueOf(currentLat + latDelta);
+        BigDecimal minLon = BigDecimal.valueOf(currentLon - lonDelta);
+        BigDecimal maxLon = BigDecimal.valueOf(currentLon + lonDelta);
+
+        List<Member> allMembers = memberRepository.findMembersInBoundingBox(minLat, maxLat, minLon, maxLon);
+
+        List<LocalMemberRecommendationDto> result = allMembers.stream()
                 .filter(member -> !member.getMemberId().equals(memberId))
-                .filter(member -> member.getLatitude() != null && member.getLongitude() != null)
                 .map(member -> {
                     double distance = calculateDistance(
-                            currentMember.getLatitude().doubleValue(),
-                            currentMember.getLongitude().doubleValue(),
+                            currentLat,
+                            currentLon,
                             member.getLatitude().doubleValue(),
                             member.getLongitude().doubleValue()
                     );
@@ -141,6 +153,8 @@ public class RecommendationService {
                 .sorted(Comparator.comparing(LocalMemberRecommendationDto::distanceKm))
                 .limit(10)
                 .collect(Collectors.toList());
+
+        return result;
     }
     
     /**

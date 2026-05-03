@@ -11,7 +11,10 @@ import java.math.BigDecimal;
 
 @Entity
 @Getter
-@Table(name = "members")
+@Table(
+    name = "members",
+    indexes = @Index(name = "idx_member_location", columnList = "latitude, longitude")
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member extends BaseEntity {
 
