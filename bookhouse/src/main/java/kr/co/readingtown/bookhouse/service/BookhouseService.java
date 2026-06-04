@@ -9,7 +9,6 @@ import kr.co.readingtown.bookhouse.dto.response.BookhouseSearchResponseDto;
 import kr.co.readingtown.bookhouse.dto.response.ExchangeStatusResponse;
 import kr.co.readingtown.bookhouse.dto.response.ExchangingBookDetail;
 import kr.co.readingtown.bookhouse.dto.response.ExchangingBookResponse;
-import kr.co.readingtown.bookhouse.event.BookhouseChangedEvent;
 import kr.co.readingtown.bookhouse.exception.BookhouseException;
 import kr.co.readingtown.bookhouse.integration.book.BookReader;
 import kr.co.readingtown.bookhouse.dto.response.MemberProfileResponseDto;
@@ -18,7 +17,6 @@ import kr.co.readingtown.bookhouse.integration.member.MemberReader;
 import kr.co.readingtown.bookhouse.repository.BookhouseRepository;
 import kr.co.readingtown.common.response.PageResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -38,8 +36,8 @@ public class BookhouseService {
 
     private final BookReader bookReader;
     private final MemberReader memberReader;
+    private final MemberClient memberClient;
     private final BookhouseRepository bookhouseRepository;
-    private final ApplicationEventPublisher eventPublisher;
 
     // 서재에 책 등록
     @Transactional
@@ -54,7 +52,7 @@ public class BookhouseService {
                 .build();
         bookhouseRepository.save(newBookhouse);
 
-        eventPublisher.publishEvent(new BookhouseChangedEvent(memberId));
+        memberClient.evictRecommendationCache(memberId);
     }
 
     // 서재에 책 등록 (bookId만 사용)
@@ -78,7 +76,7 @@ public class BookhouseService {
                 .build();
         bookhouseRepository.save(newBookhouse);
 
-        eventPublisher.publishEvent(new BookhouseChangedEvent(memberId));
+        memberClient.evictRecommendationCache(memberId);
     }
 
     // 서재에서 책 삭제
@@ -89,7 +87,7 @@ public class BookhouseService {
                 .orElseThrow(BookhouseException.BookhouseNotFound::new);
         bookhouseRepository.delete(bookhouse);
 
-        eventPublisher.publishEvent(new BookhouseChangedEvent(memberId));
+        memberClient.evictRecommendationCache(memberId);
     }
 
     // 특정 회원의 서재 책 리스트 조회

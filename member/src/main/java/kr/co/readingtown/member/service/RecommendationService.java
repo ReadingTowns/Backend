@@ -2,7 +2,6 @@ package kr.co.readingtown.member.service;
 
 import kr.co.readingtown.member.client.AiRecommendClient;
 import kr.co.readingtown.member.client.BookhouseClient;
-import kr.co.readingtown.member.event.KeywordChangedEvent;
 import kr.co.readingtown.member.client.YoutubeSearchClient;
 import kr.co.readingtown.member.domain.Keyword;
 import kr.co.readingtown.member.domain.Member;
@@ -26,7 +25,6 @@ import kr.co.readingtown.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,7 +47,6 @@ public class RecommendationService {
     private final YoutubeSearchClient youtubeSearchClient;
     private final MemberKeywordRepository memberKeywordRepository;
     private final RecommendationCacheService recommendationCacheService;
-    private final ApplicationEventPublisher eventPublisher;
 
     @Value("${youtube.key}")
     private String apiKey;
@@ -296,8 +293,7 @@ public class RecommendationService {
             memberKeywordRepository.saveAll(newKeywords);
         }
 
-        // 트랜잭션 커밋 후 캐시 무효화
-        eventPublisher.publishEvent(new KeywordChangedEvent(memberId));
+        recommendationCacheService.evictRecommendations(memberId);
     }
 
     public BertSearchResponseDto recommendBooksByKeyword(String keyword) {
