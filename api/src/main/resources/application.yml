@@ -28,3 +28,32 @@ openai:
 
 cors:
   allowed-origins: http://localhost:3000, https://readingtown.site, https://dev.readingtown.site
+
+resilience4j:
+  retry:
+    instances:
+      redisRetry:
+        maxAttempts: 3
+        waitDuration: 100ms
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+        # 1차: 100ms, 2차: 200ms, 3차: 400ms
+      aiRetry:
+        maxAttempts: 3
+        waitDuration: 1s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+        # 1차: 1s, 2차: 2s, 3차:
+
+  circuitbreaker:
+    instances:
+      redisCircuitBreaker:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 3
+      aiCircuitBreaker:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 60s
+        permittedNumberOfCallsInHalfOpenState: 3

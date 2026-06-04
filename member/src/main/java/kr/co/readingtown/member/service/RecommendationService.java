@@ -41,6 +41,7 @@ public class RecommendationService {
 
     private final BookhouseClient bookhouseClient;
     private final AiRecommendClient aiRecommendClient;
+    private final AiBookRecommendService aiBookRecommendService;
     private final KeywordRepository keywordRepository;
     private final MemberRepository memberRepository;
     private final YoutubeSearchClient youtubeSearchClient;
@@ -74,22 +75,10 @@ public class RecommendationService {
             return List.of();
         }
 
-        List<BookRecommendation> recommendations = callRecommendationServer(bookIds, keywords);
+        List<BookRecommendation> recommendations = aiBookRecommendService.recommend(bookIds, keywords);
         recommendationCacheService.saveRecommendations(memberId, recommendations);
 
         return toBookRecommendationResponseDtos(recommendations);
-    }
-
-    private List<BookRecommendation> callRecommendationServer(List<Long> bookIds, List<String> keywords) {
-
-        String bookIdsParam = bookIds.isEmpty() ? null
-                : bookIds.stream().map(String::valueOf).collect(Collectors.joining(","));
-        String keywordsParam = keywords.isEmpty() ? null
-                : String.join(",", keywords);
-
-        return aiRecommendClient
-                .recommend(bookIdsParam, keywordsParam)
-                .recommendations();
     }
 
     private List<BookRecommendationResponseDto> toBookRecommendationResponseDtos(List<BookRecommendation> recommendations) {
