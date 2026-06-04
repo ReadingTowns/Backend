@@ -30,10 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -49,56 +46,54 @@ public class RecommendationService {
     private final YoutubeSearchClient youtubeSearchClient;
     private final MemberKeywordRepository memberKeywordRepository;
 
+    private final RecommendationCacheService recommendationCacheService;
+
     @Value("${youtube.key}")
     private String apiKey;
 
+
     /**
-     * 유저 서재에 있는 책 id 리스트
-     * 유저가 선택한 키워드 id 리스트
-     * AI 서버 /recommend API 호출
+     * 유저 맞춤 도서 추천
+     * 캐시 HIT  : Redis에서 추천 결과 반환
+     * 캐시 MISS : AI 서버 호출 후 결과를 캐싱하고 반환
      */
     public List<BookRecommendationResponseDto> recommendBooks(Long memberId) {
 
-        // 유저 서재 책 id 추출
+        Optional<List<BookRecommendation>> cached = recommendationCacheService.getRecommendations(memberId);
+
+        // Cache HIT
+        if (cached.isPresent()) {
+
+            return toBookRecommendationResponseDtos(cached.get());
+        }
+
+        // Cache MISS
         List<Long> bookIds = bookhouseClient.getMembersBookId(memberId);
-
-        // 유저 키워드 추출
         List<String> keywords = keywordRepository.findContentsByMemberId(memberId);
-
-        // 둘 다 없으면 빈 리스트 반환
         if (bookIds.isEmpty() && keywords.isEmpty()) {
             return List.of();
         }
 
-        // AI 서버 호출을 위한 파라미터 준비
-        List<BookRecommendation> recommendations;
+        List<BookRecommendation> recommendations = callRecommendationServer(bookIds, keywords);
+        recommendationCacheService.saveRecommendations(memberId, recommendations);
 
-        if (!bookIds.isEmpty() && !keywords.isEmpty()) {
-            // 책 ID와 키워드 모두 있는 경우
-            String bookIdsParam = bookIds.stream()
-                    .map(String::valueOf)
-                    .collect(Collectors.joining(","));
-            String keywordsParam = String.join(",", keywords);
-            recommendations = aiRecommendClient
-                    .recommend(bookIdsParam, keywordsParam)
-                    .recommendations();
-        } else if (!bookIds.isEmpty()) {
-            // 책 ID만 있는 경우
-            String bookIdsParam = bookIds.stream()
-                    .map(String::valueOf)
-                    .collect(Collectors.joining(","));
-            recommendations = aiRecommendClient
-                    .recommend(bookIdsParam, null)
-                    .recommendations();
-        } else {
-            // 키워드만 있는 경우
-            String keywordsParam = String.join(",", keywords);
-            recommendations = aiRecommendClient
-                    .recommend(null, keywordsParam)
-                    .recommendations();
-        }
+        return toBookRecommendationResponseDtos(recommendations);
+    }
 
-        // response 가공
+    private List<BookRecommendation> callRecommendationServer(List<Long> bookIds, List<String> keywords) {
+
+        String bookIdsParam = bookIds.isEmpty() ? null
+                : bookIds.stream().map(String::valueOf).collect(Collectors.joining(","));
+        String keywordsParam = keywords.isEmpty() ? null
+                : String.join(",", keywords);
+
+        return aiRecommendClient
+                .recommend(bookIdsParam, keywordsParam)
+                .recommendations();
+    }
+
+    private List<BookRecommendationResponseDto> toBookRecommendationResponseDtos(List<BookRecommendation> recommendations) {
+
         return recommendations.stream()
                 .map(b -> new BookRecommendationResponseDto(
                         b.bookId(),
@@ -111,6 +106,7 @@ public class RecommendationService {
                 ))
                 .collect(Collectors.toList());
     }
+
 
     /**
      * 동네 기반 유저 추천

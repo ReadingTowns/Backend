@@ -3,6 +3,7 @@ package kr.co.readingtown.member.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import kr.co.readingtown.member.dto.response.ai.BookRecommendation;
 import kr.co.readingtown.member.dto.response.ai.BookRecommendationResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +32,7 @@ public class RecommendationCacheService {
      * @param memberId 사용자 ID
      * @return 캐시 HIT 시 추천 결과, MISS 시 Optional.empty()
      */
-    public Optional<List<BookRecommendationResponseDto>> getRecommendations(Long memberId) {
+    public Optional<List<BookRecommendation>> getRecommendations(Long memberId) {
 
         String key = BOOK_RECOMMEND_KEY_PREFIX + memberId;
         String value = redisTemplate.opsForValue().get(key);
@@ -40,8 +41,8 @@ public class RecommendationCacheService {
         }
 
         try {
-            List<BookRecommendationResponseDto> recommendations =
-                    objectMapper.readValue(value, new TypeReference<List<BookRecommendationResponseDto>>() {});
+            List<BookRecommendation> recommendations =
+                    objectMapper.readValue(value, new TypeReference<List<BookRecommendation>>() {});
 
             return Optional.of(recommendations);
         } catch (JsonProcessingException e) {
@@ -55,7 +56,7 @@ public class RecommendationCacheService {
      * @param memberId 사용자 ID
      * @param recommendations AI 서버 추천 결과
      */
-    public void saveRecommendations(Long memberId, List<BookRecommendationResponseDto> recommendations) {
+    public void saveRecommendations(Long memberId, List<BookRecommendation> recommendations) {
 
         String key = BOOK_RECOMMEND_KEY_PREFIX + memberId;
 
