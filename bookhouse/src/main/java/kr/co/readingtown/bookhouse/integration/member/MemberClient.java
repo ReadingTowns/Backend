@@ -3,6 +3,8 @@ package kr.co.readingtown.bookhouse.integration.member;
 import kr.co.readingtown.bookhouse.dto.request.FollowBulkCheckRequestDto;
 import kr.co.readingtown.bookhouse.dto.response.MemberProfileResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -20,4 +22,7 @@ public interface MemberClient {
     
     @PostMapping("/internal/follows/is-following-bulk")
     Map<Long, Boolean> checkFollowing(@RequestBody FollowBulkCheckRequestDto requestDto);
+
+    @DeleteMapping("/internal/members/recommendations/cache/{memberId}")
+    void evictRecommendationCache(@PathVariable("memberId") Long memberId);
 }

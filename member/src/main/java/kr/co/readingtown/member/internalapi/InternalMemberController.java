@@ -4,6 +4,7 @@ import kr.co.readingtown.member.domain.enums.LoginType;
 import kr.co.readingtown.member.dto.response.ChatProfileResponseDto;
 import kr.co.readingtown.member.dto.response.MemberProfileResponseDto;
 import kr.co.readingtown.member.service.MemberService;
+import kr.co.readingtown.member.service.RecommendationCacheService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +17,7 @@ import java.util.Map;
 public class InternalMemberController {
 
     private final MemberService memberService;
+    private final RecommendationCacheService recommendationCacheService;
 
     @PostMapping
     public void registerMember(
@@ -56,5 +58,11 @@ public class InternalMemberController {
     public Map<Long, MemberProfileResponseDto> getMembersProfile(@RequestBody List<Long> memberIds) {
         
         return memberService.getMembersProfile(memberIds);
+    }
+
+    @DeleteMapping("/recommendations/cache/{memberId}")
+    public void evictRecommendationCache(@PathVariable("memberId") Long memberId) {
+
+        recommendationCacheService.evictRecommendations(memberId);
     }
 }

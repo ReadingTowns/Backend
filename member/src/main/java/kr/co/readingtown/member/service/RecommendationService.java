@@ -304,6 +304,9 @@ public class RecommendationService {
                     .toList();
             memberKeywordRepository.saveAll(newKeywords);
         }
+
+        // 캐시 무효화
+        recommendationCacheService.evictRecommendations(memberId);
     }
 
     public BertSearchResponseDto recommendBooksByKeyword(String keyword) {
