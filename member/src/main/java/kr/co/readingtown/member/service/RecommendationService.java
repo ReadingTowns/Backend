@@ -61,10 +61,10 @@ public class RecommendationService {
 
         // 유저 서재 책 id 추출
         List<Long> bookIds = bookhouseClient.getMembersBookId(memberId);
-        
+
         // 유저 키워드 추출
         List<String> keywords = keywordRepository.findContentsByMemberId(memberId);
-        
+
         // 둘 다 없으면 빈 리스트 반환
         if (bookIds.isEmpty() && keywords.isEmpty()) {
             return List.of();
@@ -72,7 +72,7 @@ public class RecommendationService {
 
         // AI 서버 호출을 위한 파라미터 준비
         List<BookRecommendation> recommendations;
-        
+
         if (!bookIds.isEmpty() && !keywords.isEmpty()) {
             // 책 ID와 키워드 모두 있는 경우
             String bookIdsParam = bookIds.stream()
@@ -119,13 +119,13 @@ public class RecommendationService {
     public List<LocalMemberRecommendationDto> recommendLocalMembers(Long memberId) {
         Member currentMember = memberRepository.findById(memberId)
                 .orElseThrow(MemberException.NotFoundMember::new);
-        
+
         if (currentMember.getLatitude() == null || currentMember.getLongitude() == null) {
             return List.of();
         }
-        
+
         List<Member> allMembers = memberRepository.findAllWithLocation();
-        
+
         return allMembers.stream()
                 .filter(member -> !member.getMemberId().equals(memberId))
                 .filter(member -> member.getLatitude() != null && member.getLongitude() != null)
@@ -142,7 +142,7 @@ public class RecommendationService {
                 .limit(10)
                 .collect(Collectors.toList());
     }
-    
+
     /**
      * 취향 기반 유저 추천 (키워드 + 서재 책 기반)
      */
@@ -150,18 +150,18 @@ public class RecommendationService {
         try {
             // AI 서버 호출 (키워드 + 책 기반) recommendUsersByKeywords 로 변경 가능
             UserRecommendationResponse response = aiRecommendClient.recommendUsersCombined(memberId, 10);
-            
+
             if (response == null || response.recommendations() == null || response.recommendations().isEmpty()) {
                 return List.of();
             }
-            
+
             // 추천된 member_id들로 실제 멤버 정보 조회
             List<Long> recommendedMemberIds = response.recommendations().stream()
                     .map(UserRecommendation::memberId)
                     .collect(Collectors.toList());
-            
+
             List<Member> members = memberRepository.findAllById(recommendedMemberIds);
-            
+
             // 멤버 정보와 추천 정보를 매칭하여 최종 DTO 생성
             return response.recommendations().stream()
                     .map(rec -> {
@@ -169,15 +169,15 @@ public class RecommendationService {
                                 .filter(m -> m.getMemberId().equals(rec.memberId()))
                                 .findFirst()
                                 .orElse(null);
-                        
+
                         if (member == null) return null;
-                        
-                        List<String> bookNames = rec.matchedBooks() != null 
+
+                        List<String> bookNames = rec.matchedBooks() != null
                             ? rec.matchedBooks().stream()
                                 .map(UserRecommendation.MatchedBook::bookName)
                                 .collect(Collectors.toList())
                             : List.of();
-                        
+
                         return SimilarMemberRecommendationDto.from(
                                 member,
                                 rec.similarity(),
@@ -193,22 +193,22 @@ public class RecommendationService {
             return List.of();
         }
     }
-    
+
     /**
      * Haversine 공식으로 두 지점 간 거리 계산 (km)
      */
     private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
         final double R = 6371; // 지구 반지름 (km)
-        
+
         double latDistance = Math.toRadians(lat2 - lat1);
         double lonDistance = Math.toRadians(lon2 - lon1);
-        
+
         double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
                 + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
                 * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
-        
+
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        
+
         return R * c;
     }
 
@@ -313,10 +313,10 @@ public class RecommendationService {
     public BertSearchResponseDto recommendBooksByKeyword(String keyword) {
         // 요청 객체 생성 (기본값: top_k=10, use_combined=true)
         TextSearchRequest request = new TextSearchRequest(keyword);
-        
+
         // AI 서버 호출
         BertSearchResponse response = aiRecommendClient.searchByBert(request);
-        
+
         // 응답을 DTO로 변환
         List<BookSearchResponseDto> bookResults = response.results().stream()
                 .map(result -> {
@@ -325,7 +325,7 @@ public class RecommendationService {
                     if (result.keywords() != null && !result.keywords().isEmpty()) {
                         relatedUserKeywords = Arrays.asList(result.keywords().split(" "));
                     }
-                    
+
                     return new BookSearchResponseDto(
                             result.bookId(),
                             result.bookImage(),
@@ -338,7 +338,7 @@ public class RecommendationService {
                     );
                 })
                 .collect(Collectors.toList());
-        
+
         return new BertSearchResponseDto(
                 response.query(),
                 bookResults
