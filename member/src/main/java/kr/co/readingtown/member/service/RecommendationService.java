@@ -75,7 +75,9 @@ public class RecommendationService {
         }
 
         List<BookRecommendation> recommendations = aiBookRecommendService.recommend(bookIds, keywords);
-        recommendationCacheService.saveRecommendations(memberId, recommendations);
+        if (!recommendations.isEmpty()) {
+            recommendationCacheService.saveRecommendations(memberId, recommendations);
+        }
 
         return toBookRecommendationResponseDtos(recommendations);
     }
