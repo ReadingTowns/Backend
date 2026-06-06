@@ -4,6 +4,7 @@ import kr.co.readingtown.member.dto.request.TextSearchRequest;
 import kr.co.readingtown.member.dto.response.ai.BertSearchResponse;
 import kr.co.readingtown.member.dto.response.ai.RecommendationResponse;
 import kr.co.readingtown.member.dto.response.ai.UserRecommendationResponse;
+import kr.co.readingtown.member.config.AiRecommendClientConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,7 +13,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(
         name = "ai-recommend",
-        url = "${ai.server-uri}"
+        url = "${ai.server-uri}",
+        configuration = AiRecommendClientConfig.class
 )
 public interface AiRecommendClient {
 

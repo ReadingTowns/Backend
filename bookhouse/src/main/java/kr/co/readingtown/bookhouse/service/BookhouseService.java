@@ -12,6 +12,7 @@ import kr.co.readingtown.bookhouse.dto.response.ExchangingBookResponse;
 import kr.co.readingtown.bookhouse.exception.BookhouseException;
 import kr.co.readingtown.bookhouse.integration.book.BookReader;
 import kr.co.readingtown.bookhouse.dto.response.MemberProfileResponseDto;
+import kr.co.readingtown.bookhouse.integration.member.MemberClient;
 import kr.co.readingtown.bookhouse.integration.member.MemberReader;
 import kr.co.readingtown.bookhouse.repository.BookhouseRepository;
 import kr.co.readingtown.common.response.PageResponse;
@@ -35,6 +36,7 @@ public class BookhouseService {
 
     private final BookReader bookReader;
     private final MemberReader memberReader;
+    private final MemberClient memberClient;
     private final BookhouseRepository bookhouseRepository;
 
     // 서재에 책 등록
@@ -49,6 +51,8 @@ public class BookhouseService {
                 .isExchanged(IsExchanged.PENDING)
                 .build();
         bookhouseRepository.save(newBookhouse);
+
+        memberClient.evictRecommendationCache(memberId);
     }
 
     // 서재에 책 등록 (bookId만 사용)
@@ -71,6 +75,8 @@ public class BookhouseService {
                 .isExchanged(IsExchanged.PENDING)
                 .build();
         bookhouseRepository.save(newBookhouse);
+
+        memberClient.evictRecommendationCache(memberId);
     }
 
     // 서재에서 책 삭제
@@ -80,6 +86,8 @@ public class BookhouseService {
         Bookhouse bookhouse = bookhouseRepository.findByMemberIdAndBookId(memberId, bookId)
                 .orElseThrow(BookhouseException.BookhouseNotFound::new);
         bookhouseRepository.delete(bookhouse);
+
+        memberClient.evictRecommendationCache(memberId);
     }
 
     // 특정 회원의 서재 책 리스트 조회
